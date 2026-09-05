@@ -350,6 +350,7 @@ export class SessionManager {
 		const deadline = Date.now() + this.stopGraceMs;
 		while (true) {
 			const processes = await this.listSessionProcesses(runtime.terminal.pid);
+			if (!processes.length && !runtime.osExited) runtime.terminal.kill(signal);
 			for (const pid of processes) {
 				try { this.killProcess(pid, signal); }
 				catch (error) { if (error?.code !== 'ESRCH') throw error; }

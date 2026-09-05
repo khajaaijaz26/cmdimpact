@@ -398,8 +398,8 @@ export async function createTerminalService({ environment = process.env, ptyModu
 			clearInterval(heartbeat);
 			clearInterval(sweeper);
 			for (const websocket of wss.clients) websocket.close(1001, 'Server stopping');
-			await manager.shutdown();
-			await new Promise((resolveClose) => server.close(resolveClose));
+			try { await manager.shutdown(); }
+			finally { await new Promise((resolveClose) => server.close(resolveClose)); }
 		})();
 		return stopping;
 	}
