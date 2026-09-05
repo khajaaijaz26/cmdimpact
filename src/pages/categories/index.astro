@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { coverageAreas } from '../../data/coverage';
+
+const liveCount = coverageAreas.filter((area) => area.status === 'live').length;
+---
+
+<BaseLayout title="Technology coverage" description="Explore CompatNavi's worldwide compatibility map across smart home, computing, mobile, gaming, networking, creator gear and software.">
+	<section class="page-hero atlas-hero">
+		<div class="container">
+			<div class="scope-line"><span class="live-pulse"></span> Universal framework · {liveCount} verified category live</div>
+			<div class="page-hero-grid">
+				<div>
+					<p class="eyebrow">Technology atlas</p>
+					<h1>One map for the technology around you.</h1>
+				</div>
+				<p class="lede">CompatNavi is built for every market and major platform. Evidence is released category by category so “global” never becomes a shortcut for unverified claims.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section-flush">
+		<div class="container">
+			<div class="coverage-key" aria-label="Coverage status key">
+				<span><i class="status-dot live"></i> Verified tools and catalog available</span>
+				<span><i class="status-dot queued"></i> Universal profile ready; evidence queued</span>
+			</div>
+			<div class="category-atlas">
+				{coverageAreas.map((area, index) => (
+					<article class:list={['category-tile', area.status === 'live' && 'is-live']} id={area.id}>
+						<div class="category-top">
+							<span class="category-mark" aria-hidden="true">{area.mark}</span>
+							<span class:list={['status-pill', area.status]}>{area.statusLabel}</span>
+						</div>
+						<p class="category-index">0{index + 1}</p>
+						<h2>{area.name}</h2>
+						<p>{area.description}</p>
+						<div class="category-scope">{area.scope}</div>
+						<div class="mini-chip-row">{area.platforms.map((platform) => <span>{platform}</span>)}</div>
+						{area.status === 'live'
+							? <a class="tile-link" href="/products/">Open verified catalog <span aria-hidden="true">↗</span></a>
+							: <a class="tile-link quiet" href="/contact/">Request this category <span aria-hidden="true">→</span></a>}
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container passport-banner">
+			<div>
+				<p class="eyebrow">Your compatibility layer</p>
+				<h2>Set up once. Reuse everywhere.</h2>
+				<p>Your Tech Passport keeps your market, platforms and connections in this browser, ready for every category checker as coverage expands.</p>
+			</div>
+			<a class="button" href="/passport/">Build my Tech Passport</a>
+		</div>
+	</section>
+</BaseLayout>

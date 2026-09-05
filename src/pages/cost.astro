@@ -4,10 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="True cost calculator" description="Calculate the real multi-year cost of smart technology, including hardware, installation, accessories and monthly subscriptions.">
 	<section class="page-hero">
-		<div class="container narrow">
-			<p class="eyebrow">Ownership cost tool</p>
-			<h1>See the price after the price tag.</h1>
-			<p class="lede">A cheaper device can cost more after installation, storage and subscriptions. Add the numbers for your shortlist and compare on the same time horizon.</p>
+		<div class="container page-hero-grid">
+			<div><div class="scope-line"><span class="live-pulse"></span> Worldwide currencies · Any technology</div><p class="eyebrow">03 / Cost</p><h1>See the price after the price tag.</h1></div>
+			<p class="lede">A cheaper product can cost more after installation, accessories and subscriptions. Add your local numbers and compare on the same time horizon.</p>
 		</div>
 	</section>
 
@@ -16,11 +15,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 			<div class="panel-head"><h2>Your numbers</h2><p>Sample values are included to show the calculator. Replace them with current prices from your region.</p></div>
 			<form id="cost-form" class="form-stack">
 				<div class="field-grid">
-					<div class="form-field"><label for="currency">Currency</label><select id="currency" name="currency"><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option><option value="INR">INR — ₹</option></select></div>
+					<div class="form-field"><label for="currency">Currency</label><select id="currency" name="currency"><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="AUD">AUD — A$</option><option value="BRL">BRL — R$</option><option value="CAD">CAD — C$</option><option value="CHF">CHF</option><option value="CNY">CNY — ¥</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option><option value="INR">INR — ₹</option><option value="JPY">JPY — ¥</option><option value="KRW">KRW — ₩</option><option value="NGN">NGN — ₦</option><option value="NZD">NZD — NZ$</option><option value="SAR">SAR — ر.س</option><option value="SGD">SGD — S$</option><option value="ZAR">ZAR — R</option></select></div>
 					<div class="form-field"><label for="years">Ownership period</label><select id="years" name="years"><option value="1">1 year</option><option value="3" selected>3 years</option><option value="5">5 years</option><option value="10">10 years</option></select></div>
 					<div class="form-field"><label for="hardwarePrice">Price per device</label><input id="hardwarePrice" name="hardwarePrice" type="number" min="0" step="0.01" value="150" inputmode="decimal" /></div>
 					<div class="form-field"><label for="quantity">Number of devices</label><input id="quantity" name="quantity" type="number" min="1" max="100" step="1" value="1" inputmode="numeric" /></div>
-					<div class="form-field"><label for="accessories">Accessories and storage</label><input id="accessories" name="accessories" type="number" min="0" step="0.01" value="30" inputmode="decimal" /><span class="field-help">Chime, transformer, microSD card, hub or PoE equipment.</span></div>
+					<div class="form-field"><label for="accessories">Accessories and extras</label><input id="accessories" name="accessories" type="number" min="0" step="0.01" value="30" inputmode="decimal" /><span class="field-help">Adapters, cables, storage, hub, charger, mount or required upgrade.</span></div>
 					<div class="form-field"><label for="installation">Installation</label><input id="installation" name="installation" type="number" min="0" step="0.01" value="0" inputmode="decimal" /></div>
 					<div class="form-field"><label for="monthlySubscription">Subscription per month</label><input id="monthlySubscription" name="monthlySubscription" type="number" min="0" step="0.01" value="5" inputmode="decimal" /></div>
 					<div class="form-field"><label for="monthlyOther">Other monthly cost</label><input id="monthlyOther" name="monthlyOther" type="number" min="0" step="0.01" value="0" inputmode="decimal" /><span class="field-help">Optional monitoring, extra cloud plan or connectivity.</span></div>
@@ -42,7 +41,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	<section class="section tint">
 		<div class="container narrow prose">
 			<h2>Numbers people commonly miss</h2>
-			<ul><li>A transformer, indoor chime, mounting wedge, microSD card, NVR or home hub.</li><li>Professional electrical or Ethernet installation.</li><li>A plan needed to review recordings rather than only watch live video.</li><li>Price changes after an introductory trial or bundled period ends.</li></ul>
+			<ul><li>Adapters, cables, chargers, mounts, storage or a required hub.</li><li>Professional installation, setup or data migration.</li><li>A plan needed for cloud storage, security, support or the feature you expect.</li><li>Price changes after an introductory trial or bundled period ends.</li></ul>
 			<blockquote><p>Use the same ownership period and include equivalent capabilities when comparing two products.</p></blockquote>
 		</div>
 	</section>
@@ -53,6 +52,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		const form = document.querySelector<HTMLFormElement>('#cost-form');
 		const get = (name: string) => Number((form?.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null)?.value || 0);
 		const set = (selector: string, text: string) => { const element = document.querySelector<HTMLElement>(selector); if (element) element.textContent = text; };
+		try {
+			const saved = JSON.parse(localStorage.getItem('compatnavi-passport-v1') || 'null') as { currency?: unknown } | null;
+			const currency = form?.elements.namedItem('currency') as HTMLSelectElement | null;
+			if (currency && typeof saved?.currency === 'string' && [...currency.options].some((option) => option.value === saved.currency)) currency.value = saved.currency;
+		} catch { localStorage.removeItem('compatnavi-passport-v1'); }
 
 		function updateCost() {
 			if (!form) return;

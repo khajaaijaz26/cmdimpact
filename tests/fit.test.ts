@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { evaluateFit, type FitProduct, type Preferences } from '../src/lib/fit.ts';
 import { calculateOwnershipCost } from '../src/lib/cost.ts';
+import { summarizePassport } from '../src/lib/passport.ts';
 
 const product: FitProduct = {
 	id: 'local-doorbell',
@@ -40,4 +41,10 @@ test('ownership cost includes upfront and recurring costs without accepting nega
 		hardware: 200, upfront: 250, recurring: 120, total: 370, monthlyEquivalent: 370 / 24, quantity: 2, years: 2,
 	});
 	assert.equal(calculateOwnershipCost({ hardwarePrice: -100, quantity: 0, accessories: 0, installation: 0, monthlySubscription: 0, monthlyOther: 0, years: 0 }).total, 0);
+});
+
+test('tech passport summarizes a worldwide profile without duplicate platforms', () => {
+	assert.deepEqual(summarizePassport({ country: '  United Arab Emirates  ', region: 'middle-east', currency: 'AED', platforms: ['android', 'windows', 'android', ''] }), {
+		market: 'United Arab Emirates', platformCount: 2, platforms: ['android', 'windows'],
+	});
 });

@@ -10,14 +10,14 @@ const toolProducts = products.map(({ id, name, brand, power, network, ecosystems
 const serializedProducts = JSON.stringify(toolProducts).replaceAll('<', '\\u003c');
 ---
 
-<BaseLayout title="Personal fit checker" description="Check smart video doorbells against your power, Wi-Fi, ecosystem, storage and subscription preferences.">
+<BaseLayout title="Compatibility checker" description="Use your setup to check verified technology for blockers, limits and unknown compatibility facts.">
 	<section class="page-hero">
-		<div class="container narrow">
-			<p class="eyebrow">Free compatibility tool</p>
-			<h1>Will it fit your home?</h1>
+		<div class="container page-hero-grid">
+			<div><div class="scope-line"><span class="live-pulse"></span> Live module · Smart home / Video doorbells</div><p class="eyebrow">01 / Match</p><h1>Does it fit your world?</h1></div>
 			<p class="lede">Set the requirements that matter. CompatNavi separates hard blockers, practical limits and facts the manufacturer has not made clear.</p>
 		</div>
 	</section>
+	<div class="container module-bar"><div><span>ACTIVE DATASET</span><strong>{products.length} verified video doorbells</strong></div><p>The universal checker opens one category only when its evidence rules are ready.</p><a href="/categories/">All categories ↗</a></div>
 
 	<section class="container tool-layout">
 		<div class="panel sticky-panel">
@@ -89,6 +89,7 @@ const serializedProducts = JSON.stringify(toolProducts).replaceAll('<', '\\u003c
 		</div>
 
 		<div>
+			<div id="passport-context" class="passport-context" hidden><span>TECH PASSPORT</span><p id="passport-message"></p><a href="/passport/">Edit profile</a></div>
 			<div id="fit-empty" class="empty-state">
 				<div>
 					<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M16 24h16M24 16v16"/></svg>
@@ -125,6 +126,7 @@ const serializedProducts = JSON.stringify(toolProducts).replaceAll('<', '\\u003c
 		const summary = document.querySelector<HTMLElement>('#fit-summary');
 		const reset = document.querySelector<HTMLButtonElement>('#reset-profile');
 		const storageKey = 'compatnavi-profile-v1';
+		const passportKey = 'compatnavi-passport-v1';
 
 		function restoreProfile() {
 			if (!form) return;
@@ -138,6 +140,25 @@ const serializedProducts = JSON.stringify(toolProducts).replaceAll('<', '\\u003c
 			} catch {
 				localStorage.removeItem(storageKey);
 			}
+		}
+
+		function applyPassport() {
+			if (!form) return;
+			try {
+				const saved = JSON.parse(localStorage.getItem(passportKey) || 'null') as { country?: unknown; platforms?: unknown } | null;
+				if (!saved) return;
+				const mapping: Record<string, Preferences['ecosystem']> = { alexa: 'alexa', 'google-home': 'google-home', 'apple-home': 'apple-home' };
+				const homePlatforms = Array.isArray(saved.platforms) ? saved.platforms.filter((item): item is string => typeof item === 'string' && item in mapping) : [];
+				const ecosystem = form.elements.namedItem('ecosystem') as HTMLSelectElement | null;
+				if (ecosystem?.value === 'any' && homePlatforms.length === 1) ecosystem.value = mapping[homePlatforms[0]];
+				const context = document.querySelector<HTMLElement>('#passport-context');
+				const message = document.querySelector<HTMLElement>('#passport-message');
+				const market = typeof saved.country === 'string' && saved.country.trim() ? saved.country.trim() : 'your market';
+				if (message) message.textContent = homePlatforms.length === 1
+					? `Prefilled your home platform. Product evidence is still labelled by source region for ${market}.`
+					: `Using ${market} as context. Choose the home platform needed for this check.`;
+				if (context) context.hidden = false;
+			} catch { localStorage.removeItem(passportKey); }
 		}
 
 		function addResult(product: FitProduct, preferences: Preferences) {
@@ -215,6 +236,7 @@ const serializedProducts = JSON.stringify(toolProducts).replaceAll('<', '\\u003c
 		});
 
 		restoreProfile();
+		applyPassport();
 		const requestedProduct = new URLSearchParams(location.search).get('product');
 		const productSelect = form?.elements.namedItem('product') as HTMLSelectElement | null;
 		if (requestedProduct && productSelect && [...productSelect.options].some((option) => option.value === requestedProduct)) {

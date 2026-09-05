@@ -13,9 +13,10 @@ CompatNavi is designed to work with little personal data. This policy describes 
 The site uses browser local storage for:
 
 - your light or dark theme choice; and
+- your Tech Passport, including any country or market text, region, currency and platforms you choose; and
 - fit-checker preferences such as power, network, ecosystem, storage and subscription tolerance.
 
-These values stay in your browser and are not sent to a CompatNavi database. You can remove the fit profile with the tool's Reset button or clear site data in your browser.
+These values stay in your browser and are not sent to a CompatNavi database. You can clear either profile inside its tool or remove all site data in your browser.
 
 ## Accounts, forms and camera data
 

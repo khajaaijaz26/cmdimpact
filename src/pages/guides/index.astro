@@ -5,9 +5,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const guides = (await getCollection('guides')).sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.updatedAt.valueOf() - a.data.updatedAt.valueOf() || a.data.title.localeCompare(b.data.title));
 ---
 
-<BaseLayout title="Compatibility guides" description="Practical guides to smart-doorbell Wi-Fi, power, storage, subscriptions and true ownership cost.">
+<BaseLayout title="Technology compatibility guides" description="Practical guides to the networks, platforms, connections, subscriptions and regional details behind technology compatibility.">
 	<section class="page-hero">
-		<div class="container narrow"><p class="eyebrow">Decision library</p><h1>Understand the detail that changes the answer.</h1><p class="lede">Plain-language guides for the questions that appear after “Does it have a camera?” and before “Why doesn't this work?”</p></div>
+		<div class="container page-hero-grid"><div><div class="scope-line"><span class="live-pulse"></span> Library grows with verified coverage</div><p class="eyebrow">Field notes</p><h1>Decode what makes technology work together.</h1></div><p class="lede">Plain-language guides for the detail between “I want this” and “Will this work in my setup?” Current field notes support the first smart-home category.</p></div>
 	</section>
 	<section class="container">
 		<div class="guide-grid">

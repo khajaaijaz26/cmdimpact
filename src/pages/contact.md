@@ -20,7 +20,7 @@ Reports with an official source can be reviewed fastest. A retailer listing or r
 
 ## Request a product
 
-Open an issue with the model name, region and official product URL. The launch catalog is intentionally limited to video doorbells; requests in that category will fit the current data model best.
+Open an issue with the category, exact model, region and official product URL. Video doorbells are the current live dataset. Requests for computing, mobile, gaming, networking, display, creator or software coverage help prioritize the public queue but are not published until a category has reliable evidence and decision rules.
 
 ## Report a site problem
 

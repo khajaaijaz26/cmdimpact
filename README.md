@@ -1,35 +1,37 @@
 # CompatNavi
 
-**Find the tech that fits.**
+**The compatibility layer for technology everywhere.**
 
-CompatNavi turns verified manufacturer specifications into practical compatibility verdicts. The launch edition covers smart video doorbells and checks power, network, ecosystem, recording, subscription and internet-outage requirements.
+CompatNavi maps a visitor's market, platforms and connections, then turns verified manufacturer specifications into practical compatibility verdicts. The product is worldwide and category-neutral; the first verified dataset covers smart video doorbells.
 
 ## What is included
 
-- Personal fit checker with Fits, Fits with limits, Doesn't fit and Unknown verdicts
-- 12-product launch catalog with direct manufacturer sources and review dates
-- Search and filters, side-by-side comparison and true ownership-cost calculator
+- Private Tech Passport for any country, 17 currencies and major computing, mobile, smart-home, gaming and connection platforms
+- Public technology atlas with honest live and queued coverage states
+- Category-specific fit checker with Fits, Fits with limits, Doesn't fit and Unknown verdicts
+- 12-product launch catalog with direct manufacturer sources, evidence regions and review dates
+- Search, filters, side-by-side comparison and worldwide ownership-cost calculator
 - Five original decision guides
-- Responsive light/dark UI, keyboard navigation and reduced-motion support
-- Sitemap, robots file, social card, custom 404 and Cloudflare security headers
+- Completely responsive dark/light UI with keyboard navigation and reduced-motion support
+- Sitemap, installable web manifest, robots file, custom 404 and Cloudflare security headers
 - Privacy, terms, methodology, corrections and advertising policies
 - AdSense-ready slots that render nothing until real credentials are configured
-- Unit checks, Astro type/content validation, production build and GitHub CI
-- Cloudflare Workers static-assets configuration
+- Node rule checks, Astro validation, production build and GitHub CI
 
 ## Stack
 
 - Astro 7 with strict TypeScript
 - Astro content collections with Zod validation
 - Semantic HTML, native CSS and small browser scripts
+- Browser local storage for private profiles
 - Node's built-in test runner
 - Cloudflare Workers Static Assets via Wrangler
 
-There is no UI framework, account system, database or CMS in v1. The site builds to static files.
+There is no UI framework, account system, database or CMS. The site builds to static files.
 
 ## Run locally
 
-Requirements: Node.js 24 or a compatible Node version listed in `package.json`, plus npm.
+Requirements: Node.js 22.12 or newer and npm.
 
 ```bash
 git clone https://github.com/khajaaijaz26/compatnavi.git
@@ -40,7 +42,7 @@ npm run dev
 
 Open the URL printed by Astro, normally <http://localhost:4321>.
 
-This repository's Astro agent instructions also support the background server commands:
+Background development server commands are also supported:
 
 ```bash
 npx astro dev --background
@@ -49,19 +51,13 @@ npx astro dev logs
 npx astro dev stop
 ```
 
-## Validate the complete project
+## Validate the project
 
 ```bash
 npm run validate
 ```
 
-That command runs:
-
-1. `astro check` for TypeScript, Astro templates and content schemas;
-2. Node tests for verdict and cost rules;
-3. the optimized static production build.
-
-Other commands:
+This runs Astro/TypeScript/content checks, the minimal rule tests and the optimized static build.
 
 | Command | Purpose |
 | --- | --- |
@@ -70,74 +66,34 @@ Other commands:
 | `npm test` | Rule-engine tests |
 | `npm run build` | Production build in `dist/` |
 | `npm run preview` | Preview the production build |
-| `npm run deploy` | Validate a build and deploy static assets with Wrangler |
+| `npm run deploy` | Validate and deploy with Wrangler |
 
-## Project map
+## Product structure
 
-```text
-src/
-  components/       Shared header, footer, product card and optional ad slot
-  data/
-    products.json   Normalized catalog and source metadata
-    guides/         Original Markdown guides
-  layouts/          Site and policy-page layouts
-  lib/              Pure fit and ownership-cost rules
-  pages/            File-based routes and tools
-  styles/           Global design system
-tests/              Minimal executable rule checks
-public/             Brand assets, crawler files and Cloudflare headers
-wrangler.jsonc      Cloudflare Workers Static Assets deployment
-```
+The Tech Passport provides shared market and platform context. Compatibility rules remain category-specific so each verdict uses facts that actually matter to that product type. Current video-doorbell data lives in `src/data/products.json`; new categories should receive their own evidence schema and checker only when real catalog work begins.
 
-## Update or add a product
+Every published product requires an exact model, normalized compatibility fields, evidence region, verification date, useful limitations and at least one direct official source. Missing information stays `unknown` instead of being inferred from retailers, reviews or logos.
 
-Edit `src/data/products.json`. Every entry is validated by `src/content.config.ts` and must include:
+## Advertising
 
-- a stable ID and exact model name;
-- normalized compatibility fields;
-- region and verification date;
-- useful limitations, not only marketing highlights;
-- at least one direct official source with publisher and checked date.
-
-Use `unknown` or an empty supported-value list when the cited source does not answer a relevant question. Do not infer support from a retailer listing, review or logo alone. Run `npm run validate` before committing.
-
-## Advertising setup
-
-Ads are intentionally disabled until the site is approved. After Google AdSense supplies real values:
+Ads are disabled until the site is approved. After AdSense supplies real values:
 
 1. copy `.env.example` to `.env`;
-2. replace `PUBLIC_ADSENSE_CLIENT` and `PUBLIC_ADSENSE_SLOT` with the assigned values;
-3. copy the exact AdSense publisher line into `public/ads.txt` (use `public/ads.txt.example` only as a format reminder);
-4. configure Google's required consent-management flow for the regions served;
-5. update the live privacy policy with the enabled vendors and choices;
-6. rebuild and confirm every placement is labeled and separated from tool controls.
+2. set `PUBLIC_ADSENSE_CLIENT` and `PUBLIC_ADSENSE_SLOT`;
+3. add the exact publisher line to `public/ads.txt`;
+4. configure consent requirements for every region served;
+5. update the live privacy disclosure; and
+6. verify that ads remain clearly labeled and outside navigation, inputs, verdicts and source lists.
 
-Never publish the placeholder publisher ID or rename the example file without replacing its contents.
-
-## Deploy to Cloudflare Workers
-
-Wrangler is installed and `wrangler.jsonc` points to the static `dist/` directory.
+## Deployment
 
 ```bash
 npx wrangler login
 npm run deploy
 ```
 
-Then add the production domain in the Cloudflare dashboard and point it to the `compatnavi` Worker. The configuration serves the nearest generated `404.html` for missing routes and applies rules from `public/_headers`.
-
-The deploy command changes external Cloudflare state, so it is not part of local validation or GitHub CI.
-
-## Production launch checklist
-
-- Purchase or connect the final domain and confirm the canonical URL in `astro.config.mjs`
-- Verify HTTPS, `robots.txt`, `sitemap-index.xml`, canonical tags and the 404 response
-- Add the domain to Google Search Console and submit the sitemap
-- Enable privacy-appropriate analytics only after updating the privacy disclosure
-- Publish enough useful, original content and apply for AdSense
-- Configure consent choices, real ad IDs and `ads.txt` only after approval
-- Test ad spacing on mobile so ads cannot be mistaken for controls
-- Schedule catalog source reviews and process correction issues
+Then connect the production domain in Cloudflare and verify HTTPS, canonical URLs, the sitemap, Search Console, consent behavior and mobile ad spacing. Live deployment and account activation are intentionally not part of local validation.
 
 ## Editorial boundary
 
-CompatNavi is independent decision support. It does not sell products or guarantee installation, service availability or safety. Advertisers cannot buy rankings, facts or verdicts. Product and company names belong to their respective owners.
+CompatNavi is independent decision support. Advertisers cannot buy rankings, facts or verdicts. Product and company names belong to their respective owners.

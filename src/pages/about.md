@@ -1,37 +1,37 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
 title: "About CompatNavi"
-description: "Why CompatNavi starts with your setup instead of declaring one technology product best for everyone."
+description: "Why CompatNavi is building one worldwide compatibility layer for everyday technology."
 ---
 
-CompatNavi is an independent compatibility guide for everyday technology. Its job is simple: turn scattered technical requirements into an answer a normal buyer can act on.
+CompatNavi is an independent compatibility platform for technology everywhere. Its job is to answer one practical question: **will this product work in my world?**
 
-## The problem
+## The founder idea
 
-Technology shopping often begins with feature lists and ends with a hidden dependency: the wrong Wi-Fi band, missing wiring, an unsupported platform, cloud-only recording or a plan needed for the feature you assumed was included.
+Technology is sold product by product, but people live inside systems. A new device may depend on a country-specific model, the right operating system, a particular port, an existing hub, a wireless standard, a subscription or another product you already own.
 
-Those details are usually available somewhere. They are rarely organized around the buyer's actual setup.
+Most shopping sites forget that context every time the visitor starts a new search. CompatNavi's core idea is a private **Tech Passport**: one reusable map of a person's market, platforms and connections that can travel across category-specific compatibility tools.
 
-## The approach
+## Global by design, verified by category
 
-CompatNavi begins with constraints. It asks what power, network, platform, storage and outage behavior you need, then compares those answers with facts from manufacturer sources.
+“Worldwide” is the product architecture, not a claim that every product has already been checked. CompatNavi can represent any country, common currencies, major computing and mobile platforms, smart-home ecosystems, gaming systems and connection standards.
 
-The product is designed around three principles:
+Verified evidence is published more carefully. The first live category is smart video doorbells because one purchase crosses networking, electrical installation, subscriptions, privacy and smart-home platforms. Computing, mobile, gaming, networking, displays, creator equipment and software are on the public coverage map.
+
+This staged approach keeps three promises:
 
 - **Useful before monetized:** tools and original guidance come first.
-- **Evidence over confidence:** every catalog entry links to the source and date checked.
-- **Unknown over invented:** missing documentation stays visible.
+- **Evidence over confidence:** catalog entries link to sources, markets and review dates.
+- **Unknown over invented:** missing documentation remains visible.
 
-The launch category is smart video doorbells because one purchase crosses networking, electrical installation, subscriptions, privacy and smart-home platforms. Future categories should be added only when the same source quality and decision logic can be maintained.
+## One platform, specialized decisions
 
-## What CompatNavi is not
+The Tech Passport is universal. Each checker remains category-specific because a laptop, camera, game controller and smart lock do not fail for the same reasons. Shared context flows into focused rules instead of one vague “compatibility score.”
 
-CompatNavi is not a store, installer, product manufacturer or universal ranking site. It does not inspect your home, guarantee service availability or replace the official installation manual.
+CompatNavi does not sell products, inspect a user's setup or guarantee installation, regional availability or future manufacturer support. It provides evidence-led decision support and keeps advertising outside verdict logic.
 
-There are no user accounts in the first version. Your fit profile stays in your browser.
+## Private and open
 
-## Built openly
+There are no user accounts in this version. Passport and checker preferences stay in browser storage on the user's device. The project is a static Astro application with a transparent rules engine and structured evidence.
 
-The site is a small, static Astro application with a transparent rule engine and structured catalog. You can [inspect the project on GitHub](https://github.com/khajaaijaz26/compatnavi) or [report a correction](https://github.com/khajaaijaz26/compatnavi/issues).
-
-Start with the [personal fit checker](/check/) or read [how verdicts are decided](/methodology/).
+You can [inspect the project on GitHub](https://github.com/khajaaijaz26/compatnavi), [see the technology atlas](/categories/) or [report a correction](https://github.com/khajaaijaz26/compatnavi/issues).

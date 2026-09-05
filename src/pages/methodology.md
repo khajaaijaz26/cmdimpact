@@ -6,9 +6,15 @@ description: "The source, review and verdict rules behind every compatibility re
 
 _Last updated: 5 September 2026_
 
-CompatNavi exists to answer a narrow question clearly: **does this product match the setup and expectations a person has described?** We do not award a universal “best.” A product can fit one home and fail another.
+CompatNavi exists to answer a narrow question clearly: **does this product match the market, systems and expectations a person has described?** We do not award a universal “best.” A product can fit one person's technology world and fail another's.
 
-## Launch scope
+## Universal profile, focused rules
+
+The Tech Passport can store worldwide market context and the major platforms or connections a person uses. It is shared across the site, but verdict logic stays specific to each product category. A monitor should be checked for ports and display limits; a smart-home device should be checked for networks, power and ecosystems. Combining those into one generic score would hide the reason a product fails.
+
+Only categories marked **Live** in the [technology atlas](/categories/) have a verified catalog and working verdict module. Queued categories describe intended coverage, not finished evidence.
+
+## First live scope
 
 The first catalog covers consumer smart video doorbells. We evaluate compatibility facts that commonly change a purchase decision:
 

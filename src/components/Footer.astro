@@ -1,23 +1,25 @@
+---
+import Logo from './Logo.astro';
+---
+
 <footer class="site-footer">
+	<div class="container footer-launch">
+		<div><span class="footer-code">CN / PASSPORT</span><h2>Make every device join the same world.</h2><p>Build the profile CompatNavi can reuse across markets, platforms and product categories.</p></div>
+		<a class="button" href="/passport/">Create my Tech Passport <span aria-hidden="true">→</span></a>
+	</div>
 	<div class="container footer-grid">
-		<div>
-			<p class="footer-brand">CompatNavi</p>
-			<p class="footer-note">Independent compatibility guidance for everyday technology.</p>
+		<div class="footer-identity">
+			<a class="brand" href="/" aria-label="CompatNavi home"><Logo /></a>
+			<p class="footer-note">Independent, evidence-led compatibility guidance for technology everywhere.</p>
+			<span class="footer-status"><i class="live-pulse"></i> Global framework online</span>
 		</div>
-		<div class="footer-links" aria-label="Company links">
-			<a href="/methodology/">Methodology</a>
-			<a href="/about/">About</a>
-			<a href="/contact/">Contact</a>
-			<a href="/advertising/">Advertising</a>
-		</div>
-		<div class="footer-links" aria-label="Legal links">
-			<a href="/privacy/">Privacy</a>
-			<a href="/terms/">Terms</a>
-			<a href="https://github.com/khajaaijaz26/compatnavi/issues" rel="external noopener">Report a correction</a>
-		</div>
+		<div class="footer-links" aria-label="Explore links"><strong>Explore</strong><a href="/categories/">Technology atlas</a><a href="/products/">Verified catalog</a><a href="/guides/">Guides</a><a href="/about/">About</a></div>
+		<div class="footer-links" aria-label="Tool links"><strong>Tools</strong><a href="/passport/">Tech Passport</a><a href="/check/">Fit checker</a><a href="/compare/">Compare</a><a href="/cost/">True cost</a></div>
+		<div class="footer-links" aria-label="Policy links"><strong>Trust</strong><a href="/methodology/">Methodology</a><a href="/advertising/">Advertising</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/contact/">Corrections</a></div>
 	</div>
 	<div class="container footer-bottom">
-		<p>© {new Date().getFullYear()} CompatNavi. Product names belong to their owners.</p>
-		<p>Last catalog review: 5 September 2026</p>
+		<p>© {new Date().getFullYear()} CompatNavi · Built for the world</p>
+		<p>Catalog evidence last reviewed 5 September 2026</p>
+		<a href="https://github.com/khajaaijaz26/compatnavi" rel="external noopener">Open source on GitHub ↗</a>
 	</div>
 </footer>

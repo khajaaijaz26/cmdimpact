@@ -7,14 +7,14 @@ const products = (await getCollection('products')).map((entry) => entry.data).so
 const brands = [...new Set(products.map((product) => product.brand))].sort();
 ---
 
-<BaseLayout title="Verified video doorbells" description="Browse smart video doorbells with sourced facts for power, Wi-Fi, platforms, storage, subscriptions and outage behavior.">
+<BaseLayout title="Verified technology catalog" description="Browse technology with sourced compatibility facts, named market coverage, review dates and practical limitations.">
 	<section class="page-hero">
-		<div class="container narrow">
-			<p class="eyebrow">Verified catalog</p>
-			<h1>Video doorbells, without the guesswork.</h1>
-			<p class="lede">Browse the launch catalog or filter it to the shape of your setup. Facts are checked against manufacturer pages for the named region.</p>
+		<div class="container page-hero-grid">
+			<div><div class="scope-line"><span class="live-pulse"></span> Category 01 · Live</div><p class="eyebrow">Verified catalog</p><h1>Technology with receipts.</h1></div>
+			<p class="lede">The catalog will span technology categories worldwide. The current verified dataset is smart video doorbells, with facts checked against manufacturer pages for the named market.</p>
 		</div>
 	</section>
+	<div class="container module-bar"><div><span>BROWSING</span><strong>Smart home → Video doorbells</strong></div><p>{products.length} models · United States and Global English evidence regions</p><a href="/categories/">Change category ↗</a></div>
 
 	<section class="container">
 		<div class="catalog-controls" aria-label="Product filters">
@@ -23,7 +23,7 @@ const brands = [...new Set(products.map((product) => product.brand))].sort();
 			<div class="form-field"><label for="power-filter">Power</label><select id="power-filter"><option value="all">Any power</option><option value="battery">Battery</option><option value="wired">Doorbell wiring</option><option value="poe">PoE</option></select></div>
 			<div class="form-field"><label for="storage-filter">Recording</label><select id="storage-filter"><option value="all">Any storage</option><option value="local">Local</option><option value="cloud">Cloud</option></select></div>
 		</div>
-		<p class="results-count" id="catalog-count" aria-live="polite">Showing all {products.length} products</p>
+		<p class="results-count" id="catalog-count" aria-live="polite">Showing all {products.length} verified products</p>
 		<div class="product-grid" id="product-grid">
 			{products.map((product) => <ProductCard product={product} />)}
 		</div>

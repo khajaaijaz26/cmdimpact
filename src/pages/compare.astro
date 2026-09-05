@@ -9,14 +9,14 @@ const compareProducts = products.map(({ id, name, brand, power, network, ecosyst
 const serializedProducts = JSON.stringify(compareProducts).replaceAll('<', '\\u003c');
 ---
 
-<BaseLayout title="Compare video doorbells" description="Compare two smart video doorbells side by side across power, Wi-Fi, platforms, storage, subscriptions and verified limitations.">
+<BaseLayout title="Compare verified products" description="Compare two verified products side by side across the compatibility facts that change a buying decision.">
 	<section class="page-hero">
-		<div class="container narrow">
-			<p class="eyebrow">Side-by-side tool</p>
-			<h1>Compare what changes the decision.</h1>
+		<div class="container page-hero-grid">
+			<div><div class="scope-line"><span class="live-pulse"></span> Live module · Video doorbells</div><p class="eyebrow">02 / Compare</p><h1>Put the hidden differences side by side.</h1></div>
 			<p class="lede">Marketing features are easy to compare. Installation, storage and ongoing dependencies are where expensive mistakes happen.</p>
 		</div>
 	</section>
+	<div class="container module-bar"><div><span>COMPARE DATASET</span><strong>{products.length} verified products</strong></div><p>Comparisons stay inside one category so every row means the same thing.</p><a href="/tools/">All tools ↗</a></div>
 
 	<section class="container">
 		<div class="panel compare-controls">

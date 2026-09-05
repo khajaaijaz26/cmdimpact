@@ -16,7 +16,7 @@ const products = defineCollection({
 		name: z.string(),
 		brand: z.string(),
 		model: z.string(),
-		category: z.literal('Video doorbell'),
+		category: z.string(),
 		summary: z.string(),
 		region: z.string(),
 		verifiedOn: z.string(),
