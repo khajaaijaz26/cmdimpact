@@ -38,7 +38,7 @@ async function linuxSessionProcesses(sessionId) {
 			const fields = stat.slice(commandEnd + 1).trim().split(/\s+/);
 			return Number(fields[3]) === sessionId ? Number(entry.name) : undefined;
 		} catch (error) {
-			if (error?.code === 'ENOENT') return undefined;
+			if (error?.code === 'ENOENT' || error?.code === 'ESRCH') return undefined;
 			throw error;
 		}
 	}));
