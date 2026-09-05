@@ -186,3 +186,30 @@ test('malformed HTTP and WebSocket request targets return 400 without crashing t
 		await rm(directory, { recursive: true, force: true });
 	}
 });
+
+test('a shutdown failure still closes the HTTP listener', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'cmdimpact-shutdown-'));
+	const service = await createTerminalService({
+		environment: {
+			NODE_ENV: 'test',
+			TERMINAL_ACCESS_TOKEN: 'integration-test-owner-token',
+			TERMINAL_ALLOWED_ORIGINS: 'http://localhost:4321',
+			TERMINAL_HOST: '127.0.0.1',
+			TERMINAL_PORT: '0',
+			TERMINAL_WORKSPACE: join(directory, 'workspace'),
+			TERMINAL_STATE_FILE: join(directory, 'sessions.json'),
+			SystemRoot: process.env.SystemRoot,
+			WINDIR: process.env.WINDIR,
+			PATH: process.env.PATH,
+		},
+		ptyModule: fakePty(),
+	});
+	try {
+		await service.start();
+		service.manager.shutdown = async () => { throw new Error('shutdown failed'); };
+		await assert.rejects(service.stop(), /shutdown failed/);
+		assert.equal(service.server.listening, false);
+	} finally {
+		await rm(directory, { recursive: true, force: true });
+	}
+});
