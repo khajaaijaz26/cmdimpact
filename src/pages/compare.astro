@@ -1,0 +1,120 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const products = (await getCollection('products')).map((entry) => entry.data).sort((a, b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name));
+const compareProducts = products.map(({ id, name, brand, power, network, ecosystems, ecosystemCoverage, storage, subscription, internet, resolution, fieldOfView, weatherRating, limitations }) => ({
+	id, name, brand, power, network, ecosystems, ecosystemCoverage, storage, subscription, internet, resolution, fieldOfView, weatherRating, limitations,
+}));
+const serializedProducts = JSON.stringify(compareProducts).replaceAll('<', '\\u003c');
+---
+
+<BaseLayout title="Compare video doorbells" description="Compare two smart video doorbells side by side across power, Wi-Fi, platforms, storage, subscriptions and verified limitations.">
+	<section class="page-hero">
+		<div class="container narrow">
+			<p class="eyebrow">Side-by-side tool</p>
+			<h1>Compare what changes the decision.</h1>
+			<p class="lede">Marketing features are easy to compare. Installation, storage and ongoing dependencies are where expensive mistakes happen.</p>
+		</div>
+	</section>
+
+	<section class="container">
+		<div class="panel compare-controls">
+			<div class="form-field"><label for="compare-a">First product</label><select id="compare-a">{products.map((product) => <option value={product.id}>{product.brand} — {product.name}</option>)}</select></div>
+			<span class="versus" aria-hidden="true">VS</span>
+			<div class="form-field"><label for="compare-b">Second product</label><select id="compare-b">{products.map((product) => <option value={product.id}>{product.brand} — {product.name}</option>)}</select></div>
+		</div>
+
+		<p id="compare-status" class="status-note" aria-live="polite">Comparison ready.</p>
+		<div class="compare-table-wrap">
+			<table class="compare-table">
+				<thead><tr><th scope="col">Requirement</th><th scope="col"><span class="compare-product-brand" data-brand="a"></span><span class="compare-product-name" data-name="a"></span></th><th scope="col"><span class="compare-product-brand" data-brand="b"></span><span class="compare-product-name" data-name="b"></span></th></tr></thead>
+				<tbody>
+					<tr><th scope="row">Power</th><td data-side="a" data-field="power"></td><td data-side="b" data-field="power"></td></tr>
+					<tr><th scope="row">Network</th><td data-side="a" data-field="network"></td><td data-side="b" data-field="network"></td></tr>
+					<tr><th scope="row">Platforms</th><td data-side="a" data-field="ecosystems"></td><td data-side="b" data-field="ecosystems"></td></tr>
+					<tr><th scope="row">Recording</th><td data-side="a" data-field="storage"></td><td data-side="b" data-field="storage"></td></tr>
+					<tr><th scope="row">Paid plan</th><td data-side="a" data-field="subscription"></td><td data-side="b" data-field="subscription"></td></tr>
+					<tr><th scope="row">Outage clarity</th><td data-side="a" data-field="internet"></td><td data-side="b" data-field="internet"></td></tr>
+					<tr><th scope="row">Resolution</th><td data-side="a" data-field="resolution"></td><td data-side="b" data-field="resolution"></td></tr>
+					<tr><th scope="row">Field of view</th><td data-side="a" data-field="fieldOfView"></td><td data-side="b" data-field="fieldOfView"></td></tr>
+					<tr><th scope="row">Weather</th><td data-side="a" data-field="weatherRating"></td><td data-side="b" data-field="weatherRating"></td></tr>
+					<tr><th scope="row">Limits to verify</th><td data-side="a" data-field="limitations"></td><td data-side="b" data-field="limitations"></td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="button-row" style="margin-top: 1rem">
+			<a class="button secondary small" id="open-a" href="/products/">Open first product</a>
+			<a class="button secondary small" id="open-b" href="/products/">Open second product</a>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container cta-band"><div><h2>Still close?</h2><p>Run both choices against your actual setup to expose the deciding constraint.</p></div><a class="button" href="/check/">Check personal fit</a></div>
+	</section>
+
+	<script is:inline id="compare-products" type="application/json" set:html={serializedProducts}></script>
+	<script>
+		import { labels } from '../lib/fit';
+
+		type CompareProduct = {
+			id: string; name: string; brand: string; power: (keyof typeof labels.power)[];
+			network: (keyof typeof labels.network)[]; ecosystems: (keyof typeof labels.ecosystem)[];
+			ecosystemCoverage: 'verified' | 'unknown'; storage: (keyof typeof labels.storage)[];
+			subscription: 'none' | 'optional' | 'recordings'; internet: 'required' | 'limited-offline' | 'unknown';
+			resolution: string; fieldOfView: string; weatherRating: string; limitations: string[];
+		};
+
+		const products = JSON.parse(document.querySelector('#compare-products')?.textContent || '[]') as CompareProduct[];
+		const first = document.querySelector<HTMLSelectElement>('#compare-a');
+		const second = document.querySelector<HTMLSelectElement>('#compare-b');
+		const status = document.querySelector<HTMLElement>('#compare-status');
+		const openA = document.querySelector<HTMLAnchorElement>('#open-a');
+		const openB = document.querySelector<HTMLAnchorElement>('#open-b');
+
+		function value(product: CompareProduct, field: string) {
+			if (field === 'power') return product.power.map((item) => labels.power[item]).join(', ');
+			if (field === 'network') return product.network.length ? product.network.map((item) => labels.network[item]).join(', ') : 'Unknown — not stated by cited source';
+			if (field === 'ecosystems') return product.ecosystemCoverage === 'unknown' ? 'Unknown — not confirmed' : product.ecosystems.map((item) => labels.ecosystem[item]).join(', ') || 'No integration listed';
+			if (field === 'storage') return product.storage.map((item) => labels.storage[item]).join(', ');
+			if (field === 'subscription') return product.subscription === 'recordings' ? 'Needed for recorded history' : product.subscription === 'optional' ? 'Optional' : 'Not required for listed core recording';
+			if (field === 'internet') return product.internet === 'required' ? 'Core remote features require internet' : product.internet === 'limited-offline' ? 'Some local behavior documented' : 'Not clearly documented';
+			if (field === 'limitations') return product.limitations.join(' • ');
+			return product[field as 'resolution' | 'fieldOfView' | 'weatherRating'];
+		}
+
+		function renderSide(side: 'a' | 'b', product: CompareProduct) {
+			const brand = document.querySelector<HTMLElement>(`[data-brand="${side}"]`);
+			const name = document.querySelector<HTMLElement>(`[data-name="${side}"]`);
+			if (brand) brand.textContent = product.brand;
+			if (name) name.textContent = product.name;
+			for (const cell of document.querySelectorAll<HTMLElement>(`[data-side="${side}"]`)) {
+				cell.textContent = value(product, cell.dataset.field || '');
+			}
+		}
+
+		function update() {
+			const a = products.find((product) => product.id === first?.value) || products[0];
+			const b = products.find((product) => product.id === second?.value) || products[1];
+			if (!a || !b) return;
+			renderSide('a', a);
+			renderSide('b', b);
+			if (openA) { openA.href = `/products/${encodeURIComponent(a.id)}/`; openA.textContent = `Open ${a.name}`; }
+			if (openB) { openB.href = `/products/${encodeURIComponent(b.id)}/`; openB.textContent = `Open ${b.name}`; }
+			if (status) status.textContent = a.id === b.id ? 'You selected the same product twice.' : `${a.name} and ${b.name} are ready to compare.`;
+			const query = new URLSearchParams({ a: a.id, b: b.id });
+			history.replaceState(null, '', `${location.pathname}?${query}`);
+		}
+
+		const query = new URLSearchParams(location.search);
+		const requestedA = query.get('a');
+		const requestedB = query.get('b');
+		if (first && requestedA && products.some((product) => product.id === requestedA)) first.value = requestedA;
+		if (second) second.value = requestedB && products.some((product) => product.id === requestedB)
+			? requestedB
+			: products.find((product) => product.id !== first?.value)?.id || products[0]?.id || '';
+		first?.addEventListener('change', update);
+		second?.addEventListener('change', update);
+		update();
+	</script>
+</BaseLayout>

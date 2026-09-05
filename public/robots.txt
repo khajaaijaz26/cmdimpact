@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://compatnavi.com/sitemap-index.xml

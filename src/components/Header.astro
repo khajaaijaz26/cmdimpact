@@ -1,0 +1,47 @@
+---
+import Logo from './Logo.astro';
+
+const pathname = Astro.url.pathname;
+const links = [
+	{ href: '/check/', label: 'Fit checker' },
+	{ href: '/products/', label: 'Products' },
+	{ href: '/compare/', label: 'Compare' },
+	{ href: '/cost/', label: 'True cost' },
+	{ href: '/guides/', label: 'Guides' },
+];
+---
+
+<header class="site-header">
+	<div class="container header-inner">
+		<a class="brand" href="/" aria-label="CompatNavi home"><Logo /></a>
+		<nav class="primary-nav" aria-label="Main navigation">
+			{links.map((link) => (
+				<a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>{link.label}</a>
+			))}
+		</nav>
+		<details class="mobile-menu">
+			<summary class="icon-button" aria-label="Open navigation">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+			</summary>
+			<nav class="mobile-nav" aria-label="Mobile navigation">
+				{links.map((link) => (
+					<a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>{link.label}</a>
+				))}
+			</nav>
+		</details>
+		<button class="icon-button theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">
+			<svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+			<svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.6 6.6 0 0 0 21 12.8Z"/></svg>
+		</button>
+	</div>
+</header>
+
+<script>
+	const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+	button?.addEventListener('click', () => {
+		const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+		document.documentElement.dataset.theme = next;
+		localStorage.setItem('compatnavi-theme', next);
+		button.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} theme`);
+	});
+</script>

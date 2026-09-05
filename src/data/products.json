@@ -1,0 +1,519 @@
+[
+  {
+    "id": "ring-battery-doorbell-2k",
+    "name": "Battery Doorbell 2K",
+    "brand": "Ring",
+    "model": "2nd generation",
+    "category": "Video doorbell",
+    "summary": "A battery-first Ring doorbell with square 2K video and optional existing-doorbell wiring.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": ["alexa"],
+    "ecosystemCoverage": "verified",
+    "storage": ["cloud"],
+    "subscription": "recordings",
+    "internet": "required",
+    "resolution": "1944 × 1944 (2K)",
+    "fieldOfView": "140° horizontal × 140° vertical",
+    "weatherRating": "Weather resistant (manufacturer lists IPX)",
+    "highlights": [
+      "Battery installation with an optional 8–24 VAC wired connection",
+      "Head-to-toe square view",
+      "Works with Alexa"
+    ],
+    "limitations": [
+      "Uses 2.4 GHz Wi-Fi only",
+      "Reviewing recorded cloud video requires a Ring Home subscription"
+    ],
+    "sources": [
+      {
+        "title": "Battery Doorbell 2K — product and technical specifications",
+        "url": "https://ring.com/products/battery-doorbell-2nd-gen",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Understanding and comparing Ring Home plans",
+        "url": "https://ring.com/us/en/support/articles/lw54x/General-Information-on-Ring-Protect-SubscriptionPlans",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "ring-battery-doorbell-2k-plus",
+    "name": "Battery Doorbell 2K Plus",
+    "brand": "Ring",
+    "model": "2K Plus",
+    "category": "Video doorbell",
+    "summary": "Ring's removable-battery model with dual-band Wi-Fi and a wide head-to-toe view.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4", "wifi-5"],
+    "ecosystems": ["alexa"],
+    "ecosystemCoverage": "verified",
+    "storage": ["cloud"],
+    "subscription": "recordings",
+    "internet": "required",
+    "resolution": "2K",
+    "fieldOfView": "140° × 140° (178° diagonal)",
+    "weatherRating": "Operating range −20°C to 50°C",
+    "highlights": [
+      "Quick-release rechargeable battery",
+      "2.4 GHz and 5 GHz Wi-Fi",
+      "Works with Alexa"
+    ],
+    "limitations": [
+      "Wiring charges the battery rather than making it a battery-free doorbell",
+      "Recorded video and several smart features require a Ring subscription"
+    ],
+    "sources": [
+      {
+        "title": "Battery Doorbell 2K Plus technical specifications",
+        "url": "https://ring.com/support/products/doorbells/battery-doorbell-2k-plus?page=1",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Understanding and comparing Ring Home plans",
+        "url": "https://ring.com/us/en/support/articles/lw54x/General-Information-on-Ring-Protect-SubscriptionPlans",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "ring-video-doorbell-wired",
+    "name": "Video Doorbell Wired",
+    "brand": "Ring",
+    "model": "Wired",
+    "category": "Video doorbell",
+    "summary": "A compact, always-powered Ring doorbell for homes with compatible low-voltage wiring.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": ["alexa"],
+    "ecosystemCoverage": "verified",
+    "storage": ["cloud"],
+    "subscription": "recordings",
+    "internet": "required",
+    "resolution": "1080p HD",
+    "fieldOfView": "155° horizontal × 90° vertical",
+    "weatherRating": "Operating range −20.5°C to 48.5°C",
+    "highlights": [
+      "Continuous power from compatible doorbell wiring",
+      "Two-way audio and night vision",
+      "Works with Alexa"
+    ],
+    "limitations": [
+      "Requires a 10–24 VAC compatible power source",
+      "Uses 2.4 GHz Wi-Fi only",
+      "Reviewing recorded video requires a Ring subscription"
+    ],
+    "sources": [
+      {
+        "title": "Video Doorbell Wired technical specifications",
+        "url": "https://partners.ring.com/support/products/doorbells/video-doorbell-wired?page=1&redirect=true",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Understanding and comparing Ring Home plans",
+        "url": "https://ring.com/us/en/support/articles/lw54x/General-Information-on-Ring-Protect-SubscriptionPlans",
+        "publisher": "Ring",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "google-nest-doorbell-battery",
+    "name": "Nest Doorbell (battery)",
+    "brand": "Google Nest",
+    "model": "Battery",
+    "category": "Video doorbell",
+    "summary": "A flexible Google Home doorbell that can run wire-free or connect to existing wiring.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4", "wifi-5"],
+    "ecosystems": ["google-home", "alexa"],
+    "ecosystemCoverage": "verified",
+    "storage": ["cloud"],
+    "subscription": "optional",
+    "internet": "required",
+    "resolution": "960 × 1280 HDR",
+    "fieldOfView": "145° diagonal, 3:4 aspect ratio",
+    "weatherRating": "IP54",
+    "highlights": [
+      "Battery or 8–24 VAC wired installation",
+      "2.4 GHz and 5 GHz Wi-Fi",
+      "Up to three hours of event video history is included"
+    ],
+    "limitations": [
+      "Requires Google Home app, Google Account, Wi-Fi and broadband internet",
+      "24/7 video history is unavailable even when wired"
+    ],
+    "sources": [
+      {
+        "title": "Nest Doorbell (battery) installation and tech specs",
+        "url": "https://store.google.com/us/product/nest_doorbell_specs?hl=en-US",
+        "publisher": "Google Store",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Event and 24/7 video history",
+        "url": "https://support.google.com/googlehome/answer/16593318?hl=en",
+        "publisher": "Google Nest Help",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "google-nest-doorbell-wired-3rd-gen",
+    "name": "Nest Doorbell (wired, 3rd gen)",
+    "brand": "Google Nest",
+    "model": "Wired, 3rd generation",
+    "category": "Video doorbell",
+    "summary": "Google's wired 2K doorbell with short included event previews and optional extended history.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["wired"],
+    "network": [],
+    "ecosystems": ["google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["cloud"],
+    "subscription": "optional",
+    "internet": "required",
+    "resolution": "2K HDR",
+    "fieldOfView": "166° diagonal, 1:1 aspect ratio",
+    "weatherRating": "Built for outdoor rain, wind and snow; rating not stated on cited page",
+    "highlights": [
+      "Six hours of included event previews",
+      "Optional 24/7 cloud history with the Advanced plan",
+      "Google Home app and web viewing"
+    ],
+    "limitations": [
+      "Requires a 16–24 VAC, 10–40 VA transformer and compatible chime",
+      "The cited product page does not state the supported Wi-Fi bands",
+      "Longer event history and 24/7 history require a subscription"
+    ],
+    "sources": [
+      {
+        "title": "Nest Doorbell (wired, 3rd gen) product details and FAQ",
+        "url": "https://store.google.com/product/nest_doorbell_wired_3rd_gen?hl=en-US",
+        "publisher": "Google Store",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Event and 24/7 video history",
+        "url": "https://support.google.com/googlehome/answer/16593318?hl=en",
+        "publisher": "Google Nest Help",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "arlo-video-doorbell-2k-2nd-gen",
+    "name": "Video Doorbell 2K",
+    "brand": "Arlo",
+    "model": "2nd generation / AVD4001",
+    "category": "Video doorbell",
+    "summary": "A 2K Arlo doorbell with battery or wired installation and cloud-based storage.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": [],
+    "ecosystemCoverage": "unknown",
+    "storage": ["cloud"],
+    "subscription": "recordings",
+    "internet": "required",
+    "resolution": "1944 × 1944 (2K)",
+    "fieldOfView": "180° diagonal",
+    "weatherRating": "Operating range −20°C to 45°C",
+    "highlights": [
+      "Battery or existing-doorbell wiring",
+      "Head-to-toe 180° view",
+      "Live stream and basic alerts work without a subscription"
+    ],
+    "limitations": [
+      "Uses 2.4 GHz Wi-Fi",
+      "Manufacturer specifications list cloud storage",
+      "Smart-home ecosystem support was not confirmed in the cited specifications"
+    ],
+    "sources": [
+      {
+        "title": "Wireless Video Doorbell — specifications",
+        "url": "https://www.arlo.com/en-us/doorbell/video/arlo-doorbell.html",
+        "publisher": "Arlo",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Video Doorbell 2K (2nd Generation) spec sheet",
+        "url": "https://kb.arlo.com/000063725/Arlo-Video-Doorbell-2K-2nd-Generation-Spec-Sheet-AVD4001",
+        "publisher": "Arlo Support",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "eufy-video-doorbell-e340",
+    "name": "Video Doorbell E340",
+    "brand": "eufy",
+    "model": "E340 / T8214",
+    "category": "Video doorbell",
+    "summary": "A dual-camera doorbell with removable battery power and built-in device storage.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": ["alexa", "google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["device", "homebase"],
+    "subscription": "none",
+    "internet": "unknown",
+    "resolution": "2K main camera + 1080p package camera",
+    "fieldOfView": "160° listed viewing angle",
+    "weatherRating": "IP65",
+    "highlights": [
+      "Dual cameras cover visitors and packages",
+      "8 GB on-device storage",
+      "Works standalone or with compatible HomeBase"
+    ],
+    "limitations": [
+      "Wired mode still requires the battery to remain installed",
+      "Offline behavior is not clearly documented in the cited sources"
+    ],
+    "sources": [
+      {
+        "title": "Video Doorbell E340 product details and comparison",
+        "url": "https://www.eufy.com/products/t8214111",
+        "publisher": "eufy",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Understanding the specifications of Video Doorbell E340",
+        "url": "https://support.nz.eufy.com/support/solutions/articles/154000242527-understanding-the-specifications-of-the-video-doorbell-e340",
+        "publisher": "eufy Support",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "eufy-video-doorbell-c31",
+    "name": "Video Doorbell C31",
+    "brand": "eufy",
+    "model": "C31 / T8223",
+    "category": "Video doorbell",
+    "summary": "A removable-battery 2K doorbell with microSD storage and wired 24/7 recording support.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": [],
+    "ecosystems": ["alexa", "google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["microSD", "homebase"],
+    "subscription": "none",
+    "internet": "unknown",
+    "resolution": "2K",
+    "fieldOfView": "Not stated on cited product page",
+    "weatherRating": "IP65",
+    "highlights": [
+      "Up to 128 GB microSD storage",
+      "Removable 6,500 mAh battery",
+      "24/7 recording is available when correctly wired"
+    ],
+    "limitations": [
+      "Apple HomeKit is not supported",
+      "24/7 recording requires 16–24 V, 30 VA wiring and bypasses the existing chime",
+      "The cited product page does not state supported Wi-Fi bands"
+    ],
+    "sources": [
+      {
+        "title": "Video Doorbell C31 product details and FAQ",
+        "url": "https://www.eufy.com/products/t8223111",
+        "publisher": "eufy",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Video Doorbell C31/C30 power and charging requirements",
+        "url": "https://service.eufy.com/article-description/Video-Doorbell-C31-C30-Power-and-Charging-Requirements-FAQ",
+        "publisher": "eufy Support",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "reolink-video-doorbell-wifi",
+    "name": "Video Doorbell WiFi",
+    "brand": "Reolink",
+    "model": "WiFi 5MP",
+    "category": "Video doorbell",
+    "summary": "A hardwired dual-band doorbell with local microSD and Reolink NVR recording.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["wired"],
+    "network": ["wifi-2.4", "wifi-5", "ethernet"],
+    "ecosystems": ["google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["microSD", "nvr"],
+    "subscription": "none",
+    "internet": "unknown",
+    "resolution": "2560 × 1920 (5 MP)",
+    "fieldOfView": "180° diagonal",
+    "weatherRating": "IP65",
+    "highlights": [
+      "2.4 GHz and 5 GHz Wi-Fi plus Ethernet",
+      "microSD and Reolink NVR recording",
+      "Supports RTSP and ONVIF"
+    ],
+    "limitations": [
+      "Requires 12–24 VAC or 24 V DC power",
+      "Offline behavior is not clearly stated in the cited specifications"
+    ],
+    "sources": [
+      {
+        "title": "Video Doorbell WiFi product introduction and specifications",
+        "url": "https://support.reolink.com/c/video-doorbell-wifi/",
+        "publisher": "Reolink Support",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "reolink-video-doorbell-poe",
+    "name": "Video Doorbell PoE",
+    "brand": "Reolink",
+    "model": "PoE 5MP",
+    "category": "Video doorbell",
+    "summary": "A wired Ethernet doorbell using PoE, with local microSD and NVR recording options.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["poe", "wired"],
+    "network": ["ethernet"],
+    "ecosystems": ["google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["microSD", "nvr"],
+    "subscription": "none",
+    "internet": "unknown",
+    "resolution": "Up to 2560 × 1920 (5 MP)",
+    "fieldOfView": "180° diagonal",
+    "weatherRating": "IP65",
+    "highlights": [
+      "One Ethernet cable can carry power and data",
+      "microSD and Reolink NVR recording",
+      "Supports RTSP and ONVIF"
+    ],
+    "limitations": [
+      "Requires Ethernet cabling; Wi-Fi is not supported",
+      "A compatible 802.3af PoE source is needed for single-cable installation",
+      "Offline behavior is not clearly stated in the cited specifications"
+    ],
+    "sources": [
+      {
+        "title": "Video Doorbell PoE product introduction and specifications",
+        "url": "https://support.reolink.com/c/video-doorbell-poe/",
+        "publisher": "Reolink Support",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Reolink PoE Doorbell product specifications",
+        "url": "https://reolink.com/us/product/reolink-video-doorbell-poe/",
+        "publisher": "Reolink",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "aqara-smart-video-doorbell-g4",
+    "name": "Smart Video Doorbell G4",
+    "brand": "Aqara",
+    "model": "G4",
+    "category": "Video doorbell",
+    "summary": "A battery-or-wired doorbell with Apple Home support and protected microSD storage in its indoor chime.",
+    "region": "Global English",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": ["apple-home", "alexa", "google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["microSD", "cloud"],
+    "subscription": "optional",
+    "internet": "limited-offline",
+    "resolution": "1080p",
+    "fieldOfView": "162°",
+    "weatherRating": "IP66 on Aqara US specification page",
+    "highlights": [
+      "Supports Apple HomeKit Secure Video",
+      "Up to 512 GB microSD storage in the indoor chime",
+      "Some local recognition automations work during an internet outage"
+    ],
+    "limitations": [
+      "Uses 2.4 GHz Wi-Fi only",
+      "24/7 local recording is available only in wired power mode",
+      "HomeKit Secure Video requires the appropriate Apple setup and iCloud+ plan"
+    ],
+    "sources": [
+      {
+        "title": "Smart Video Doorbell G4 specifications",
+        "url": "https://www.aqara.com/en/product/smart-video-doorbell-g4/specs/",
+        "publisher": "Aqara",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Smart Video Doorbell G4 features and ecosystem support",
+        "url": "https://www.aqara.com/en/product/smart-video-doorbell-g4/",
+        "publisher": "Aqara",
+        "checked": "2026-09-05"
+      },
+      {
+        "title": "Store encrypted security camera footage with HomeKit Secure Video",
+        "url": "https://support.apple.com/en-in/guide/icloud/mme054c72692/icloud",
+        "publisher": "Apple Support",
+        "checked": "2026-09-05"
+      }
+    ]
+  },
+  {
+    "id": "tapo-d225",
+    "name": "Tapo D225",
+    "brand": "Tapo",
+    "model": "D225",
+    "category": "Video doorbell",
+    "summary": "A battery-or-wired 2K doorbell with microSD recording and optional Tapo Care cloud storage.",
+    "region": "United States",
+    "verifiedOn": "2026-09-05",
+    "power": ["battery", "wired"],
+    "network": ["wifi-2.4"],
+    "ecosystems": ["alexa", "google-home"],
+    "ecosystemCoverage": "verified",
+    "storage": ["microSD", "cloud"],
+    "subscription": "optional",
+    "internet": "unknown",
+    "resolution": "2K / 4 MP QHD",
+    "fieldOfView": "180° diagonal head-to-toe view",
+    "weatherRating": "IP66",
+    "highlights": [
+      "Up to 512 GB microSD storage",
+      "Battery or hardwired power",
+      "24/7 recording is supported when hardwired"
+    ],
+    "limitations": [
+      "Uses 2.4 GHz Wi-Fi only",
+      "Continuous recording is limited to hardwired mode",
+      "Offline behavior is not clearly stated in the cited specifications"
+    ],
+    "sources": [
+      {
+        "title": "Tapo D225 product details and specifications",
+        "url": "https://www.tapo.com/us/product/smart-doorbell/tapo-d225/",
+        "publisher": "Tapo / TP-Link",
+        "checked": "2026-09-05"
+      }
+    ]
+  }
+]

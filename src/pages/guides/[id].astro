@@ -1,0 +1,30 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import AdSlot from '../../components/AdSlot.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+	const guides = await getCollection('guides');
+	return guides.map((guide) => ({ params: { id: guide.id }, props: { guide } }));
+}
+
+interface Props {
+	guide: CollectionEntry<'guides'>;
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+---
+
+<BaseLayout title={guide.data.title} description={guide.data.description}>
+	<header class="article-header container narrow">
+		<p class="eyebrow">CompatNavi guide</p>
+		<h1>{guide.data.title}</h1>
+		<p class="lede">{guide.data.description}</p>
+		<div class="guide-meta"><span>{guide.data.readingTime}</span><span>Published {guide.data.publishedAt.toLocaleDateString('en-US', { dateStyle: 'medium' })}</span><span>Updated {guide.data.updatedAt.toLocaleDateString('en-US', { dateStyle: 'medium' })}</span></div>
+		<div class="chip-row">{guide.data.topics.map((topic) => <span class="chip">{topic}</span>)}</div>
+	</header>
+	<article class="container narrow prose"><Content /></article>
+	<div class="container narrow"><AdSlot /></div>
+	<section class="section"><div class="container narrow cta-band"><div><h2>Apply it to your shortlist.</h2><p>Use verified product facts to find the closest fit.</p></div><a class="button" href="/check/">Open fit checker</a></div></section>
+</BaseLayout>

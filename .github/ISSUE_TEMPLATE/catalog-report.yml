@@ -1,0 +1,42 @@
+name: Catalog correction or product request
+description: Report a wrong fact or request another video doorbell.
+title: "Catalog: "
+labels: ["catalog"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Request type
+      options:
+        - Correct an existing product
+        - Add a video doorbell
+        - Report a broken source
+    validations:
+      required: true
+  - type: input
+    id: product
+    attributes:
+      label: Exact product and model
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: Country or region
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Official manufacturer source
+      description: Link directly to a specification, support page or manual.
+      placeholder: https://manufacturer.example/product/specs
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: What should change?
+      description: Do not include account details, an address, serial numbers or private footage.
+    validations:
+      required: true

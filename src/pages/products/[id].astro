@@ -1,0 +1,72 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import AdSlot from '../../components/AdSlot.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { labels } from '../../lib/fit';
+
+export async function getStaticPaths() {
+	const products = await getCollection('products');
+	return products.map((entry) => ({ params: { id: entry.data.id }, props: { entry } }));
+}
+
+interface Props {
+	entry: CollectionEntry<'products'>;
+}
+
+const { entry } = Astro.props;
+const product = entry.data;
+const network = product.network.length ? product.network.map((item) => labels.network[item]).join(', ') : 'Unknown — not stated in cited source';
+const ecosystems = product.ecosystemCoverage === 'unknown' ? 'Unknown — not confirmed' : product.ecosystems.length ? product.ecosystems.map((item) => labels.ecosystem[item]).join(', ') : 'No integration listed';
+const storage = product.storage.map((item) => labels.storage[item]).join(', ');
+const verified = new Date(`${product.verifiedOn}T00:00:00`).toLocaleDateString('en-US', { dateStyle: 'long' });
+---
+
+<BaseLayout title={`${product.brand} ${product.name}`} description={`${product.summary} See verified compatibility facts, limitations and manufacturer sources.`}>
+	<section class="page-hero">
+		<div class="container product-hero-grid">
+			<div>
+				<p class="eyebrow">{product.brand} · {product.category}</p>
+				<h1>{product.name}</h1>
+				<p class="lede">{product.summary}</p>
+				<div class="verified-line"><span>✓ Source checked {verified}</span><span>Region: {product.region}</span><span>Model: {product.model}</span></div>
+				<div class="button-row"><a class="button" href={`/check/?product=${product.id}`}>Check against my setup</a><a class="button secondary" href={`/compare/?a=${product.id}`}>Compare this product</a></div>
+			</div>
+			<div class="product-visual" aria-label={`Abstract illustration for ${product.name}`}><div class="doorbell-shape" aria-hidden="true"></div></div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-head"><div><p class="eyebrow">Compatibility snapshot</p><h2>The facts that decide fit.</h2></div></div>
+			<dl class="spec-grid">
+				<div><dt>Power</dt><dd>{product.power.map((item) => labels.power[item]).join(', ')}</dd></div>
+				<div><dt>Network</dt><dd>{network}</dd></div>
+				<div><dt>Platforms</dt><dd>{ecosystems}</dd></div>
+				<div><dt>Recording</dt><dd>{storage}</dd></div>
+				<div><dt>Paid plan</dt><dd>{product.subscription === 'recordings' ? 'Needed for recorded history' : product.subscription === 'optional' ? 'Optional' : 'Not required for listed core recording'}</dd></div>
+				<div><dt>Offline clarity</dt><dd>{product.internet === 'required' ? 'Internet required for core remote features' : product.internet === 'limited-offline' ? 'Some local behavior documented' : 'Not clearly documented'}</dd></div>
+				<div><dt>Resolution</dt><dd>{product.resolution}</dd></div>
+				<div><dt>Field of view</dt><dd>{product.fieldOfView}</dd></div>
+				<div><dt>Weather</dt><dd>{product.weatherRating}</dd></div>
+			</dl>
+		</div>
+	</section>
+
+	<section class="section tint">
+		<div class="container two-column">
+			<article class="fact-panel"><h2>Why it may fit</h2><ul class="check-list">{product.highlights.map((item) => <li>{item}</li>)}</ul></article>
+			<article class="fact-panel"><h2>Limits to check</h2><ul class="limit-list">{product.limitations.map((item) => <li>{item}</li>)}</ul></article>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container narrow">
+			<div class="section-head"><div><p class="eyebrow">Evidence</p><h2>Manufacturer sources</h2><p>Product availability, features and plan terms can change. Open these pages for the latest details in your market.</p></div></div>
+			<ul class="source-list">
+				{product.sources.map((source) => <li><a href={source.url} rel="external noopener">{source.title} <span aria-hidden="true">↗</span></a><span>{source.publisher} · checked {new Date(`${source.checked}T00:00:00`).toLocaleDateString('en-US', { dateStyle: 'medium' })}</span></li>)}
+			</ul>
+			<p class="notice">CompatNavi is independent and does not sell this product. This page is decision support, not an installation or safety guarantee.</p>
+			<AdSlot />
+		</div>
+	</section>
+</BaseLayout>
