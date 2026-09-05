@@ -1,33 +1,29 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
 title: "Contact and corrections"
-description: "Request a product, report a source correction or raise a problem with CompatNavi."
+description: "Report a missed command pattern, incorrect warning, accessibility problem or documentation correction."
+section: "Support"
 ---
 
-The fastest way to reach the project is through [CompatNavi issues on GitHub](https://github.com/khajaaijaz26/compatnavi/issues).
+Use [CmdImpact issues on GitHub](https://github.com/khajaaijaz26/cmdimpact/issues) to report a problem or suggest a focused improvement.
 
-## Report a catalog correction
+## Before posting
 
-Include:
+Remove or replace:
 
-- the exact product and model;
-- your country or region;
-- the fact that appears wrong or incomplete;
-- a direct manufacturer specification, support page or manual;
-- the date you checked it.
+- passwords, API keys, access tokens and private keys;
+- private hostnames, repository URLs and IP addresses;
+- personal, customer or employer information; and
+- confidential source code or internal commands.
 
-Reports with an official source can be reviewed fastest. A retailer listing or review is useful context but is not enough on its own to replace a manufacturer fact.
+Use placeholders such as `https://example.com`, `YOUR_TOKEN` and `./example-folder`.
 
-## Request a product
+## Useful checker reports
 
-Open an issue with the category, exact model, region and official product URL. Video doorbells are the current live dataset. Requests for computing, mobile, gaming, networking, display, creator or software coverage help prioritize the public queue but are not published until a category has reliable evidence and decision rules.
+Include the redacted command, the result you received, the result you expected, your shell and why the difference matters. A new detector should describe a concrete effect and avoid claiming that a command is universally safe or dangerous.
 
-## Report a site problem
+## Site and accessibility problems
 
-For a broken page or tool result, include the URL, browser, selections you made and what you expected. Do not include your address, account credentials, serial number or private camera footage.
+Include the page URL, browser, device or assistive technology and the step that failed. Screenshots are welcome after confidential information is removed.
 
-## Business and advertising
-
-Advertising questions can also be opened through GitHub. Read the [advertising policy](/advertising/) first. Payment never buys a fit verdict, ranking or editorial change.
-
-Public issues are visible to everyone. Do not post personal or confidential information.
+GitHub issues are public. Do not use them for security secrets or private disclosure; open a minimal issue asking for a private contact route without describing the sensitive detail.

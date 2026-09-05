@@ -7,13 +7,14 @@ interface Props {
 	title: string;
 	description: string;
 	noIndex?: boolean;
+	allowAds?: boolean;
 }
 
-const { title, description, noIndex = false } = Astro.props;
-const pageTitle = title === 'CompatNavi' ? title : `${title} · CompatNavi`;
+const { title, description, noIndex = false, allowAds = false } = Astro.props;
+const pageTitle = title === 'CmdImpact' ? title : `${title} · CmdImpact`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const socialImage = new URL('/social-card.png', Astro.site);
-const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
+const adsenseClient = allowAds ? import.meta.env.PUBLIC_ADSENSE_CLIENT : undefined;
 ---
 
 <!doctype html>
@@ -22,16 +23,16 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
-		<meta name="theme-color" content="#f1f0eb" media="(prefers-color-scheme: light)" />
-		<meta name="theme-color" content="#07090d" media="(prefers-color-scheme: dark)" />
-		<meta name="color-scheme" content="dark light" />
 		<meta name="description" content={description} />
+		<meta name="theme-color" content="#f5f0e8" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#13110f" media="(prefers-color-scheme: dark)" />
+		<meta name="color-scheme" content="light dark" />
 		{noIndex && <meta name="robots" content="noindex" />}
 		<link rel="canonical" href={canonical} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="CompatNavi" />
+		<meta property="og:site_name" content="CmdImpact" />
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />
@@ -39,7 +40,7 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 		<meta property="og:image:type" content="image/png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="CompatNavi — Find the tech that fits." />
+		<meta property="og:image:alt" content="CmdImpact — understand commands before running them." />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={pageTitle} />
 		<meta name="twitter:description" content={description} />
@@ -47,13 +48,12 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 		<title>{pageTitle}</title>
 		<script is:inline>
 			(() => {
-				const saved = localStorage.getItem('compatnavi-theme');
-				document.documentElement.dataset.theme = saved || 'dark';
+				const saved = localStorage.getItem('cmdimpact-theme');
+				const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				document.documentElement.dataset.theme = saved || preferred;
 			})();
 		</script>
-		{adsenseClient && (
-			<script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`} crossorigin="anonymous"></script>
-		)}
+		{adsenseClient && <script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`} crossorigin="anonymous"></script>}
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">Skip to content</a>

@@ -1,39 +1,28 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
 title: "Advertising policy"
-description: "How CompatNavi can fund useful tools without selling rankings, verdicts or user trust."
+description: "How CmdImpact can fund free guides without exposing checker input or influencing command findings."
+section: "Trust center"
 ---
 
-_Last updated: 5 September 2026_
+_Last updated: 6 September 2026_
 
-CompatNavi is built to earn through clearly labeled display advertising after the site meets the advertising network's eligibility and consent requirements. Ads are disabled in the project by default.
+CmdImpact is designed to earn from clearly labeled advertising on educational content. Advertising is disabled in the source project until real publisher credentials and regional consent controls are configured.
 
-## Editorial rules
+## No ads on the checker
 
-An advertiser cannot pay to:
+The command checker at `/` does not load AdSense or place advertising beside the textarea, warnings, evidence or copy buttons. This separation protects the checker’s browser-only privacy boundary and prevents an advertisement from being mistaken for an action.
 
-- change a compatibility fact or source;
-- receive a Fits verdict;
-- move above a better-matching product;
-- remove a limitation or unknown;
-- influence a guide conclusion.
+## Guide placement
 
-Fit-checker ordering comes from the published rule engine and the visitor's selections, not commercial relationships.
+When enabled, ads may appear below editorial guide content or between clearly separated sections. Every placement is labeled “Advertisement.” An ad must not imitate a terminal command, warning, download button or official recommendation.
 
-## Placement rules
+## Independence
 
-When enabled, advertising is labeled “Advertisement” and placed between meaningful sections or after results—not inside controls, navigation, product verdicts or source lists. Ads must not be styled to imitate buttons, download links or product recommendations.
+An advertiser cannot pay to remove a finding, change rule severity, receive favorable guide coverage or make a command appear approved. Checker results come only from the published deterministic rules.
 
-The first version reserves only a small number of optional placements. Empty ad containers are not shown when advertising is disabled.
+CmdImpact does not currently use affiliate links or sponsored articles. Any future commercial relationship will be disclosed beside the relevant content.
 
 ## Privacy and consent
 
-Before serving Google ads, the deployed site must have an approved AdSense account, exact publisher details, a valid `ads.txt` line and any consent-management configuration required for the regions served. See the [privacy policy](/privacy/) for how advertising-related data will be disclosed.
-
-## Affiliate links and sponsored content
-
-CompatNavi does not currently use affiliate links or sponsored product entries. If either is introduced, the relationship will be disclosed beside the relevant link or content. The compatibility dataset and verdict rules will remain separate.
-
-## Corrections remain free
-
-Manufacturers, advertisers and readers can submit better official evidence through the [public issue tracker](https://github.com/khajaaijaz26/compatnavi/issues). Accepted corrections are based on evidence, not payment.
+Before advertising is activated, the deployed site must have an approved account, exact `ads.txt` record, updated live privacy disclosure and consent configuration required in every served region. See the [privacy policy](/privacy/) for the boundary between checker and guide pages.

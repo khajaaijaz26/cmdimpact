@@ -1,0 +1,49 @@
+name: Checker report
+description: Report a missed pattern, incorrect finding or unclear explanation.
+title: "[checker]: "
+labels: ["checker"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove all real credentials, private URLs, personal data and confidential code before posting. GitHub issues are public.
+  - type: textarea
+    id: command
+    attributes:
+      label: Redacted command
+      description: Use example.com, YOUR_TOKEN and example paths instead of real values.
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: shell
+    attributes:
+      label: Shell
+      options:
+        - Bash or sh
+        - PowerShell
+        - Mixed
+        - Unknown or another shell
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Current result
+      description: What did CmdImpact report?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What concrete effect should be added, removed or explained differently?
+    validations:
+      required: true
+  - type: checkboxes
+    id: redacted
+    attributes:
+      label: Public-data check
+      options:
+        - label: I replaced all credentials, private addresses, personal data and confidential code.
+          required: true

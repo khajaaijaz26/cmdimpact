@@ -1,51 +1,36 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
 title: "Privacy policy"
-description: "What CompatNavi stores, what it does not collect, and how future analytics or advertising will be handled."
+description: "What CmdImpact processes in the browser, what is stored, and where advertising or hosting providers may receive data."
+section: "Trust center"
 ---
 
-_Effective: 5 September 2026_
+_Effective: 6 September 2026_
 
-CompatNavi is designed to work with little personal data. This policy describes the current project and the controls required before optional analytics or advertising are enabled.
+## Command checker
 
-## Data stored on your device
+Text pasted into the command checker is processed inside the browser tab. CmdImpact does not send it to an application server, database, AI provider or analytics service. The checker page does not load advertising scripts.
 
-The site uses browser local storage for:
+The report remains in the page only until it is cleared, replaced or the tab is closed. CmdImpact does not provide cloud history or user accounts.
 
-- your light or dark theme choice; and
-- your Tech Passport, including any country or market text, region, currency and platforms you choose; and
-- fit-checker preferences such as power, network, ecosystem, storage and subscription tolerance.
+Do not paste a real password, token, private key, customer record or confidential source. The checker includes limited local redaction, but it is not a complete data-loss-prevention product.
 
-These values stay in your browser and are not sent to a CompatNavi database. You can clear either profile inside its tool or remove all site data in your browser.
+## Browser storage
 
-## Accounts, forms and camera data
+CmdImpact stores only the selected light or dark theme in browser local storage. The pasted command and report are not stored there.
 
-CompatNavi has no user accounts, server database or upload feature. It does not ask for an address, camera login, serial number or video footage. The cost calculator runs in the browser and does not store the numbers you enter.
+## Hosting
 
-Contact and correction links lead to GitHub. Information submitted there is handled under GitHub's policies and may be public.
+A deployed site and its network provider may process normal request data—such as IP address, requested URL, browser details, time and security signals—to deliver and protect pages. The planned hosting provider is Cloudflare, which applies its own privacy terms.
 
-## Hosting logs
+## Guides and advertising
 
-When the site is deployed, the hosting and network provider may process routine request information such as IP address, browser details, requested URL, time and security signals to deliver and protect the service. The planned host is Cloudflare; its processing is governed by its own terms and privacy documentation.
-
-## Analytics
-
-No analytics script is included in the local project by default. If Cloudflare Web Analytics is enabled for the deployed domain, this policy and the live site will identify that use before or when collection begins.
-
-## Advertising
-
-Advertising is disabled by default. The code loads Google AdSense only when a valid publisher client and slot are deliberately configured at build time.
-
-If advertising is enabled, Google and its partners may use cookies or similar technologies for ad delivery, measurement, fraud prevention and—where consent allows—personalization. Required consent controls for relevant regions must be configured before ads are served there. The live privacy notice will be updated with the applicable choices and vendor details.
+Advertising is disabled in the source project by default. If Google AdSense is configured, its script may load on clearly editorial guide pages, but never on the checker page. Google and its partners may then process cookies or similar data for delivery, measurement and fraud prevention. Required regional consent controls must be enabled before ads are served.
 
 ## External links
 
-Product sources and project links take you to third-party sites. Those sites receive normal browser request information and apply their own privacy policies. CompatNavi does not control their content or practices.
+Guide sources and project links lead to third-party sites. Opening one sends the normal web request directly to that site. GitHub issues are public and handled under GitHub's policies.
 
-## Children
+## Changes and contact
 
-CompatNavi is a general technology-reference service and is not directed to children. It does not knowingly request personal information from children.
-
-## Changes and questions
-
-Material changes will update the effective date on this page. Ask a privacy question or report a concern through the [project issue tracker](https://github.com/khajaaijaz26/compatnavi/issues), without posting confidential information.
+Material changes will update the effective date. Report a privacy concern through the [project issue tracker](https://github.com/khajaaijaz26/cmdimpact/issues) without including confidential information.

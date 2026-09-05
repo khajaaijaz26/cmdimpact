@@ -3,23 +3,14 @@ import Logo from './Logo.astro';
 ---
 
 <footer class="site-footer">
-	<div class="container footer-launch">
-		<div><span class="footer-code">CN / PASSPORT</span><h2>Make every device join the same world.</h2><p>Build the profile CompatNavi can reuse across markets, platforms and product categories.</p></div>
-		<a class="button" href="/passport/">Create my Tech Passport <span aria-hidden="true">→</span></a>
+	<div class="shell footer-callout">
+		<div><span class="kicker">Pause before paste</span><h2>Understand the command first.</h2><p>CmdImpact gives you evidence and questions to ask—not a magic “safe” badge.</p></div>
+		<a class="button" href="/#checker">Check a command <span aria-hidden="true">→</span></a>
 	</div>
-	<div class="container footer-grid">
-		<div class="footer-identity">
-			<a class="brand" href="/" aria-label="CompatNavi home"><Logo /></a>
-			<p class="footer-note">Independent, evidence-led compatibility guidance for technology everywhere.</p>
-			<span class="footer-status"><i class="live-pulse"></i> Global framework online</span>
-		</div>
-		<div class="footer-links" aria-label="Explore links"><strong>Explore</strong><a href="/categories/">Technology atlas</a><a href="/products/">Verified catalog</a><a href="/guides/">Guides</a><a href="/about/">About</a></div>
-		<div class="footer-links" aria-label="Tool links"><strong>Tools</strong><a href="/passport/">Tech Passport</a><a href="/check/">Fit checker</a><a href="/compare/">Compare</a><a href="/cost/">True cost</a></div>
-		<div class="footer-links" aria-label="Policy links"><strong>Trust</strong><a href="/methodology/">Methodology</a><a href="/advertising/">Advertising</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/contact/">Corrections</a></div>
+	<div class="shell footer-grid">
+		<div class="footer-brand"><a class="brand" href="/" aria-label="CmdImpact home"><Logo /></a><p>Plain-English impact checks for commands copied from AI and the web.</p></div>
+		<nav aria-label="Product links"><strong>Product</strong><a href="/#checker">Command checker</a><a href="/methodology/">How checks work</a><a href="/guides/">Guides</a><a href="/about/">About</a></nav>
+		<nav aria-label="Policy links"><strong>Trust</strong><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/advertising/">Advertising</a><a href="/contact/">Report a problem</a></nav>
 	</div>
-	<div class="container footer-bottom">
-		<p>© {new Date().getFullYear()} CompatNavi · Built for the world</p>
-		<p>Catalog evidence last reviewed 5 September 2026</p>
-		<a href="https://github.com/khajaaijaz26/compatnavi" rel="external noopener">Open source on GitHub ↗</a>
-	</div>
+	<div class="shell footer-bottom"><span>© {new Date().getFullYear()} CmdImpact</span><span>Nothing pasted into the checker leaves your browser.</span><a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">Open source on GitHub ↗</a></div>
 </footer>

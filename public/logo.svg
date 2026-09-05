@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 96" role="img" aria-labelledby="title desc">
-  <title id="title">CompatNavi</title><desc id="desc">A route check inside a compass beside the CompatNavi name.</desc>
-  <circle cx="48" cy="48" r="38" fill="none" stroke="#1769ff" stroke-opacity=".25" stroke-width="6"/>
-  <path d="m27 51 12 12 25-30M64 33v15" fill="none" stroke="#1769ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
-  <text x="105" y="64" fill="#0b1930" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="750" letter-spacing="-2">Compat<tspan fill="#1769ff">Navi</tspan></text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" role="img" aria-labelledby="title desc">
+  <title id="title">CmdImpact</title>
+  <desc id="desc">A terminal prompt followed by the CmdImpact wordmark.</desc>
+  <rect x="10" y="16" width="88" height="88" rx="24" fill="#17191c"/>
+  <path d="m31 40 23 20-23 20M62 80h18" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"/>
+  <path d="m31 40 23 20-23 20" stroke="#ffb000"/><path d="M62 80h18" stroke="#f6f4ed"/>
+  <text x="126" y="79" fill="#181512" font-family="Inter,Arial,sans-serif" font-size="58" font-weight="850" letter-spacing="-3"><tspan font-family="Consolas,monospace" font-weight="700">cmd</tspan>impact</text>
 </svg>

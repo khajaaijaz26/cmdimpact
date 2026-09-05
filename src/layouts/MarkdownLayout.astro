@@ -1,18 +1,19 @@
 ---
+import AdSlot from '../components/AdSlot.astro';
 import BaseLayout from './BaseLayout.astro';
 
 const { frontmatter } = Astro.props;
+const allowAds = frontmatter.ads === true;
 ---
 
-<BaseLayout title={frontmatter.title} description={frontmatter.description}>
-	<section class="page-hero compact-hero">
-		<div class="container narrow">
-			<p class="eyebrow">CompatNavi</p>
+<BaseLayout title={frontmatter.title} description={frontmatter.description} allowAds={allowAds}>
+	<header class="page-hero">
+		<div class="shell narrow">
+			<p class="kicker">CmdImpact / {frontmatter.section || 'Trust center'}</p>
 			<h1>{frontmatter.title}</h1>
-			<p class="lede">{frontmatter.description}</p>
+			<p class="page-lede">{frontmatter.description}</p>
 		</div>
-	</section>
-	<article class="container narrow prose legal-copy">
-		<slot />
-	</article>
+	</header>
+	<article class="shell narrow prose"><slot /></article>
+	{allowAds && <div class="shell narrow"><AdSlot /></div>}
 </BaseLayout>
