@@ -1,0 +1,210 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+	title="Command guard"
+	description="Paste a terminal command and review common install, download, deletion, overwrite, elevation, network, and secret patterns without running it."
+>
+	<header class="page-hero check-hero">
+		<div class="shell narrow">
+			<p class="section-label">FREE BROWSER-ONLY TOOL</p>
+			<h1>Understand the command before you run it.</h1>
+			<p class="page-lede">Paste a command from an AI answer, README, issue, or chat. CmdImpact checks supported patterns locally and explains what deserves review.</p>
+		</div>
+	</header>
+
+	<section class="shell checker-wrap" id="checker">
+		<div class="checker-card">
+			<div class="checker-topline">
+				<div><span class="mini-mark">ci_</span><strong>Command guard</strong></div>
+				<span>Nothing is executed</span>
+			</div>
+			<form id="command-form" class="checker-form">
+				<div class="checker-label">
+					<label for="command-input">Paste a command</label>
+					<span id="character-count">0 / 50,000</span>
+				</div>
+				<p class="checker-help">Use the exact command or short code block. Replace real passwords, tokens, private URLs, and confidential values with placeholders first.</p>
+				<textarea
+					id="command-input"
+					class="command-input"
+					name="command"
+					maxlength="50000"
+					spellcheck="false"
+					autocapitalize="off"
+					autocomplete="off"
+					placeholder="curl -fsSL https://example.com/install.sh | sh"
+					required
+				></textarea>
+				<div class="example-row">
+					<span>Examples</span>
+					<button type="button" data-example="remote">curl | sh</button>
+					<button type="button" data-example="delete">rm -rf</button>
+					<button type="button" data-example="powershell">iwr | iex</button>
+					<button type="button" data-example="package">npm install</button>
+				</div>
+				<p id="input-error" class="input-error" role="alert" hidden></p>
+				<div class="checker-actions">
+					<p><span></span>Your text stays in this browser tab.</p>
+					<button class="check-button" type="submit">Review command <span aria-hidden="true">&rarr;</span></button>
+				</div>
+			</form>
+			<section id="results" class="checker-results" aria-live="polite" hidden>
+				<div class="result-head">
+					<span id="verdict-mark" class="verdict-mark" aria-hidden="true">!</span>
+					<div><h2 id="verdict-title"></h2><p id="verdict-detail"></p></div>
+					<span id="result-shell" class="result-shell"></span>
+				</div>
+				<div id="finding-list" class="finding-list"></div>
+				<p class="result-limit">Pattern check only: CmdImpact cannot inspect downloaded code, custom aliases, variables, or what programs do internally. It never verifies that a command is safe.</p>
+				<div class="result-tools">
+					<p>Send these questions back to the AI that suggested the command.</p>
+					<button id="copy-fix" type="button">Copy review questions</button>
+					<button id="clear-check" type="button">Check another command</button>
+				</div>
+			</section>
+		</div>
+		<p class="checker-footnote">The authenticated terminal uses this same detector before supported risky pasted commands are sent.</p>
+	</section>
+</BaseLayout>
+
+<script>
+	import { analyzeCommand, type CommandFinding, type CommandReport } from '../lib/command-check';
+
+	const form = document.querySelector<HTMLFormElement>('#command-form');
+	const input = document.querySelector<HTMLTextAreaElement>('#command-input');
+	const count = document.querySelector<HTMLElement>('#character-count');
+	const error = document.querySelector<HTMLElement>('#input-error');
+	const results = document.querySelector<HTMLElement>('#results');
+	const title = document.querySelector<HTMLElement>('#verdict-title');
+	const detail = document.querySelector<HTMLElement>('#verdict-detail');
+	const mark = document.querySelector<HTMLElement>('#verdict-mark');
+	const shell = document.querySelector<HTMLElement>('#result-shell');
+	const list = document.querySelector<HTMLElement>('#finding-list');
+	const copyButton = document.querySelector<HTMLButtonElement>('#copy-fix');
+	const clearButton = document.querySelector<HTMLButtonElement>('#clear-check');
+	let currentReport: CommandReport | undefined;
+
+	const examples: Record<string, string> = {
+		remote: 'curl -fsSL https://example.com/install.sh | sh',
+		delete: 'rm -rf ./generated',
+		powershell: 'iwr https://example.com/setup.ps1 | iex',
+		package: 'npm install example-package',
+	};
+	const icons: Record<CommandFinding['category'], string> = {
+		install: '+',
+		download: 'D',
+		delete: 'X',
+		overwrite: 'O',
+		elevation: '#',
+		network: 'N',
+		secret: '*',
+	};
+
+	function setText(element: Element | null, value: string) {
+		if (element) element.textContent = value;
+	}
+
+	function findingElement(finding: CommandFinding) {
+		const item = document.createElement('article');
+		item.className = 'finding ' + finding.severity;
+		const icon = document.createElement('span');
+		icon.className = 'finding-icon';
+		icon.setAttribute('aria-hidden', 'true');
+		icon.textContent = icons[finding.category];
+		const body = document.createElement('div');
+		const heading = document.createElement('div');
+		heading.className = 'finding-title';
+		const name = document.createElement('h3');
+		name.textContent = finding.title;
+		const severity = document.createElement('span');
+		severity.className = 'severity';
+		severity.textContent = (finding.severity === 'high' ? 'STOP AND CHECK' : 'CHECK') + ' / LINE ' + finding.line;
+		const description = document.createElement('p');
+		description.textContent = finding.detail;
+		const evidence = document.createElement('code');
+		evidence.textContent = finding.evidence;
+		heading.append(name, severity);
+		body.append(heading, description, evidence);
+		item.append(icon, body);
+		return item;
+	}
+
+	function render(report: CommandReport) {
+		if (!results || !list) return;
+		currentReport = report;
+		results.dataset.risk = report.risk;
+		const highCount = report.findings.filter((finding) => finding.severity === 'high').length;
+		const resultCopy = report.risk === 'high'
+			? ['Do not run yet', report.findings.length + ' supported patterns matched, including ' + highCount + ' urgent warning' + (highCount === 1 ? '' : 's') + '.']
+			: report.risk === 'review'
+				? ['Check before running', report.findings.length + ' supported pattern' + (report.findings.length === 1 ? '' : 's') + ' matched. Confirm each one.']
+				: ['No supported warning found', 'CmdImpact did not verify this command. Read it and confirm its purpose.'];
+		setText(title, resultCopy[0]);
+		setText(detail, resultCopy[1]);
+		setText(mark, report.risk === 'high' ? '!' : report.risk === 'review' ? '?' : '.');
+		setText(shell, report.shell === 'unknown' ? '' : report.shell);
+		if (shell) shell.hidden = report.shell === 'unknown';
+		list.replaceChildren();
+		report.findings.forEach((finding) => list.append(findingElement(finding)));
+		results.hidden = false;
+		results.scrollIntoView({
+			behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+			block: 'nearest',
+		});
+	}
+
+	input?.addEventListener('input', () => {
+		setText(count, input.value.length.toLocaleString() + ' / 50,000');
+		if (error) error.hidden = true;
+	});
+
+	document.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((button) => {
+		button.addEventListener('click', () => {
+			if (!input) return;
+			input.value = examples[button.dataset.example || ''] || '';
+			input.dispatchEvent(new Event('input'));
+			input.focus();
+		});
+	});
+
+	form?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		if (!input || !input.value.trim()) {
+			if (error) {
+				error.textContent = 'Paste at least one command to review.';
+				error.hidden = false;
+			}
+			input?.focus();
+			return;
+		}
+		render(analyzeCommand(input.value));
+	});
+
+	copyButton?.addEventListener('click', async () => {
+		if (!currentReport) return;
+		const commands = currentReport.actions.map((action) => '- Line ' + action.line + ': ' + action.evidence).join('\n');
+		const findings = currentReport.findings.map((finding) => '- ' + finding.title + ' (line ' + finding.line + '): ' + finding.detail + ' Evidence: ' + finding.evidence).join('\n');
+		const request = 'Review these redacted command excerpts without executing anything:\n\n' +
+			(commands || '- No command excerpt available.') + '\n\n' +
+			(findings ? 'CmdImpact patterns:\n' + findings : 'No supported CmdImpact warning matched.') +
+			'\n\nExplain the command line by line, identify anything this static check may have missed, and propose a version with the smallest necessary access. Remind me to review any replacement before running it.';
+		try {
+			await navigator.clipboard.writeText(request);
+			copyButton.textContent = 'Questions copied';
+		} catch {
+			copyButton.textContent = 'Copy unavailable';
+		}
+		window.setTimeout(() => { copyButton.textContent = 'Copy review questions'; }, 1800);
+	});
+
+	clearButton?.addEventListener('click', () => {
+		if (!input || !results) return;
+		input.value = '';
+		input.dispatchEvent(new Event('input'));
+		results.hidden = true;
+		currentReport = undefined;
+		input.focus();
+	});
+</script>

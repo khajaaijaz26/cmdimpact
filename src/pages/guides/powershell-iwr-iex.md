@@ -32,4 +32,4 @@ Invoke-WebRequest https://example.com/setup.ps1 -OutFile setup.ps1
 
 Open `setup.ps1` as text. Check the expected publisher and review file writes, downloads, scheduled tasks, profile edits, environment variables and elevated operations. Do not execute it merely because a second AI says it looks safe.
 
-CmdImpact flags the compact pipeline as direct remote execution. It never downloads the script, so it cannot verify the file behind the URL. Use the [checker](/#checker) as a first pause, not a final security approval.
+CmdImpact flags the compact pipeline as direct remote execution. It never downloads the script, so it cannot verify the file behind the URL. Use the [checker](/check/) as a first pause, not a final security approval.

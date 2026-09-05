@@ -1,0 +1,78 @@
+services:
+  terminal:
+    build:
+      context: .
+      target: terminal
+      args:
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:4321}
+        PUBLIC_SPONSOR_NAME: ${PUBLIC_SPONSOR_NAME:-}
+        PUBLIC_SPONSOR_TEXT: ${PUBLIC_SPONSOR_TEXT:-}
+        PUBLIC_SPONSOR_URL: ${PUBLIC_SPONSOR_URL:-}
+    environment:
+      TERMINAL_ACCESS_TOKEN: ${TERMINAL_ACCESS_TOKEN:?Run npm run setup first}
+      TERMINAL_ALLOWED_ORIGINS: ${TERMINAL_ALLOWED_ORIGINS:-http://localhost:4321,http://127.0.0.1:4321}
+      TERMINAL_ALLOW_INSECURE_LOCALHOST: ${TERMINAL_ALLOW_INSECURE_LOCALHOST:-true}
+      TERMINAL_MAX_SESSIONS: ${TERMINAL_MAX_SESSIONS:-4}
+      TERMINAL_IDLE_MINUTES: ${TERMINAL_IDLE_MINUTES:-30}
+      TERMINAL_HARD_HOURS: ${TERMINAL_HARD_HOURS:-8}
+      TERMINAL_COOKIE_HOURS: ${TERMINAL_COOKIE_HOURS:-12}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    expose:
+      - "8787"
+    volumes:
+      - terminal_state:/app/.data
+      - terminal_workspace:/workspace
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    cap_add:
+      - KILL
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    pids_limit: 256
+    mem_limit: 768m
+    cpus: 1.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:4321}
+        PUBLIC_SPONSOR_NAME: ${PUBLIC_SPONSOR_NAME:-}
+        PUBLIC_SPONSOR_TEXT: ${PUBLIC_SPONSOR_TEXT:-}
+        PUBLIC_SPONSOR_URL: ${PUBLIC_SPONSOR_URL:-}
+    depends_on:
+      terminal:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:4321:4321"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /config:size=16m,mode=0755
+      - /data:size=32m,mode=0755
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.25
+    restart: unless-stopped
+
+volumes:
+  terminal_state:
+  terminal_workspace:

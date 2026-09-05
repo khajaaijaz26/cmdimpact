@@ -3,14 +3,33 @@ import Logo from './Logo.astro';
 ---
 
 <footer class="site-footer">
-	<div class="shell footer-callout">
-		<div><span class="kicker">Pause before paste</span><h2>Understand the command first.</h2><p>CmdImpact gives you evidence and questions to ask—not a magic “safe” badge.</p></div>
-		<a class="button" href="/#checker">Check a command <span aria-hidden="true">→</span></a>
+	<div class="shell footer-main">
+		<div class="footer-brand">
+			<a class="brand" href="/" aria-label="CmdImpact home"><Logo /></a>
+			<p>The single-owner, self-hosted terminal that keeps your sessions within reach.</p>
+		</div>
+		<nav aria-label="Product links">
+			<strong>Product</strong>
+			<a href="/#product">Terminal workspace</a>
+			<a href="/check/">Command guard</a>
+			<a href="/methodology/">How checks work</a>
+			<a href="/guides/">Guides</a>
+		</nav>
+		<nav aria-label="Project links">
+			<strong>Project</strong>
+			<a href="/about/">About</a>
+			<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">GitHub</a>
+			<a href="/contact/">Report a problem</a>
+		</nav>
+		<nav aria-label="Policy links">
+			<strong>Legal</strong>
+			<a href="/privacy/">Privacy</a>
+			<a href="/terms/">Terms</a>
+			<a href="/advertising/">Sponsorship</a>
+		</nav>
 	</div>
-	<div class="shell footer-grid">
-		<div class="footer-brand"><a class="brand" href="/" aria-label="CmdImpact home"><Logo /></a><p>Plain-English impact checks for commands copied from AI and the web.</p></div>
-		<nav aria-label="Product links"><strong>Product</strong><a href="/#checker">Command checker</a><a href="/methodology/">How checks work</a><a href="/guides/">Guides</a><a href="/about/">About</a></nav>
-		<nav aria-label="Policy links"><strong>Trust</strong><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/advertising/">Advertising</a><a href="/contact/">Report a problem</a></nav>
+	<div class="shell footer-bottom">
+		<span>&copy; {new Date().getFullYear()} CmdImpact</span>
+		<span>Open-source alpha. Use only on machines you control.</span>
 	</div>
-	<div class="shell footer-bottom"><span>© {new Date().getFullYear()} CmdImpact</span><span>Nothing pasted into the checker leaves your browser.</span><a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">Open source on GitHub ↗</a></div>
 </footer>

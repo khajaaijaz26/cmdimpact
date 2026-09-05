@@ -1,27 +1,40 @@
-<span class="brand-prompt" aria-hidden="true">&gt;</span>
-<span class="brand-name"><span>cmd</span>impact</span>
+<span class="brand-symbol" aria-hidden="true"><b>c</b><i></i></span>
+<span class="brand-word">cmdimpact<span>_</span></span>
 
 <style>
-	.brand-prompt {
+	.brand-symbol {
+		position: relative;
 		display: grid;
 		width: 2rem;
 		height: 2rem;
 		place-items: center;
+		border: 1px solid var(--navy);
 		border-radius: 0.55rem;
-		background: var(--accent);
-		color: #17120d;
-		font: 850 1rem/1 var(--mono);
+		background: var(--navy);
+		color: white;
 	}
 
-	.brand-name {
+	.brand-symbol b {
+		font: 800 0.95rem/1 var(--mono);
+		transform: translateX(-0.14rem);
+	}
+
+	.brand-symbol i {
+		position: absolute;
+		right: 0.36rem;
+		bottom: 0.42rem;
+		width: 0.5rem;
+		height: 0.12rem;
+		border-radius: 999px;
+		background: var(--terracotta);
+	}
+
+	.brand-word {
 		color: var(--ink);
-		font-size: 1.05rem;
-		font-weight: 850;
+		font-size: 1.02rem;
+		font-weight: 820;
 		letter-spacing: -0.045em;
 	}
 
-	.brand-name span {
-		font-family: var(--mono);
-		font-weight: 700;
-	}
+	.brand-word span { color: var(--cobalt); }
 </style>

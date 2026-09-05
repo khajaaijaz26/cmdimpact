@@ -1,24 +1,23 @@
 ---
-interface Props {
-	label?: string;
-}
+const sponsorName = import.meta.env.PUBLIC_SPONSOR_NAME?.trim();
+const sponsorText = import.meta.env.PUBLIC_SPONSOR_TEXT?.trim();
+const rawSponsorUrl = import.meta.env.PUBLIC_SPONSOR_URL?.trim();
+let sponsorUrl: string | undefined;
 
-const { label = 'Advertisement' } = Astro.props;
-const client = import.meta.env.PUBLIC_ADSENSE_CLIENT;
-const slot = import.meta.env.PUBLIC_ADSENSE_SLOT;
+try {
+	const url = new URL(rawSponsorUrl);
+	if (url.protocol === 'https:') sponsorUrl = url.href;
+} catch {
+	// Missing or invalid configuration keeps the placement disabled.
+}
 ---
 
-{client && slot && (
-	<aside class="ad-shell" aria-label={label}>
-		<span>{label}</span>
-		<ins
-			class="adsbygoogle"
-			style="display:block"
-			data-ad-client={client}
-			data-ad-slot={slot}
-			data-ad-format="auto"
-			data-full-width-responsive="true"
-		></ins>
-		<script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+{sponsorName && sponsorText && sponsorUrl && (
+	<aside class="ad-shell" aria-label="Sponsored content">
+		<span>Sponsored</span>
+		<a href={sponsorUrl} target="_blank" rel="sponsored noopener noreferrer">
+			<strong>{sponsorName}</strong>
+			<p>{sponsorText}</p>
+		</a>
 	</aside>
 )}

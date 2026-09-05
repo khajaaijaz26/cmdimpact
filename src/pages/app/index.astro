@@ -1,0 +1,897 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout>
+	<div id="terminal-workspace" class="terminal-app">
+		<button id="sidebar-scrim" class="sidebar-scrim" type="button" aria-label="Close sessions"></button>
+		<aside id="session-sidebar" class="session-sidebar" aria-label="Terminal sessions">
+			<div class="session-sidebar-title">
+				<div><span>Workspace</span><h1>Sessions</h1></div>
+				<button id="new-session-side" class="round-button" type="button" title="New session" aria-label="New session">+</button>
+			</div>
+			<div class="sidebar-explainer">
+				<strong>Processes stay on this server.</strong>
+				<span>Closing the browser does not end a session.</span>
+			</div>
+			<div id="session-list" class="session-list" aria-live="polite">
+				<div class="session-loading"><span></span><span></span><span></span></div>
+			</div>
+			<div class="session-sidebar-foot">
+				<span class="server-dot"></span>
+				<div><strong>CmdImpact server</strong><small id="server-status">Checking connection...</small></div>
+			</div>
+		</aside>
+
+		<main class="terminal-main">
+			<section id="workspace-empty" class="workspace-empty">
+				<div class="empty-mark" aria-hidden="true">ci_</div>
+				<p class="app-kicker">NO SESSION SELECTED</p>
+				<h2>Your terminal will open here.</h2>
+				<p>Create a session to start a real shell on this CmdImpact server, or choose an existing session to reconnect.</p>
+				<button id="new-session-empty" class="app-primary large" type="button">Create your first session</button>
+				<small>Alpha boundary: sessions survive browser disconnects, not server restarts.</small>
+			</section>
+
+			<section id="active-workspace" class="active-workspace" hidden>
+				<header class="terminal-toolbar">
+					<button id="sidebar-toggle" class="icon-button mobile-only" type="button" aria-label="Open sessions">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+					</button>
+					<div class="session-identity">
+						<div><h2 id="active-session-name">Terminal</h2><span id="active-session-meta">live session</span></div>
+					</div>
+					<div class="terminal-actions">
+						<button id="rename-session" class="toolbar-button" type="button">Rename</button>
+						<button id="take-control" class="toolbar-button control" type="button" hidden>Take control</button>
+						<button id="reconnect-session" class="toolbar-button" type="button" hidden>Reconnect</button>
+						<button id="end-session" class="toolbar-button danger" type="button">End</button>
+					</div>
+				</header>
+				<div class="terminal-frame">
+					<div id="terminal" class="terminal-mount" aria-label="Interactive terminal"></div>
+					<div id="terminal-overlay" class="terminal-overlay" hidden>
+						<div class="overlay-spinner"></div>
+						<strong id="terminal-overlay-title">Connecting...</strong>
+						<span id="terminal-overlay-detail">Opening the session on this server.</span>
+					</div>
+				</div>
+				<div class="mobile-keybar" aria-label="Terminal shortcut keys">
+					<button type="button" data-key="escape">esc</button>
+					<button type="button" data-key="control-c">ctrl+c</button>
+					<button type="button" data-key="tab">tab</button>
+					<button type="button" data-key="up">&uarr;</button>
+					<button type="button" data-key="down">&darr;</button>
+					<button type="button" data-key="left">&larr;</button>
+					<button type="button" data-key="right">&rarr;</button>
+				</div>
+				<footer class="terminal-statusbar">
+					<span id="terminal-connection" data-state="idle"><i></i>Not connected</span>
+					<span id="terminal-size">- x -</span>
+					<span class="status-boundary">Browser disconnects keep the process running</span>
+				</footer>
+			</section>
+		</main>
+	</div>
+
+	<div id="login-screen" class="login-screen" hidden>
+		<div class="login-card">
+			<a class="login-home" href="/" aria-label="Back to CmdImpact"><span>ci_</span>cmdimpact</a>
+			<p class="app-kicker">SELF-HOSTED ACCESS</p>
+			<h1>Open your workspace.</h1>
+			<p>Enter the access token configured on this CmdImpact server. The token is sent only to this server.</p>
+			<form id="login-form">
+				<label for="access-token">Access token</label>
+				<input id="access-token" name="token" type="password" autocomplete="current-password" required autofocus />
+				<p id="login-error" class="form-error" role="alert" hidden></p>
+				<button class="app-primary large" type="submit">Sign in</button>
+			</form>
+			<small>Single-owner alpha. Do not share the token or expose an untrusted development server.</small>
+		</div>
+	</div>
+
+	<dialog id="new-session-dialog" class="app-dialog">
+		<form id="new-session-form" method="dialog">
+			<div class="dialog-head"><span class="dialog-icon">+</span><button type="button" data-close-dialog aria-label="Close">&times;</button></div>
+			<p class="app-kicker">NEW TERMINAL</p>
+			<h2>Start a session</h2>
+			<p>The shell runs on this CmdImpact server and stays active when the browser disconnects.</p>
+			<label for="session-name">Session name</label>
+			<input id="session-name" name="name" maxlength="64" placeholder="api migration" autocomplete="off" />
+			<label for="session-shell">Shell</label>
+			<select id="session-shell" name="shell"></select>
+			<p id="session-error" class="form-error" role="alert" hidden></p>
+			<div class="dialog-actions"><button type="button" class="dialog-cancel" data-close-dialog>Cancel</button><button class="app-primary" type="submit">Create session</button></div>
+		</form>
+	</dialog>
+
+	<dialog id="guard-dialog" class="app-dialog guard-dialog">
+		<div class="dialog-head"><span class="dialog-icon warning">!</span><button type="button" data-guard-action="cancel" aria-label="Close">&times;</button></div>
+		<p class="app-kicker">COMMAND GUARD</p>
+		<h2>Review this paste</h2>
+		<p id="guard-summary">CmdImpact found a supported pattern worth checking before these lines reach your shell.</p>
+		<div id="guard-findings" class="guard-findings"></div>
+		<p class="guard-limit">Pattern check only. CmdImpact cannot inspect remote code or prove this command is safe.</p>
+		<div class="dialog-actions guard-buttons">
+			<button type="button" class="dialog-cancel" data-guard-action="cancel">Cancel</button>
+			<button type="button" class="dialog-cancel" data-guard-action="paste">Paste as one line</button>
+			<button type="button" class="app-danger" data-guard-action="send">Send anyway</button>
+		</div>
+	</dialog>
+
+	<dialog id="end-session-dialog" class="app-dialog">
+		<div class="dialog-head"><span class="dialog-icon danger">!</span><button type="button" data-close-dialog aria-label="Close">&times;</button></div>
+		<p class="app-kicker">DESTRUCTIVE ACTION</p>
+		<h2 id="end-dialog-title">End this session?</h2>
+		<p id="end-dialog-copy">The shell and jobs attached to <strong id="end-session-name">this session</strong> will stop. It cannot be resumed.</p>
+		<p id="end-error" class="form-error" role="alert" hidden></p>
+		<div class="dialog-actions"><button type="button" class="dialog-cancel" data-close-dialog>Keep session</button><button id="confirm-end-session" class="app-danger" type="button">End session</button></div>
+	</dialog>
+</AppLayout>
+
+<script>
+	import { Terminal } from '@xterm/xterm';
+	import { FitAddon } from '@xterm/addon-fit';
+	import { WebLinksAddon } from '@xterm/addon-web-links';
+	import '@xterm/xterm/css/xterm.css';
+	import { analyzeCommand, type CommandFinding } from '../../lib/command-check';
+	import { pasteAsOneLine, pasteNeedsReview, terminalInputFits } from '../../lib/terminal-paste';
+
+	interface SessionRecord {
+		id: string;
+		name: string;
+		shell: string;
+		state: 'running' | 'detached' | 'exited';
+		createdAt: string;
+		lastAttachedAt: string | null;
+		detachedAt: string | null;
+		exitedAt: string | null;
+		exitCode: number | null;
+		exitReason: string | null;
+		clients: number;
+		writable: boolean;
+	}
+
+	type SocketMessage = {
+		type?: 'hello' | 'ready' | 'output' | 'control' | 'pong' | 'exit' | 'error';
+		protocol?: number;
+		attachWithinMs?: number;
+		session?: SessionRecord;
+		writable?: boolean;
+		reason?: string;
+		data?: string;
+		message?: string;
+		code?: string;
+		exitCode?: number | null;
+	};
+
+	const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+	const loginScreen = element<HTMLDivElement>('login-screen');
+	const loginForm = element<HTMLFormElement>('login-form');
+	const loginError = element<HTMLParagraphElement>('login-error');
+	const tokenInput = element<HTMLInputElement>('access-token');
+	const sessionList = element<HTMLDivElement>('session-list');
+	const emptyState = element<HTMLElement>('workspace-empty');
+	const activeWorkspace = element<HTMLElement>('active-workspace');
+	const activeName = element<HTMLElement>('active-session-name');
+	const activeMeta = element<HTMLElement>('active-session-meta');
+	const globalConnection = element<HTMLElement>('global-connection');
+	const terminalConnection = element<HTMLElement>('terminal-connection');
+	const terminalSize = element<HTMLElement>('terminal-size');
+	const overlay = element<HTMLElement>('terminal-overlay');
+	const overlayTitle = element<HTMLElement>('terminal-overlay-title');
+	const overlayDetail = element<HTMLElement>('terminal-overlay-detail');
+	const reconnectButton = element<HTMLButtonElement>('reconnect-session');
+	const newDialog = element<HTMLDialogElement>('new-session-dialog');
+	const newForm = element<HTMLFormElement>('new-session-form');
+	const sessionNameInput = element<HTMLInputElement>('session-name');
+	const sessionShellInput = element<HTMLSelectElement>('session-shell');
+	const sessionError = element<HTMLParagraphElement>('session-error');
+	const guardDialog = element<HTMLDialogElement>('guard-dialog');
+	const guardSummary = element<HTMLElement>('guard-summary');
+	const guardFindings = element<HTMLElement>('guard-findings');
+	const endDialog = element<HTMLDialogElement>('end-session-dialog');
+	const endName = element<HTMLElement>('end-session-name');
+	const endTitle = element<HTMLElement>('end-dialog-title');
+	const endCopy = element<HTMLElement>('end-dialog-copy');
+	const endError = element<HTMLParagraphElement>('end-error');
+	const endButton = element<HTMLButtonElement>('confirm-end-session');
+	const takeControlButton = element<HTMLButtonElement>('take-control');
+	const sidebar = element<HTMLElement>('session-sidebar');
+	const scrim = element<HTMLButtonElement>('sidebar-scrim');
+
+	let sessions: SessionRecord[] = [];
+	let selected: SessionRecord | undefined;
+	let socket: WebSocket | undefined;
+	let reconnectTimer = 0;
+	let reconnectAttempts = 0;
+	let connectionGeneration = 0;
+	let manualDisconnect = false;
+	let pendingPaste = '';
+	let availableShells: string[] = [];
+	let writable = false;
+	let heartbeatTimer = 0;
+
+	const fitAddon = new FitAddon();
+	const terminal = new Terminal({
+		cursorBlink: true,
+		cursorStyle: 'bar',
+		fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", monospace',
+		fontSize: 14,
+		lineHeight: 1.35,
+		scrollback: 5000,
+		allowProposedApi: false,
+		theme: {
+			background: '#151a23',
+			foreground: '#e7eaf0',
+			cursor: '#90a8e8',
+			cursorAccent: '#151a23',
+			selectionBackground: '#35466f',
+			black: '#151a23',
+			red: '#d66d68',
+			green: '#72a78e',
+			yellow: '#c9a064',
+			blue: '#839ce0',
+			magenta: '#aa8ebd',
+			cyan: '#70a5ab',
+			white: '#e7eaf0',
+			brightBlack: '#667184',
+			brightRed: '#e3837f',
+			brightGreen: '#8abb9f',
+			brightYellow: '#d8b479',
+			brightBlue: '#9db1e9',
+			brightMagenta: '#bea5cc',
+			brightCyan: '#89b9be',
+			brightWhite: '#ffffff',
+		},
+	});
+	terminal.loadAddon(fitAddon);
+	terminal.loadAddon(new WebLinksAddon());
+	terminal.open(element<HTMLDivElement>('terminal'));
+
+	function sessionLabel(session: SessionRecord) {
+		return session.name.trim() || 'Untitled session';
+	}
+
+	function connectionState(state: 'idle' | 'connecting' | 'connected' | 'offline' | 'error', label: string) {
+		globalConnection.dataset.state = state;
+		terminalConnection.dataset.state = state;
+		const globalLabel = globalConnection.querySelector('span');
+		if (globalLabel) globalLabel.textContent = label;
+		terminalConnection.lastChild!.textContent = label;
+		element<HTMLElement>('server-status').textContent = state === 'connected' ? 'Online' : label;
+		reconnectButton.hidden = state !== 'offline' && state !== 'error';
+	}
+
+	async function api(path: string, options: RequestInit = {}) {
+		const headers = new Headers(options.headers);
+		if (options.body) headers.set('Content-Type', 'application/json');
+		const response = await fetch(path, { ...options, headers, credentials: 'include' });
+		if (response.status === 401 && path !== '/api/auth/login') {
+			const hadWorkspace = Boolean(selected || sessions.length);
+			handleUnauthorized(hadWorkspace ? 'Your sign-in expired. Enter the access token again.' : '');
+		}
+		return response;
+	}
+
+	function normalizeSessions(value: unknown): SessionRecord[] {
+		const records = Array.isArray(value) ? value : typeof value === 'object' && value !== null && Array.isArray((value as { sessions?: unknown[] }).sessions)
+			? (value as { sessions: unknown[] }).sessions
+			: [];
+		return records.filter((item): item is SessionRecord => {
+			return typeof item === 'object' && item !== null && typeof (item as SessionRecord).id === 'string';
+		});
+	}
+
+	function groupFor(session: SessionRecord) {
+		if (session.state === 'exited') return 'Finished';
+		if (session.state === 'detached') return 'Detached';
+		return session.clients > 0 ? 'Attached' : 'Running';
+	}
+
+	function formatAge(value?: string) {
+		if (!value) return '';
+		const timestamp = Date.parse(value);
+		if (!Number.isFinite(timestamp)) return '';
+		const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+		if (seconds < 60) return 'now';
+		if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
+		if (seconds < 86400) return Math.floor(seconds / 3600) + 'h';
+		return Math.floor(seconds / 86400) + 'd';
+	}
+
+	function renderSessions() {
+		sessionList.replaceChildren();
+		if (!sessions.length) {
+			const empty = document.createElement('div');
+			empty.className = 'sidebar-empty';
+			const strong = document.createElement('strong');
+			strong.textContent = 'No sessions yet';
+			const span = document.createElement('span');
+			span.textContent = 'Create one and it will stay listed here.';
+			empty.append(strong, span);
+			sessionList.append(empty);
+			return;
+		}
+
+		['Attached', 'Running', 'Detached', 'Finished'].forEach((group) => {
+			const matching = sessions.filter((session) => groupFor(session) === group);
+			if (!matching.length) return;
+			const heading = document.createElement('p');
+			heading.className = 'session-list-heading';
+			heading.textContent = group.toUpperCase();
+			sessionList.append(heading);
+			matching.forEach((session) => {
+				const button = document.createElement('button');
+				button.type = 'button';
+				button.className = 'session-item' + (selected?.id === session.id ? ' is-current' : '');
+				button.dataset.status = group.toLowerCase().replace(' ', '-');
+				const status = document.createElement('i');
+				const copy = document.createElement('span');
+				const title = document.createElement('strong');
+				title.textContent = sessionLabel(session);
+				const meta = document.createElement('small');
+				meta.textContent = session.shell + ' / ' + session.state;
+				const age = document.createElement('time');
+				age.textContent = formatAge(session.exitedAt || session.detachedAt || session.lastAttachedAt || session.createdAt);
+				copy.append(title, meta);
+				button.append(status, copy, age);
+				button.addEventListener('click', () => selectSession(session));
+				sessionList.append(button);
+			});
+		});
+	}
+
+	async function loadSessions(expectedGeneration?: number) {
+		const response = await api('/api/sessions');
+		if (expectedGeneration !== undefined && expectedGeneration !== connectionGeneration) return false;
+		if (!response.ok) throw new Error('Could not load sessions.');
+		const body = await response.json();
+		if (expectedGeneration !== undefined && expectedGeneration !== connectionGeneration) return false;
+		sessions = normalizeSessions(body);
+		if (Array.isArray(body.shells)) {
+			availableShells = body.shells.filter((shell: unknown): shell is string => typeof shell === 'string');
+			renderShellOptions();
+		}
+		renderSessions();
+		if (selected) {
+			selected = sessions.find((item) => item.id === selected?.id);
+			if (!selected) {
+				showEmpty();
+			} else {
+				activeName.textContent = sessionLabel(selected);
+				activeMeta.textContent = selected.shell + ' / ' + selected.state + (writable ? ' / keyboard control' : ' / view only');
+				element<HTMLButtonElement>('end-session').textContent = selected.state === 'exited' ? 'Remove' : 'End';
+			}
+		}
+		return true;
+	}
+
+	function showLogin(message = '') {
+		loginScreen.hidden = false;
+		loginError.hidden = !message;
+		loginError.textContent = message;
+		window.setTimeout(() => tokenInput.focus(), 0);
+	}
+
+	function hideLogin() {
+		loginScreen.hidden = true;
+		tokenInput.value = '';
+		loginError.hidden = true;
+	}
+
+	function renderShellOptions() {
+		sessionShellInput.replaceChildren();
+		const shells = availableShells.length ? availableShells : ['default'];
+		shells.forEach((shell) => {
+			const option = document.createElement('option');
+			option.value = shell === 'default' ? '' : shell;
+			option.textContent = shell === 'default' ? 'Server default' : shell;
+			sessionShellInput.append(option);
+		});
+	}
+
+	async function bootstrap() {
+		try {
+			const response = await api('/api/me');
+			if (!response.ok) {
+				showLogin();
+				return;
+			}
+			const identity = await response.json().catch(() => ({ authenticated: true }));
+			if (identity && identity.authenticated === false) {
+				showLogin();
+				return;
+			}
+			if (Array.isArray(identity.shells)) {
+				availableShells = identity.shells.filter((shell: unknown): shell is string => typeof shell === 'string');
+				renderShellOptions();
+			}
+			hideLogin();
+			await loadSessions();
+			element<HTMLElement>('server-status').textContent = 'Online';
+			const requested = new URLSearchParams(location.search).get('session');
+			const first = sessions.find((item) => item.id === requested) || sessions.find((item) => item.state !== 'exited');
+			if (first) selectSession(first);
+		} catch {
+			showLogin('The CmdImpact server is unavailable. Confirm it is running and refresh this page.');
+		}
+	}
+
+	loginForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const submit = loginForm.querySelector<HTMLButtonElement>('button[type="submit"]');
+		if (submit) submit.disabled = true;
+		loginError.hidden = true;
+		try {
+			const response = await api('/api/auth/login', {
+				method: 'POST',
+				body: JSON.stringify({ token: tokenInput.value }),
+			});
+			if (!response.ok) {
+				const body = await response.json().catch(() => ({}));
+				throw new Error(body.error || 'That access token was not accepted.');
+			}
+			hideLogin();
+			await loadSessions();
+			element<HTMLElement>('server-status').textContent = 'Online';
+			const first = sessions.find((item) => item.state !== 'exited');
+			if (first) selectSession(first);
+		} catch (error) {
+			showLogin(error instanceof Error ? error.message : 'Sign-in failed.');
+		} finally {
+			if (submit) submit.disabled = false;
+		}
+	});
+
+	element<HTMLButtonElement>('logout-button').addEventListener('click', async () => {
+		const response = await api('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
+		if (!response || (!response.ok && response.status !== 401)) {
+			window.alert('Sign-out was not confirmed. You are still signed in; check the connection and try again.');
+			return;
+		}
+		if (response.status !== 401) handleUnauthorized();
+	});
+
+	function socketUrl() {
+		const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
+		return scheme + '//' + location.host + '/ws';
+	}
+
+	function send(message: object) {
+		if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
+	}
+
+	function sendInput(data: string) {
+		if (!terminalInputFits(data)) {
+			terminal.writeln('\r\n\x1b[38;2;214;109;104m[input not sent] Paste a smaller section; one terminal message is limited to 32 KiB.\x1b[0m');
+			return;
+		}
+		send({ type: 'input', data });
+	}
+
+	function setWritable(next: boolean, reason = '') {
+		writable = next;
+		terminal.options.disableStdin = !next;
+		takeControlButton.hidden = next || !selected || selected.state === 'exited';
+		if (selected) {
+			selected.writable = next;
+			activeMeta.textContent = selected.shell + ' / ' + selected.state + (next ? ' / keyboard control' : ' / view only');
+		}
+		if (reason && !next) terminal.writeln('\r\n\x1b[38;2;201;160;100m[view only] ' + reason + '\x1b[0m');
+	}
+
+	function writeSocketMessage(event: MessageEvent) {
+		if (typeof event.data !== 'string') return;
+		let message: SocketMessage;
+		try {
+			message = JSON.parse(event.data) as SocketMessage;
+		} catch {
+			terminal.writeln('\r\n\x1b[38;2;214;109;104m[invalid server frame]\x1b[0m');
+			return;
+		}
+		if (message.type === 'hello') {
+			if (!selected) return;
+			send({ type: 'attach', sessionId: selected.id, takeover: false });
+		} else if (message.type === 'ready') {
+			const readySession = message.session;
+			if (readySession && selected?.id === readySession.id) {
+				selected = readySession;
+				sessions = sessions.map((item) => item.id === readySession.id ? readySession : item);
+			}
+			reconnectAttempts = 0;
+			overlay.hidden = true;
+			connectionState('connected', message.writable ? 'Connected' : 'View only');
+			setWritable(Boolean(message.writable));
+			renderSessions();
+			try { fitAddon.fit(); } catch { /* terminal may still be settling */ }
+			if (message.writable) send({ type: 'resize', cols: terminal.cols, rows: terminal.rows });
+			if (message.writable) terminal.focus();
+			window.clearInterval(heartbeatTimer);
+			heartbeatTimer = window.setInterval(() => send({ type: 'ping', nonce: String(Date.now()) }), 25000);
+		} else if (message.type === 'output') {
+			terminal.write(message.data || '');
+		} else if (message.type === 'control') {
+			connectionState('connected', message.writable ? 'Connected' : 'View only');
+			setWritable(Boolean(message.writable), message.reason || '');
+		} else if (message.type === 'exit') {
+			terminal.writeln('\r\n\x1b[38;2;146;155;171m[session ended' + (typeof message.exitCode === 'number' ? ' with code ' + message.exitCode : '') + ']\x1b[0m');
+			connectionState('offline', 'Session ended');
+			manualDisconnect = true;
+			if (selected) {
+				selected.state = 'exited';
+				selected.exitCode = message.exitCode ?? null;
+				selected.exitReason = message.reason || null;
+				activeMeta.textContent = selected.shell + ' / exited';
+				element<HTMLButtonElement>('end-session').textContent = 'Remove';
+				setWritable(false);
+				renderSessions();
+			}
+		} else if (message.type === 'error') {
+			terminal.writeln('\r\n\x1b[38;2;214;109;104m[error] ' + (message.message || message.data || 'Terminal error') + '\x1b[0m');
+		}
+		return message;
+	}
+
+	function scheduleReconnect(generation: number) {
+		if (manualDisconnect || !selected || generation !== connectionGeneration) return;
+		reconnectAttempts += 1;
+		const delay = Math.min(8000, 500 * Math.pow(2, reconnectAttempts - 1));
+		connectionState('offline', 'Reconnecting...');
+		window.clearTimeout(reconnectTimer);
+		reconnectTimer = window.setTimeout(() => {
+			if (selected && generation === connectionGeneration) connectSocket(selected);
+		}, delay);
+	}
+
+	function disconnectSocket() {
+		manualDisconnect = true;
+		connectionGeneration += 1;
+		window.clearTimeout(reconnectTimer);
+		window.clearInterval(heartbeatTimer);
+		send({ type: 'detach' });
+		socket?.close();
+		socket = undefined;
+		setWritable(false);
+	}
+
+	function connectSocket(session: SessionRecord) {
+		disconnectSocket();
+		const generation = connectionGeneration;
+		manualDisconnect = false;
+		terminal.reset();
+		terminal.writeln('\x1b[38;2;146;155;171mConnecting to ' + sessionLabel(session) + '...\x1b[0m');
+		overlay.hidden = false;
+		overlayTitle.textContent = reconnectAttempts ? 'Reconnecting...' : 'Connecting...';
+		overlayDetail.textContent = 'The shell process remains on this server.';
+		connectionState('connecting', 'Connecting');
+		setWritable(false);
+		const nextSocket = new WebSocket(socketUrl());
+		let serverErrorCode = '';
+		socket = nextSocket;
+		nextSocket.addEventListener('open', () => {
+			if (generation !== connectionGeneration) return;
+			connectionState('connecting', 'Authorizing');
+		});
+		nextSocket.addEventListener('message', (event) => {
+			if (generation !== connectionGeneration) return;
+			const message = writeSocketMessage(event);
+			if (message?.type === 'error') serverErrorCode = message.code || '';
+		});
+		nextSocket.addEventListener('error', () => {
+			if (generation === connectionGeneration) connectionState('error', 'Connection error');
+		});
+		nextSocket.addEventListener('close', async (event) => {
+			if (generation !== connectionGeneration) return;
+			const failedSessionId = session.id;
+			window.clearInterval(heartbeatTimer);
+			setWritable(false);
+			if (event.code === 1008) {
+				manualDisconnect = true;
+				overlay.hidden = false;
+				overlayTitle.textContent = 'Connection refused';
+				overlayDetail.textContent = 'Checking your sign-in and server origin settings...';
+				try {
+					const response = await api('/api/me');
+					if (generation !== connectionGeneration) return;
+					const identity = response.ok ? await response.json().catch(() => ({ authenticated: false })) : { authenticated: false };
+					if (generation !== connectionGeneration) return;
+					if (!identity.authenticated) {
+						showLogin('Your sign-in expired. Enter the access token again.');
+					} else if (serverErrorCode === 'not-live') {
+						if (!await loadSessions(generation)) return;
+						const ended = sessions.find((session) => session.id === failedSessionId);
+						if (ended?.state === 'exited') selectSession(ended);
+						else if (selected?.id === failedSessionId) showEmpty();
+					} else {
+						overlayDetail.textContent = 'The server rejected this terminal attachment. Refresh or check the server settings.';
+						connectionState('error', 'Attachment refused');
+					}
+				} catch {
+					if (generation !== connectionGeneration) return;
+					showLogin('The CmdImpact server is unavailable. Confirm it is running and refresh this page.');
+				}
+				return;
+			}
+			overlay.hidden = false;
+			overlayTitle.textContent = manualDisconnect ? 'Disconnected' : 'Connection lost';
+			overlayDetail.textContent = manualDisconnect ? 'Reconnect when you are ready.' : 'The process may still be running. Trying again...';
+			scheduleReconnect(generation);
+		});
+	}
+
+	function selectSession(session: SessionRecord) {
+		disconnectSocket();
+		selected = session;
+		writable = false;
+		emptyState.hidden = true;
+		activeWorkspace.hidden = false;
+		activeName.textContent = sessionLabel(session);
+		activeMeta.textContent = session.shell + ' / ' + session.state;
+		element<HTMLButtonElement>('end-session').textContent = session.state === 'exited' ? 'Remove' : 'End';
+		renderSessions();
+		closeSidebar();
+		history.replaceState(null, '', '/app/?session=' + encodeURIComponent(session.id));
+		requestAnimationFrame(() => {
+			fitAddon.fit();
+			if (session.state === 'exited') {
+				terminal.reset();
+				terminal.writeln('\x1b[38;2;146;155;171mThis session has ended' + (typeof session.exitCode === 'number' ? ' with code ' + session.exitCode : '') + '.\x1b[0m');
+				if (session.exitReason) terminal.writeln('\x1b[38;2;113;125;143mReason: ' + session.exitReason + '\x1b[0m');
+				overlay.hidden = true;
+				connectionState('offline', 'Session ended');
+				setWritable(false);
+			} else {
+				connectSocket(session);
+			}
+		});
+	}
+
+	function showEmpty() {
+		disconnectSocket();
+		emptyState.hidden = false;
+		activeWorkspace.hidden = true;
+		connectionState('idle', 'Not connected');
+		history.replaceState(null, '', '/app/');
+	}
+
+	function handleUnauthorized(message = '') {
+		sessions = [];
+		selected = undefined;
+		renderSessions();
+		showEmpty();
+		showLogin(message);
+	}
+
+	terminal.onData((data) => {
+		if (writable) sendInput(data);
+	});
+	terminal.onResize(({ cols, rows }) => {
+		terminalSize.textContent = cols + ' x ' + rows;
+		if (writable) send({ type: 'resize', cols, rows });
+	});
+	new ResizeObserver(() => {
+		if (!activeWorkspace.hidden) {
+			try { fitAddon.fit(); } catch { /* layout is still settling */ }
+		}
+	}).observe(element<HTMLElement>('terminal'));
+
+	element<HTMLElement>('terminal').addEventListener('paste', (event) => {
+		if (!writable) {
+			event.preventDefault();
+			return;
+		}
+		const clipboardEvent = event as ClipboardEvent;
+		const text = clipboardEvent.clipboardData?.getData('text/plain') || '';
+		if (!text) return;
+		const report = analyzeCommand(text);
+		const hasLineBreaks = /[\r\n]/.test(text);
+		if (!pasteNeedsReview(text, report.findings.length)) return;
+		event.preventDefault();
+		event.stopPropagation();
+		pendingPaste = text;
+		guardFindings.replaceChildren();
+		guardSummary.textContent = report.findings.length
+			? 'CmdImpact found ' + report.findings.length + ' supported pattern' + (report.findings.length === 1 ? '' : 's') + ' worth checking before this paste reaches your shell.' + (hasLineBreaks ? ' It also contains line breaks that may submit more than one command.' : '')
+			: 'This paste contains line breaks. Sending it unchanged may run multiple commands immediately.';
+		if (!report.findings.length) {
+			const item = document.createElement('article');
+			const icon = document.createElement('span');
+			icon.textContent = '!';
+			const copy = document.createElement('div');
+			const heading = document.createElement('strong');
+			heading.textContent = 'Multiple commands may run';
+			const detail = document.createElement('p');
+			detail.textContent = 'Line breaks can submit earlier lines before you have reviewed the rest.';
+			const evidence = document.createElement('code');
+			const lines = text.split(/\r\n|\r|\n/).filter((line) => line.length > 0).length;
+			evidence.textContent = String(Math.max(1, lines)) + ' non-empty lines';
+			copy.append(heading, detail, evidence);
+			item.append(icon, copy);
+			guardFindings.append(item);
+		}
+		report.findings.slice(0, 6).forEach((finding: CommandFinding) => {
+			const item = document.createElement('article');
+			const icon = document.createElement('span');
+			icon.textContent = finding.severity === 'high' ? '!' : '?';
+			const copy = document.createElement('div');
+			const heading = document.createElement('strong');
+			heading.textContent = finding.title;
+			const detail = document.createElement('p');
+			detail.textContent = finding.detail;
+			const evidence = document.createElement('code');
+			evidence.textContent = finding.evidence;
+			copy.append(heading, detail, evidence);
+			item.append(icon, copy);
+			guardFindings.append(item);
+		});
+		guardDialog.showModal();
+	}, true);
+
+	document.querySelectorAll<HTMLButtonElement>('[data-guard-action]').forEach((button) => {
+		button.addEventListener('click', () => {
+			const action = button.dataset.guardAction;
+			if (action === 'paste') sendInput(pasteAsOneLine(pendingPaste));
+			if (action === 'send') sendInput(pendingPaste);
+			pendingPaste = '';
+			guardDialog.close();
+			terminal.focus();
+		});
+	});
+
+	const shortcuts: Record<string, string> = {
+		escape: '\x1b',
+		'control-c': '\x03',
+		tab: '\t',
+		up: '\x1b[A',
+		down: '\x1b[B',
+		left: '\x1b[D',
+		right: '\x1b[C',
+	};
+	document.querySelectorAll<HTMLButtonElement>('[data-key]').forEach((button) => {
+		button.addEventListener('click', () => {
+			if (writable) sendInput(shortcuts[button.dataset.key || ''] || '');
+			terminal.focus();
+		});
+	});
+
+	function openNewDialog() {
+		sessionNameInput.value = '';
+		sessionError.hidden = true;
+		newDialog.showModal();
+		window.setTimeout(() => sessionNameInput.focus(), 0);
+	}
+	['new-session-top', 'new-session-side', 'new-session-empty'].forEach((id) => {
+		element<HTMLButtonElement>(id).addEventListener('click', openNewDialog);
+	});
+
+	newForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		sessionError.hidden = true;
+		const submit = newForm.querySelector<HTMLButtonElement>('button[type="submit"]');
+		if (submit) submit.disabled = true;
+		try {
+			const response = await api('/api/sessions', {
+				method: 'POST',
+				body: JSON.stringify({
+					name: sessionNameInput.value.trim() || 'New session',
+					shell: sessionShellInput.value || undefined,
+					cols: terminal.cols,
+					rows: terminal.rows,
+				}),
+			});
+			if (!response.ok) {
+				const body = await response.json().catch(() => ({}));
+				throw new Error(body.error || 'Could not create the session.');
+			}
+			const body = await response.json();
+			const created = (body.session || body) as SessionRecord;
+			if (!created.id) throw new Error('The server returned an invalid session.');
+			sessions.unshift(created);
+			newDialog.close();
+			renderSessions();
+			selectSession(created);
+		} catch (error) {
+			sessionError.textContent = error instanceof Error ? error.message : 'Could not create the session.';
+			sessionError.hidden = false;
+		} finally {
+			if (submit) submit.disabled = false;
+		}
+	});
+
+	element<HTMLButtonElement>('rename-session').addEventListener('click', async () => {
+		if (!selected) return;
+		const name = window.prompt('Rename this session', sessionLabel(selected))?.trim();
+		if (!name || name === sessionLabel(selected)) return;
+		if (name.length > 64) {
+			window.alert('Session names can be at most 64 characters.');
+			return;
+		}
+		const response = await api('/api/sessions/' + encodeURIComponent(selected.id), {
+			method: 'PATCH',
+			body: JSON.stringify({ name }),
+		}).catch(() => undefined);
+		if (!response) {
+			window.alert('Could not reach the CmdImpact server. Try again.');
+			return;
+		}
+		if (response.status === 401) return;
+		if (!response.ok) {
+			const body = await response.json().catch(() => ({}));
+			const message = typeof body.error === 'string' ? body.error : body.error?.message;
+			window.alert(message || 'CmdImpact could not rename this session.');
+			return;
+		}
+		selected.name = name;
+		activeName.textContent = name;
+		renderSessions();
+	});
+
+	element<HTMLButtonElement>('end-session').addEventListener('click', () => {
+		if (!selected) return;
+		endName.textContent = sessionLabel(selected);
+		endError.hidden = true;
+		const remove = selected.state === 'exited';
+		endTitle.textContent = remove ? 'Remove this session?' : 'End this session?';
+		endCopy.childNodes[0]!.textContent = remove ? 'The finished session record ' : 'The shell and jobs attached to ';
+		endCopy.childNodes[2]!.textContent = remove ? ' will be removed from this list.' : ' will stop. It cannot be resumed.';
+		endButton.textContent = remove ? 'Remove session' : 'End session';
+		endDialog.showModal();
+	});
+
+	endButton.addEventListener('click', async () => {
+		if (!selected) return;
+		const ending = selected;
+		endError.hidden = true;
+		const remove = ending.state === 'exited';
+		const endpoint = '/api/sessions/' + encodeURIComponent(ending.id) + (remove ? '' : '/stop');
+		const response = await api(endpoint, { method: remove ? 'DELETE' : 'POST' }).catch(() => undefined);
+		if (!response?.ok) {
+			endError.textContent = 'The server could not ' + (remove ? 'remove' : 'end') + ' this session.';
+			endError.hidden = false;
+			return;
+		}
+		if (remove) {
+			sessions = sessions.filter((item) => item.id !== ending.id);
+		} else {
+			ending.state = 'exited';
+			ending.exitedAt = new Date().toISOString();
+			ending.writable = false;
+		}
+		selected = undefined;
+		endDialog.close();
+		renderSessions();
+		showEmpty();
+	});
+
+	reconnectButton.addEventListener('click', () => {
+		if (!selected) return;
+		reconnectAttempts = 0;
+		connectSocket(selected);
+	});
+
+	takeControlButton.addEventListener('click', () => {
+		send({ type: 'take-control' });
+		connectionState('connecting', 'Requesting control');
+	});
+
+	function openSidebar() {
+		sidebar.classList.add('is-open');
+		scrim.classList.add('is-open');
+	}
+	function closeSidebar() {
+		sidebar.classList.remove('is-open');
+		scrim.classList.remove('is-open');
+	}
+	element<HTMLButtonElement>('sidebar-toggle').addEventListener('click', openSidebar);
+	scrim.addEventListener('click', closeSidebar);
+
+	document.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach((button) => {
+		button.addEventListener('click', () => button.closest('dialog')?.close());
+	});
+
+	window.setInterval(() => {
+		if (document.visibilityState === 'visible' && loginScreen.hidden) void loadSessions().catch(() => undefined);
+	}, 15000);
+	bootstrap();
+</script>

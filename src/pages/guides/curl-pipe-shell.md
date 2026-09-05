@@ -41,4 +41,4 @@ This separation does not make an unknown script safe. It simply gives you a usef
 
 CmdImpact labels this pattern as direct remote execution, a network download and a network action. It does not fetch the URL or decide that the publisher is trustworthy.
 
-Paste the exact command into the [checker](/#checker) before using it. Replace real tokens or private URLs with placeholders first.
+Paste the exact command into the [checker](/check/) before using it. Replace real tokens or private URLs with placeholders first.

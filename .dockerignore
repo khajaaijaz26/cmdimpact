@@ -1,0 +1,12 @@
+.git
+.github
+.astro
+.data
+.env
+.env.*
+dist
+graphify-out
+node_modules
+npm-debug.log*
+*.png
+!public/*.png

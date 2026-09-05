@@ -9,6 +9,8 @@ _Last updated: 6 September 2026_
 
 CmdImpact performs static text analysis. It **never runs the pasted command**.
 
+The same browser-side analysis powers both the standalone checker and the guarded-paste review inside the terminal workspace.
+
 ## Supported input
 
 The first release recognizes common Bash/sh and PowerShell syntax, plus familiar commands from npm, npx, pnpm, yarn, pip, pipx and several system package managers. Input is capped at 50,000 characters to keep the browser check predictable.

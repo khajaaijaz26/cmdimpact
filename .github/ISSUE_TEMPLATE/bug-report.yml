@@ -1,0 +1,105 @@
+name: Bug report
+description: Report a reproducible problem with the terminal, sessions, or interface.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve CmdImpact.
+
+        **Do not post vulnerabilities, credentials, private hostnames, access tokens, or unredacted terminal output here.** Report security issues privately through [GitHub Security Advisories](https://github.com/khajaaijaz26/cmdimpact/security/advisories/new).
+
+  - type: checkboxes
+    id: public-data
+    attributes:
+      label: Public-data check
+      options:
+        - label: This is not a security vulnerability, and I removed credentials, private addresses, personal data, and confidential terminal output.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Terminal input or output
+        - Session creation or reconnect
+        - Authentication or owner access
+        - Guarded paste
+        - Docker or self-hosting
+        - Responsive interface or accessibility
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: For example, v0.2 alpha or the output of `git rev-parse --short HEAD`.
+      placeholder: v0.2 alpha
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment method
+      options:
+        - Docker Compose
+        - Direct npm development
+        - Other self-hosted setup
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: Client environment
+      description: Browser name/version and client operating system.
+      placeholder: Firefox 142 on Android 16
+    validations:
+      required: true
+
+  - type: input
+    id: server
+    attributes:
+      label: Server environment
+      description: Host operating system, architecture, Docker version, and configured shell when relevant.
+      placeholder: Ubuntu 24.04, x86_64, Docker 28, bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use harmless commands and placeholder values. Never paste a real terminal transcript.
+      placeholder: |
+        1. Start CmdImpact using ...
+        2. Create a session ...
+        3. Reconnect from ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Optional. Remove commands, output, tokens, paths, hostnames, usernames, and personal data first.

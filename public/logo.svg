@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" role="img" aria-labelledby="title desc">
   <title id="title">CmdImpact</title>
-  <desc id="desc">A terminal prompt followed by the CmdImpact wordmark.</desc>
-  <rect x="10" y="16" width="88" height="88" rx="24" fill="#17191c"/>
-  <path d="m31 40 23 20-23 20M62 80h18" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"/>
-  <path d="m31 40 23 20-23 20" stroke="#ffb000"/><path d="M62 80h18" stroke="#f6f4ed"/>
-  <text x="126" y="79" fill="#181512" font-family="Inter,Arial,sans-serif" font-size="58" font-weight="850" letter-spacing="-3"><tspan font-family="Consolas,monospace" font-weight="700">cmd</tspan>impact</text>
+  <desc id="desc">CmdImpact wordmark with a continuous terminal cursor.</desc>
+  <rect x="10" y="16" width="88" height="88" rx="24" fill="#192234"/>
+  <path d="M64 38a23 23 0 1 0 0 44" fill="none" stroke="#F6F7F9" stroke-linecap="round" stroke-width="10"/>
+  <path d="M65 82h16" fill="none" stroke="#C7664E" stroke-linecap="round" stroke-width="9"/>
+  <text x="126" y="79" fill="#141A24" font-family="Inter,Arial,sans-serif" font-size="58" font-weight="800" letter-spacing="-3">cmdimpact<tspan fill="#3959C6">_</tspan></text>
 </svg>

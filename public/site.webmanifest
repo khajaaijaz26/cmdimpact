@@ -1,12 +1,13 @@
 {
-	"name": "CmdImpact",
-	"short_name": "CmdImpact",
-	"description": "Understand a pasted terminal command before running it.",
-	"start_url": "/",
-	"display": "standalone",
-	"background_color": "#f5f0e8",
-	"theme_color": "#ffb000",
-	"icons": [
-		{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
-	]
+  "name": "CmdImpact Terminal",
+  "short_name": "CmdImpact",
+  "description": "A self-hosted web terminal for reconnectable sessions with guarded paste.",
+  "start_url": "/app/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#151a23",
+  "theme_color": "#151a23",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
 }

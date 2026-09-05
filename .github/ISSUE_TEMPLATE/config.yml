@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/khajaaijaz26/cmdimpact/security/advisories/new
+    about: Report vulnerabilities privately. Never disclose credentials or exploits in a public issue.
+  - name: Ask the community
+    url: https://github.com/khajaaijaz26/cmdimpact/discussions/new?category=q-a
+    about: Ask setup and usage questions without sharing private terminal data.

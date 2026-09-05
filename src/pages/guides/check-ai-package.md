@@ -40,4 +40,4 @@ Pinning a version improves reproducibility, but does not prove that the selected
 
 Prefer a project directory or Python virtual environment over global or system-wide installation. Read the lockfile changes before committing them. If the answer asks for administrator access, understand why the package needs it.
 
-CmdImpact identifies common installation commands and tells you to review the package. Live registry verification is intentionally not presented as a “safe package” badge. Paste the install line into the [checker](/#checker) for the first review step.
+CmdImpact identifies common installation commands and tells you to review the package. Live registry verification is intentionally not presented as a “safe package” badge. Paste the install line into the [checker](/check/) for the first review step.

@@ -2,202 +2,186 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="CmdImpact" description="Paste a terminal command from ChatGPT, Claude, Codex, Copilot or GitHub and see what it may install, download, delete, overwrite or expose before you run it.">
-	<section class="hero">
-		<div class="shell hero-grid">
-			<div class="hero-copy">
-				<p class="kicker">A pause button for copy-paste coding</p>
-				<h1>Spot common <em>command risks</em> before you run it.</h1>
-				<p>Paste a command from an AI answer or GitHub. CmdImpact checks for common install, download, delete, administrator, network and exposed-secret patterns—without running anything.</p>
-				<div class="source-row" aria-label="Common command sources"><span>ChatGPT</span><span>Claude</span><span>Codex</span><span>GitHub</span><span>Copilot</span><span>Gemini</span></div>
-				<div class="hero-note">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.8 3.2 7.8 7.5 9.5 4.3-1.7 7.5-4.7 7.5-9.5V6L12 3Z"/><path d="m8.5 12 2.1 2.1 4.9-5"/></svg>
-					<span><strong>Your text stays here.</strong> The checker runs inside this browser tab and the checker page loads no ads.</span>
+<BaseLayout
+	title="CmdImpact"
+	description="A self-hosted web terminal for persistent shell and AI coding sessions, with a built-in guard for risky pasted commands."
+>
+	<section class="landing-hero">
+		<div class="shell hero-copy">
+			<p class="eyebrow"><span></span>A browser terminal for your own server</p>
+			<h1>Your terminal,<br /><em>wherever you are.</em></h1>
+			<p class="hero-lede">Start Claude Code, Codex, Gemini CLI, or any shell task. Close the browser and reconnect to the same live session from another device.</p>
+			<div class="hero-actions">
+				<a class="button primary" href="/app/">Open your terminal <span aria-hidden="true">&rarr;</span></a>
+				<a class="button quiet" href="/check/">Check a command first</a>
+			</div>
+			<ul class="trust-list" aria-label="Product boundaries">
+				<li><span></span>Single-owner alpha</li>
+				<li><span></span>Runs on your server</li>
+				<li><span></span>No ads in the workspace</li>
+			</ul>
+		</div>
+
+		<div class="shell product-stage" id="product">
+			<div class="product-window">
+				<div class="preview-topbar">
+					<div><span class="mini-mark">ci_</span><strong>Workspace</strong></div>
+					<div class="preview-machine"><i></i> local server online</div>
+					<span class="preview-avatar">KA</span>
+				</div>
+				<div class="preview-body">
+					<aside class="preview-sidebar">
+						<div class="preview-sidebar-head"><span>Sessions</span><b>3</b></div>
+						<p class="session-group">ATTACHED</p>
+						<div class="preview-session is-active">
+							<i class="status-run"></i>
+							<div><strong>checkout fix</strong><small>claude &middot; shop-api</small></div>
+							<time>now</time>
+						</div>
+						<p class="session-group">DETACHED</p>
+						<div class="preview-session">
+							<i class="status-wait"></i>
+							<div><strong>mobile tests</strong><small>codex &middot; web-app</small></div>
+							<time>2m</time>
+						</div>
+						<p class="session-group">FINISHED</p>
+						<div class="preview-session">
+							<i class="status-idle"></i>
+							<div><strong>server logs</strong><small>bash &middot; home-server</small></div>
+							<time>18m</time>
+						</div>
+					</aside>
+					<div class="preview-terminal">
+						<div class="preview-tabbar">
+							<div><span>checkout fix</span><small>shop-api / main</small></div>
+							<span class="preview-state">Writable session</span>
+						</div>
+						<div class="preview-screen" aria-label="Terminal product preview">
+							<p><span class="term-muted">claude</span> I found the failing checkout path.</p>
+							<p class="term-gap">The migration changes the order status index and<br />updates 3 tests. Apply these edits?</p>
+							<p><span class="term-choice">1</span> Yes, apply the edits</p>
+							<p><span class="term-choice">2</span> Show the diff first</p>
+							<p><span class="term-choice">3</span> Cancel</p>
+							<p class="term-prompt"><span>&gt;</span><i></i></p>
+						</div>
+						<div class="preview-status"><span><i></i> Connected</span><span>ubuntu-home &middot; zsh &middot; 120 x 36</span></div>
+					</div>
+					<aside class="preview-impact">
+						<p class="session-group">COMMAND GUARD</p>
+						<div class="impact-icon">!</div>
+						<h2>Review this paste</h2>
+						<p>This command downloads code and sends it directly to a shell.</p>
+						<div class="impact-detail"><span>Remote execution</span><strong>High attention</strong></div>
+						<button type="button">Paste as one line</button>
+						<small>Pattern check only. It cannot prove a command is safe.</small>
+					</aside>
 				</div>
 			</div>
-
-			<section id="checker" class="checker-card" aria-labelledby="checker-title">
-				<div class="terminal-bar"><span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>cmdimpact / local-check</span><span>v1</span></div>
-				<form id="command-form" class="checker-form">
-					<div class="checker-label"><label id="checker-title" for="command-input">Paste a command</label><span id="character-count">0 / 50,000</span></div>
-					<p class="checker-help">Paste only the command or short code block you were told to run—not the surrounding explanation. Replace real passwords, API keys, tokens, private URLs and confidential data with placeholders first.</p>
-					<textarea id="command-input" class="command-input" name="command" maxlength="50000" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Example:&#10;curl -fsSL https://example.com/install.sh | sh" required></textarea>
-					<div class="example-row"><span>Try:</span><button class="example-chip" type="button" data-example="remote">curl | sh</button><button class="example-chip" type="button" data-example="delete">rm -rf</button><button class="example-chip" type="button" data-example="powershell">iwr | iex</button><button class="example-chip" type="button" data-example="package">npm install</button></div>
-					<p id="input-error" class="input-error" role="alert" hidden></p>
-					<div class="checker-actions"><p>Nothing is uploaded, saved or run.</p><button class="check-button" type="submit">Check this command →</button></div>
-				</form>
-				<section id="results" class="results" aria-live="polite" hidden>
-					<div class="result-head"><span id="verdict-mark" class="verdict-mark" aria-hidden="true">!</span><div><h2 id="verdict-title"></h2><p id="verdict-detail"></p></div><span id="result-shell" class="result-shell"></span></div>
-					<div id="finding-list" class="result-body"></div>
-					<p class="result-limit">Pattern check only: CmdImpact cannot inspect downloaded code, custom aliases, variables or what programs do internally. It does not verify that a command is safe.</p>
-					<div class="result-tools"><p>Paste these questions into the AI that gave you the command. Review any replacement too.</p><button id="copy-fix" class="result-button" type="button">Copy questions for the AI</button><button id="clear-check" class="result-button" type="button">Check another command</button></div>
-				</section>
-			</section>
+			<p class="stage-caption"><span>Actual product shape</span> Session manager, full terminal, and guarded paste in one focused workspace.</p>
 		</div>
 	</section>
 
-	<section class="section section-tint">
+	<section class="proof-strip">
+		<div class="shell proof-list">
+			<span>Run installed CLIs</span>
+			<strong>Claude Code</strong>
+			<strong>Codex</strong>
+			<strong>Gemini CLI</strong>
+			<strong>OpenCode</strong>
+			<strong>Freebuff</strong>
+			<strong>SSH</strong>
+		</div>
+	</section>
+
+	<section class="landing-section" id="how-it-works">
 		<div class="shell">
-			<div class="section-heading"><div><p class="kicker">Why it exists</p><h2>AI moves fast. A terminal moves faster.</h2></div><p>A polished answer can still ask for more access than the task needs, install the wrong package or hide a destructive step inside a one-liner.</p></div>
-			<div class="problem-grid">
-				<article class="story-card"><span class="card-index">01 / RECEIVE</span><h3>An AI gives you a command.</h3><p>It may come from ChatGPT, Claude, Codex, Copilot, Gemini, a GitHub issue or a README.</p></article>
-				<article class="story-card"><span class="card-index">02 / PAUSE</span><h3>You paste it here first.</h3><p>CmdImpact reads the text locally. It never starts a shell, downloads code or touches your files.</p></article>
-				<article class="story-card is-impact"><span class="card-index">03 / UNDERSTAND</span><h3>You see what needs checking.</h3><p>Known download, install, deletion, overwrite, administrator, network and exposed-secret patterns are called out in plain English.</p></article>
+			<div class="section-intro">
+				<p class="section-label">THE SIMPLE IDEA</p>
+				<h2>Leave the screen.<br />Keep the work running.</h2>
+				<p>CmdImpact keeps terminal processes on the self-hosted server. Closing a tab only disconnects your view, so you can come back without starting over.</p>
+			</div>
+			<div class="value-grid">
+				<article class="value-card">
+					<span class="value-number">01</span>
+					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
+					<h3>Start a real shell</h3>
+					<p>Create a session in the browser. Commands execute on the CmdImpact server, not in a pretend terminal.</p>
+				</article>
+				<article class="value-card is-blue">
+					<span class="value-number">02</span>
+					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h11v11M18 7 6 19"/><path d="M6 6h4M18 14v4h-4"/></svg></div>
+					<h3>Reconnect anywhere</h3>
+					<p>Open the workspace from another browser and attach to the same session while the server remains online.</p>
+				</article>
+				<article class="value-card is-sage">
+					<span class="value-number">03</span>
+					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.8 3.2 7.8 7.5 9.5 4.3-1.7 7.5-4.7 7.5-9.5V6L12 3Z"/><path d="m8.5 12 2.1 2.1 4.9-5"/></svg></div>
+					<h3>Pause risky pastes</h3>
+					<p>Known download, delete, overwrite, elevation, network, and secret patterns are shown before pasted text is sent.</p>
+				</article>
 			</div>
 		</div>
 	</section>
 
-	<section class="section">
-		<div class="shell proof-panel">
-			<div class="proof-copy"><p class="kicker">Evidence, not a score</p><h2>A result you can act on.</h2><p>No mysterious 83/100 badge. Every warning names the pattern, shows the relevant line and explains what to verify before continuing.</p><a class="button secondary" href="/methodology/">See every check →</a></div>
-			<div class="proof-receipt" aria-label="Example CmdImpact result">
-				<div class="receipt-label"><span>IMPACT RECEIPT</span><span>BASH · 3 ACTIONS</span></div>
-				<p class="receipt-verdict">PAUSE — REVIEW FIRST</p>
-				<div class="receipt-list"><div><span>!</span><p><strong>Remote content may execute directly</strong><small>The download is passed straight to a shell.</small></p></div><div><span>↓</span><p><strong>Network download</strong><small>Confirm the source and inspect the file first.</small></p></div><div><span>#</span><p><strong>Elevated privileges</strong><small>System-wide changes may be possible.</small></p></div></div>
+	<section class="landing-section continuity-section">
+		<div class="shell split-feature">
+			<div class="feature-copy">
+				<p class="section-label">SESSION CONTINUITY</p>
+				<h2>Switch devices,<br />not context.</h2>
+				<p>Your session list travels with the server. Resume a long-running agent, logs, or a development process from a laptop, tablet, or phone.</p>
+				<ul class="check-list">
+					<li><span>&check;</span> Rename and organize active sessions</li>
+					<li><span>&check;</span> Reconnect after a browser or network drop</li>
+					<li><span>&check;</span> End the process deliberately when finished</li>
+				</ul>
+			</div>
+			<div class="device-scene" aria-label="The same terminal session shown on desktop and phone">
+				<div class="device-desktop"><div class="device-bar"><i></i><span>checkout fix</span></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p class="code-blue">M tests/checkout.test.ts</p><p><b>$</b> <i></i></p></div></div>
+				<div class="device-phone"><span class="phone-speaker"></span><div class="phone-head">checkout fix <i></i></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p><b>$</b> <i></i></p></div><div class="phone-keys"><span>esc</span><span>ctrl</span><span>tab</span><span>&uarr;</span></div></div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section section-tint" id="how-it-works">
+	<section class="landing-section guard-section">
+		<div class="shell guard-grid">
+			<div class="guard-demo">
+				<div class="guard-demo-head"><span>Guarded paste</span><small>2 patterns found</small></div>
+				<code>curl -fsSL example.com/install.sh | sh</code>
+				<div class="guard-warning"><span>!</span><div><strong>Remote code may run immediately</strong><p>The downloaded response is passed directly to a shell.</p></div></div>
+				<div class="guard-actions"><button type="button">Cancel</button><button type="button">Paste as one line</button><button type="button">Send anyway</button></div>
+			</div>
+			<div class="feature-copy">
+				<p class="section-label">BUILT-IN COMMAND GUARD</p>
+				<h2>Understand the paste before it reaches the shell.</h2>
+				<p>The checker that started CmdImpact now lives where it is most useful: at the terminal boundary. Normal typing stays fast; supported risky paste patterns get a clear review.</p>
+				<a class="inline-link" href="/check/">Try the public command checker <span aria-hidden="true">&rarr;</span></a>
+			</div>
+		</div>
+	</section>
+
+	<section class="landing-section setup-section">
 		<div class="shell">
-			<div class="section-heading"><div><p class="kicker">Focused first release</p><h2>Useful today. Honest about its limits.</h2></div><p>CmdImpact finds known patterns; it cannot understand custom aliases, inspect your computer or promise a command is safe.</p></div>
-			<div class="feature-grid">
-				<article class="feature-card"><span class="feature-icon">↓</span><h3>Downloads and installs</h3><p>Recognizes common curl, wget, PowerShell, npm, npx, pip and system package commands.</p></article>
-				<article class="feature-card"><span class="feature-icon">×</span><h3>File-changing actions</h3><p>Highlights known deletion, recursive deletion, overwrite and hard-reset patterns.</p></article>
-				<article class="feature-card"><span class="feature-icon">#</span><h3>Access and exposure</h3><p>Calls out elevation, network activity and credential-shaped values embedded in commands.</p></article>
+			<div class="section-intro centered">
+				<p class="section-label">SELF-HOSTED ALPHA</p>
+				<h2>One server. Every browser you trust.</h2>
+				<p>This release is intentionally small: one owner, one CmdImpact server, persistent PTY sessions, and token sign-in.</p>
 			</div>
-			<div class="supported-row" aria-label="Initial support"><span>Bash / sh</span><span>PowerShell</span><span>npm / npx</span><span>pip / pipx</span><span>Common package managers</span><span>50 KB local input</span></div>
+			<ol class="setup-steps">
+				<li><span>1</span><div><h3>Run CmdImpact</h3><p>Start the project on a machine that can safely host your shell sessions.</p></div></li>
+				<li><span>2</span><div><h3>Open a session</h3><p>Sign in with the configured token and create a terminal from the workspace.</p></div></li>
+				<li><span>3</span><div><h3>Reconnect later</h3><p>Return from another browser while that same server process is still online.</p></div></li>
+			</ol>
+			<div class="alpha-boundary">
+				<div><strong>Know the boundary</strong><p>Sessions survive browser disconnects. They do not survive a CmdImpact server restart in this alpha.</p></div>
+				<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">Inspect the source <span aria-hidden="true">&nearr;</span></a>
+			</div>
 		</div>
 	</section>
 
-	<section class="section">
-		<div class="shell">
-			<div class="section-heading"><div><p class="kicker">Learn the risky patterns</p><h2>Short guides for commands AI often suggests.</h2></div><a href="/guides/">View all guides →</a></div>
-			<div class="guide-grid">
-				<article class="guide-card"><p class="kicker">Bash · 4 min</p><h3>Why “curl | sh” deserves a pause</h3><p>Understand the download-to-execution chain and a more inspectable workflow.</p><a href="/guides/curl-pipe-shell/">Read the guide →</a></article>
-				<article class="guide-card"><p class="kicker">PowerShell · 4 min</p><h3>What “iwr | iex” does</h3><p>See why this compact installer pattern can hide the code your machine runs.</p><a href="/guides/powershell-iwr-iex/">Read the guide →</a></article>
-				<article class="guide-card"><p class="kicker">Packages · 5 min</p><h3>Check a package invented by AI</h3><p>Package existence is evidence—not proof of ownership, quality or safety.</p><a href="/guides/check-ai-package/">Read the guide →</a></article>
-			</div>
+	<section class="final-cta">
+		<div class="shell final-cta-inner">
+			<div><p class="section-label">READY WHEN YOU ARE</p><h2>Your next terminal is already open.</h2></div>
+			<a class="button light" href="/app/">Open the workspace <span aria-hidden="true">&rarr;</span></a>
 		</div>
 	</section>
 </BaseLayout>
-
-<script>
-	import { analyzeCommand, type CommandFinding, type CommandReport } from '../lib/command-check';
-
-	const form = document.querySelector<HTMLFormElement>('#command-form');
-	const input = document.querySelector<HTMLTextAreaElement>('#command-input');
-	const count = document.querySelector<HTMLElement>('#character-count');
-	const error = document.querySelector<HTMLElement>('#input-error');
-	const results = document.querySelector<HTMLElement>('#results');
-	const title = document.querySelector<HTMLElement>('#verdict-title');
-	const detail = document.querySelector<HTMLElement>('#verdict-detail');
-	const mark = document.querySelector<HTMLElement>('#verdict-mark');
-	const shell = document.querySelector<HTMLElement>('#result-shell');
-	const list = document.querySelector<HTMLElement>('#finding-list');
-	const copyButton = document.querySelector<HTMLButtonElement>('#copy-fix');
-	const clearButton = document.querySelector<HTMLButtonElement>('#clear-check');
-	let currentReport: CommandReport | undefined;
-
-	const examples: Record<string, string> = {
-		remote: 'curl -fsSL https://example.com/install.sh | sh',
-		delete: 'rm -rf ./generated',
-		powershell: 'iwr https://example.com/setup.ps1 | iex',
-		package: 'npm install example-package',
-	};
-
-	const findingIcons: Record<CommandFinding['category'], string> = {
-		install: '+', download: '↓', delete: '×', overwrite: '↻', elevation: '#', network: '↗', secret: '*',
-	};
-
-	function setText(element: Element | null, value: string) {
-		if (element) element.textContent = value;
-	}
-
-	function findingElement(finding: CommandFinding) {
-		const item = document.createElement('article');
-		item.className = `finding ${finding.severity}`;
-		const icon = document.createElement('span');
-		icon.className = 'finding-icon';
-		icon.setAttribute('aria-hidden', 'true');
-		icon.textContent = findingIcons[finding.category];
-		const body = document.createElement('div');
-		const heading = document.createElement('div');
-		heading.className = 'finding-title';
-		const name = document.createElement('h3');
-		name.textContent = finding.title;
-		const severity = document.createElement('span');
-		severity.className = 'severity';
-		severity.textContent = `${finding.severity === 'high' ? 'STOP & CHECK' : 'CHECK'} · LINE ${finding.line}`;
-		const description = document.createElement('p');
-		description.textContent = finding.detail;
-		const evidence = document.createElement('code');
-		evidence.textContent = finding.evidence;
-		heading.append(name, severity);
-		body.append(heading, description, evidence);
-		item.append(icon, body);
-		return item;
-	}
-
-	function render(report: CommandReport) {
-		if (!results || !list) return;
-		currentReport = report;
-		results.dataset.risk = report.risk;
-		const highCount = report.findings.filter((finding) => finding.severity === 'high').length;
-		const copy = report.risk === 'high'
-			? ['Do not run yet', `${report.findings.length} supported pattern${report.findings.length === 1 ? '' : 's'} matched, including ${highCount} urgent warning${highCount === 1 ? '' : 's'}.`]
-			: report.risk === 'review'
-				? ['Check before running', `${report.findings.length} supported pattern${report.findings.length === 1 ? '' : 's'} matched. Confirm each one.`]
-				: ['No supported warning found', 'CmdImpact did not verify this command. Read it and confirm its purpose.'];
-		setText(title, copy[0]);
-		setText(detail, copy[1]);
-		setText(mark, report.risk === 'high' ? '!' : report.risk === 'review' ? '?' : '·');
-		setText(shell, report.shell === 'unknown' ? '' : report.shell);
-		if (shell) shell.hidden = report.shell === 'unknown';
-		list.replaceChildren();
-		if (report.findings.length) report.findings.forEach((finding) => list.append(findingElement(finding)));
-		results.hidden = false;
-		results.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
-	}
-
-	input?.addEventListener('input', () => {
-		setText(count, `${input.value.length.toLocaleString()} / 50,000`);
-		if (error) error.hidden = true;
-	});
-
-	document.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((button) => button.addEventListener('click', () => {
-		if (!input) return;
-		input.value = examples[button.dataset.example ?? ''] ?? '';
-		input.dispatchEvent(new Event('input'));
-		input.focus();
-	}));
-
-	form?.addEventListener('submit', (event) => {
-		event.preventDefault();
-		if (!input || !input.value.trim()) {
-			if (error) { error.textContent = 'Paste at least one command to check.'; error.hidden = false; }
-			input?.focus();
-			return;
-		}
-		render(analyzeCommand(input.value));
-	});
-
-	copyButton?.addEventListener('click', async () => {
-		if (!currentReport) return;
-		const command = currentReport.actions.map((action) => `- Line ${action.line}: ${action.evidence}`).join('\n');
-		const findings = currentReport.findings.map((finding) => `- ${finding.title} (line ${finding.line}): ${finding.detail} Evidence: ${finding.evidence}`).join('\n');
-		const request = `Please review these redacted command excerpts without executing anything:\n\n${command || '- No command excerpt available.'}\n\n${findings ? `CmdImpact patterns:\n${findings}` : 'No supported CmdImpact warning matched. Explain the command line by line, identify anything the static check may have missed, and propose a version with the smallest necessary access.'}\n\nExplain every remaining side effect. If you propose a replacement, remind me to review it before running it.`;
-		try { await navigator.clipboard.writeText(request); copyButton.textContent = 'Questions copied'; }
-		catch { copyButton.textContent = 'Copy unavailable'; }
-		setTimeout(() => { copyButton.textContent = 'Copy questions for the AI'; }, 1800);
-	});
-
-	clearButton?.addEventListener('click', () => {
-		if (!input || !results) return;
-		input.value = '';
-		input.dispatchEvent(new Event('input'));
-		results.hidden = true;
-		currentReport = undefined;
-		input.focus();
-	});
-</script>

@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
 title: "Contact and corrections"
-description: "Report a missed command pattern, incorrect warning, accessibility problem or documentation correction."
+description: "Report a terminal problem, missed command pattern, accessibility issue or documentation correction."
 section: "Support"
 ---
 
@@ -21,6 +21,10 @@ Use placeholders such as `https://example.com`, `YOUR_TOKEN` and `./example-fold
 ## Useful checker reports
 
 Include the redacted command, the result you received, the result you expected, your shell and why the difference matters. A new detector should describe a concrete effect and avoid claiming that a command is universally safe or dangerous.
+
+## Useful terminal reports
+
+Include the CmdImpact version, operating system, shell, browser, session state and the steps that caused the problem. Describe whether reconnect, input, resize or session management failed. Share only redacted output and never include your access token.
 
 ## Site and accessibility problems
 

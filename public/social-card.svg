@@ -1,11 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-  <title id="title">CmdImpact</title>
-  <desc id="desc">Paste a command and spot common risks before running it.</desc>
-  <rect width="1200" height="630" fill="#f5f0e8"/>
-  <circle cx="104" cy="82" r="220" fill="#ffb000" opacity=".18"/>
-  <path d="M0 520 1200 270" stroke="#d7cbbc" stroke-width="2"/>
-  <g transform="translate(80 70)"><rect width="62" height="62" rx="17" fill="#17191c"/><path d="m15 18 17 13-17 13M38 44h12" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/><path d="m15 18 17 13-17 13" stroke="#ffb000"/><path d="M38 44h12" stroke="#f6f4ed"/><text x="80" y="45" fill="#181512" font-family="Inter,Arial,sans-serif" font-size="43" font-weight="850" letter-spacing="-2"><tspan font-family="Consolas,monospace" font-weight="700">cmd</tspan>impact</text></g>
-  <text x="80" y="270" fill="#181512" font-family="Inter,Arial,sans-serif" font-size="70" font-weight="850" letter-spacing="-4">Spot common command risks</text>
-  <text x="80" y="352" fill="#3f49d8" font-family="Inter,Arial,sans-serif" font-size="70" font-weight="850" letter-spacing="-4">before you run it.</text>
-  <g transform="translate(80 430)"><rect width="1040" height="120" rx="22" fill="#17191c"/><circle cx="30" cy="26" r="6" fill="#ff705f"/><circle cx="49" cy="26" r="6" fill="#f5be4f"/><circle cx="68" cy="26" r="6" fill="#58c978"/><text x="30" y="82" fill="#ffb000" font-family="Consolas,monospace" font-size="27">&gt;</text><text x="63" y="82" fill="#f6f4ed" font-family="Consolas,monospace" font-size="27">paste command</text><text x="800" y="82" fill="#8d949e" font-family="Consolas,monospace" font-size="20">nothing executes</text></g>
+  <title id="title">CmdImpact - the terminal that follows you</title>
+  <desc id="desc">A self-hosted web terminal for reconnectable sessions with guarded paste.</desc>
+  <rect width="1200" height="630" fill="#F6F7F9"/>
+  <rect x="64" y="54" width="58" height="58" rx="15" fill="#192234"/>
+  <path d="M99 70a15 15 0 1 0 0 27" fill="none" stroke="#F6F7F9" stroke-linecap="round" stroke-width="6"/>
+  <path d="M100 97h10" fill="none" stroke="#C7664E" stroke-linecap="round" stroke-width="5"/>
+  <text x="140" y="96" fill="#141A24" font-family="Inter,Arial,sans-serif" font-size="40" font-weight="800" letter-spacing="-2">cmdimpact<tspan fill="#3959C6">_</tspan></text>
+  <text x="64" y="236" fill="#141A24" font-family="Inter,Arial,sans-serif" font-size="70" font-weight="800" letter-spacing="-4">Your terminal,</text>
+  <text x="64" y="310" fill="#3959C6" font-family="Inter,Arial,sans-serif" font-size="70" font-weight="800" letter-spacing="-4">wherever you are.</text>
+  <text x="66" y="365" fill="#5F6B7B" font-family="Inter,Arial,sans-serif" font-size="24">Reconnectable shell sessions with a built-in guarded paste.</text>
+  <g transform="translate(64 420)">
+    <rect width="1072" height="150" rx="16" fill="#151A23"/>
+    <rect width="1072" height="38" rx="16" fill="#1F2531"/>
+    <path d="M0 38h1072" stroke="#303846"/>
+    <text x="22" y="25" fill="#9CA6B5" font-family="Consolas,monospace" font-size="13">checkout fix / connected</text>
+    <text x="22" y="85" fill="#90A8E8" font-family="Consolas,monospace" font-size="20">$</text>
+    <text x="48" y="85" fill="#E7EAF0" font-family="Consolas,monospace" font-size="20">claude</text>
+    <text x="22" y="120" fill="#929BAB" font-family="Consolas,monospace" font-size="16">Session remains on your server when the browser disconnects.</text>
+    <rect x="790" y="57" width="250" height="65" rx="10" fill="#F4E7E2"/>
+    <text x="810" y="82" fill="#9E4B38" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700">COMMAND GUARD</text>
+    <text x="810" y="105" fill="#5E3E37" font-family="Inter,Arial,sans-serif" font-size="15">Review risky paste</text>
+  </g>
 </svg>

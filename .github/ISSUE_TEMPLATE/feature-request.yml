@@ -1,0 +1,46 @@
+name: Feature request
+description: Propose a focused improvement to the self-hosted terminal.
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem before the solution. CmdImpact v0.2 is intentionally a single-owner, self-hosted alpha; multi-user hosting, managed cloud, and device revocation remain future work.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is difficult today, and who encounters it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the smallest useful result rather than a specific implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and privacy impact
+      description: Could this affect authentication, session ownership, shell access, stored output, networking, or secrets?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: public-data
+    attributes:
+      label: Public-data check
+      options:
+        - label: I removed credentials, private addresses, personal data, and confidential terminal output.
+          required: true

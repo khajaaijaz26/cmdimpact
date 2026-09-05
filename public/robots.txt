@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://cmdimpact.com/sitemap-index.xml
+Disallow: /app/
+Disallow: /api/

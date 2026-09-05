@@ -6,7 +6,7 @@ const { frontmatter } = Astro.props;
 const allowAds = frontmatter.ads === true;
 ---
 
-<BaseLayout title={frontmatter.title} description={frontmatter.description} allowAds={allowAds}>
+<BaseLayout title={frontmatter.title} description={frontmatter.description}>
 	<header class="page-hero">
 		<div class="shell narrow">
 			<p class="kicker">CmdImpact / {frontmatter.section || 'Trust center'}</p>

@@ -4,9 +4,17 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -15,3 +23,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run validate
+
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TERMINAL_ACCESS_TOKEN: this-is-only-a-ci-placeholder
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+      - name: Build the supported container path
+        run: docker compose build
+      - name: Verify the live PTY isolation boundary
+        run: |
+          docker compose up -d --wait
+          docker compose exec -T terminal node scripts/verify-container.mjs
+      - name: Stop the stack
+        if: always()
+        run: docker compose down
