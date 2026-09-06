@@ -86,7 +86,6 @@ For a private local evaluation with Docker and Docker Compose:
 ```bash
 git clone https://github.com/khajaaijaz26/cmdimpact.git
 cd cmdimpact
-npm install
 npm run setup
 npm start
 ```
@@ -97,14 +96,20 @@ The Docker workspace survives container recreation, but live terminal processes 
 
 Do not add privileged mode, the Docker socket, broad host mounts, or unnecessary access to private networks. The container boundary reduces accidental host access; it is not a guarantee against hostile code.
 
-To connect the isolated Compose runner from a Vercel dashboard, configure the dashboard origin and start the stack:
+For private access from a phone or another computer, install [Tailscale](https://tailscale.com/kb/1017/install/) on both devices and sign in to the same tailnet. Then configure the dashboard origin and start the stack on the runner computer:
 
 ```bash
 npm run setup -- --origin https://YOUR-VERCEL-DOMAIN
 npm start
 ```
 
-Publish `http://127.0.0.1:4321` through the runner's HTTPS/WSS proxy or trusted tunnel, then enter that external runner origin in the Vercel dashboard. Compose always uses its named `/workspace` volume; `--workspace` configures direct-host mode only.
+Keep that terminal open. In a second terminal, create a private HTTPS address:
+
+```bash
+tailscale serve --bg 4321
+```
+
+Approve HTTPS if Tailscale asks. On the other device, keep Tailscale connected, open the Vercel dashboard, and enter the `https://...ts.net` address printed by Tailscale plus the owner access token. The runner computer must stay online; the browser can close. A trusted HTTPS/WSS proxy remains a supported alternative. Compose always uses its named `/workspace` volume; `--workspace` configures direct-host mode only.
 
 ## Sessions that outlive the browser
 

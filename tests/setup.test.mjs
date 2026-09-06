@@ -12,7 +12,8 @@ const setupScript = resolve('scripts/setup.mjs');
 test('runner setup accepts only a secure exact browser origin and an explicit workspace', async () => {
 	const directory = await mkdtemp(join(tmpdir(), 'cmdimpact-setup-'));
 	try {
-		await execute(process.execPath, [setupScript, '--origin', 'https://app.example.test', '--workspace', 'projects'], { cwd: directory });
+		const { stdout } = await execute(process.execPath, [setupScript, '--origin', 'https://app.example.test', '--workspace', 'projects'], { cwd: directory });
+		assert.match(stdout, /Next, run npm start/);
 		const environment = await readFile(join(directory, '.env'), 'utf8');
 		assert.match(environment, /NODE_ENV="production"/);
 		assert.match(environment, /TERMINAL_ALLOWED_ORIGINS="https:\/\/app\.example\.test"/);

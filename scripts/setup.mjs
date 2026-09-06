@@ -72,4 +72,4 @@ await mkdir(resolve(setupOptions.workspace || '.data/workspace'), { recursive: t
 console.log(existing && !origin && !setupOptions.workspace ? 'Terminal configuration already exists in .env.' : 'Terminal configuration is ready in .env.');
 console.log(origin ? `Allowed browser dashboard: ${origin}` : 'Open http://localhost:4321/app/');
 console.log(`Owner access token: ${token}`);
-console.log(`Keep this token private. Run ${origin ? 'npm run server' : 'npm run dev'} to start the runner.`);
+console.log('Keep this token private. Next, run npm start for the recommended isolated Docker runner.');

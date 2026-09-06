@@ -1,5 +1,7 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
+
+const remoteDashboardOrigin = Astro.site?.protocol === 'https:' ? Astro.site.origin : 'https://cmdimpact.vercel.app';
 ---
 
 <AppLayout>
@@ -78,54 +80,66 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	<dialog id="login-screen" class="login-screen" aria-labelledby="login-heading" aria-describedby="login-copy">
 		<div class="login-card">
 			<a class="login-home" href="/" aria-label="Back to CmdImpact"><span>ci_</span>cmdimpact</a>
-			<p class="app-kicker">CONNECT TO A RUNNER</p>
-			<h1 id="login-heading">Connect this browser to your terminal runner.</h1>
-			<p id="login-copy">The runner is a service on a computer you control. It owns CmdImpact's terminal sessions; this browser displays and controls them.</p>
+			<p class="app-kicker">BROWSER TERMINAL SETUP</p>
+			<h1 id="login-heading">Let's open your terminal.</h1>
+			<p id="login-copy">Choose one path below. For local use, paste one private token; the runner address is filled for you. Remote use has its own guided steps.</p>
 
-			<div class="app-runner-map" aria-label="The browser connects directly to live sessions on the selected CmdImpact runner">
-				<span><small>THIS BROWSER</small><strong>View + keyboard</strong></span>
-				<i><small>Direct API + WebSocket</small><b aria-hidden="true">&harr;</b></i>
-				<span><small>CONNECTED RUNNER</small><strong>Terminal processes</strong></span>
+			<h2 id="setup-path-heading" class="setup-path-heading">What do you want to do?</h2>
+			<div class="setup-paths" role="group" aria-labelledby="setup-path-heading">
+				<button type="button" data-setup-path="local" aria-controls="setup-local" aria-pressed="true"><span>01 &middot; EASIEST</span><strong>Use this computer</strong><small>First-time setup</small></button>
+				<button type="button" data-setup-path="remote" aria-controls="setup-remote" aria-pressed="false"><span>02 &middot; PRIVATE</span><strong>Phone or another device</strong><small>Remote access</small></button>
+				<button type="button" data-setup-path="connect" aria-controls="setup-connect" aria-pressed="false"><span>03 &middot; READY</span><strong>I already set it up</strong><small>Address + token</small></button>
 			</div>
-			<p class="runner-map-caption">Execution and workspace storage stay on the runner. The browser receives live terminal traffic directly; Vercel does not relay or archive it.</p>
 
-			<div class="login-body-grid">
-				<section class="login-connect-pane" aria-label="Runner sign in">
-					<form id="login-form" method="dialog">
-						<div class="login-form-heading"><span>CONNECT</span><strong>Load this runner's sessions</strong></div>
-						<label for="runner-url">Runner URL</label>
-						<input id="runner-url" name="runner" type="url" inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="runner-help" required />
-						<small id="runner-help" class="form-help">Local Docker dashboard: <code>http://localhost:4321</code>. On a hosted dashboard, complete Option B first and enter the external HTTPS runner address.</small>
-						<label for="access-token">Access token</label>
-						<input id="access-token" name="token" type="password" autocomplete="current-password" required />
-						<small class="form-help">Use the owner access token printed by <code>npm run setup</code>.</small>
-						<p id="login-error" class="form-error" role="alert" hidden></p>
-						<button class="app-primary large" type="submit">Connect and show sessions</button>
-					</form>
-					<small>The dashboard does not store your owner access token; it remains in the runner's private <code>.env</code>. The browser keeps only a signed, expiring session credential.</small>
-				</section>
-
-				<section class="login-setup-pane" aria-labelledby="local-setup-heading">
-					<div class="login-section-heading"><span>OPTION A</span><strong id="local-setup-heading">Try it locally on one computer</strong></div>
-					<ol class="onboarding-steps">
-						<li><span>1</span><div><strong>Install and start</strong><p>Requires Git, Node.js 22.12+, npm, and Docker with Compose. Terminals run inside the included lower-privileged Linux container.</p><pre><code>git clone https://github.com/khajaaijaz26/cmdimpact.git
+			<div class="setup-panels">
+				<section id="setup-local" class="setup-path-panel" data-setup-panel="local" aria-labelledby="local-setup-heading">
+					<div class="setup-panel-heading"><span>RECOMMENDED</span><div><h2 id="local-setup-heading">Set up this computer</h2><p>Do these four steps in order. It usually takes a few minutes.</p></div></div>
+					<ol class="guided-steps">
+						<li><span>1</span><div><h3>Install the requirements once</h3><p>Install <a href="https://git-scm.com/downloads" rel="external noopener">Git</a>, <a href="https://nodejs.org/en/download/" rel="external noopener">Node.js 22.12 or newer</a>, and <a href="https://docs.docker.com/get-started/get-docker/" rel="external noopener">Docker Desktop</a> on Windows/macOS or Docker Engine with Compose on Linux. Start Docker and wait until it is running. CmdImpact sessions use an isolated Linux workspace inside Docker.</p></div></li>
+						<li><span>2</span><div><h3>Open Terminal or PowerShell</h3><p>Copy and run these commands on the computer where your terminal should run.</p><div class="setup-code-block" data-code-block><div><small>TERMINAL / POWERSHELL</small><button type="button" data-copy-code aria-label="Copy local setup commands">Copy</button></div><pre><code>git clone https://github.com/khajaaijaz26/cmdimpact.git
 cd cmdimpact
-npm install
-npm run setup
-npm start</code></pre></div></li>
-						<li><span>2</span><div><strong>Copy the access token</strong><p>Setup prints it when configuration is ready. Keep <code>npm start</code> running and the computer online.</p></div></li>
-						<li><span>3</span><div><strong>Open the local dashboard</strong><p>Visit <code>http://localhost:4321/app/</code> on that computer, enter the printed token, then create a session.</p></div></li>
+npm run setup</code></pre><span data-copy-status role="status" aria-live="polite"></span></div></div></li>
+						<li><span>3</span><div><h3>Copy the token it prints</h3><p>Find <code>Owner access token: ...</code>. Copy everything after the colon. Pasting the complete line also works.</p><div class="token-example"><small>LOOK FOR THIS LINE</small><code>Owner access token: your-private-token</code></div></div></li>
+						<li><span>4</span><div><h3>Start CmdImpact and leave it running</h3><div class="setup-code-block compact" data-code-block><div><small>SAME TERMINAL</small><button type="button" data-copy-code aria-label="Copy start command">Copy</button></div><pre><code>npm start</code></pre><span data-copy-status role="status" aria-live="polite"></span></div><p>Wait until Docker finishes starting, then open the local dashboard. Keep this computer and Docker on while sessions run.</p><a class="setup-open-link" href="http://localhost:4321/app/">Open local dashboard <span aria-hidden="true">&rarr;</span></a></div></li>
 					</ol>
+					<p class="setup-result"><span class="setup-result-icon" aria-hidden="true">&#10003;</span><span><strong>On the local dashboard:</strong> the runner address is automatic. Paste the token and choose <em>Show my sessions</em>.</span></p>
+				</section>
 
-					<details class="remote-setup-help">
-						<summary><span>OPTION B</span><strong>Use this dashboard from another device</strong><b aria-hidden="true">+</b></summary>
-						<div><p>On the runner computer, allow the exact dashboard origin you will use, then start the Docker stack:</p><pre><code>npm run setup -- --origin https://YOUR-DASHBOARD-DOMAIN
-npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a trusted HTTPS/WSS reverse proxy or authenticated tunnel. A private VPN can restrict access to that proxy. Enter its external HTTPS address and the printed token in the form.</p><small>Never expose raw port 8787. Use only the dashboard origin, such as <code>https://dashboard.example</code>&mdash;without <code>/app/</code>, a query, or a fragment.</small></div>
-					</details>
-					<div class="onboarding-links"><a href="/#setup">Local quickstart <span aria-hidden="true">&rarr;</span></a><a href="https://github.com/khajaaijaz26/cmdimpact/blob/main/README.md#L98-L107" rel="external noopener">Remote Docker steps <span aria-hidden="true">&nearr;</span></a></div>
-					<p class="managed-session-note"><span aria-hidden="true">i</span> CmdImpact lists only sessions created by the selected runner. It cannot import unrelated terminal windows already open on the computer.</p>
+				<section id="setup-remote" class="setup-path-panel" data-setup-panel="remote" aria-labelledby="remote-setup-heading" hidden>
+					<div class="setup-panel-heading"><span>PRIVATE REMOTE ACCESS</span><div><h2 id="remote-setup-heading">Use it from your phone or another computer</h2><p>Tailscale gives your runner a private HTTPS address without opening router ports.</p></div></div>
+					<ol class="guided-steps">
+						<li><span>1</span><div><h3>Install Tailscale on both devices</h3><p>Sign in with the same Tailscale account on the runner computer and the phone or computer you will use. <a href="https://tailscale.com/kb/1017/install/" rel="external noopener">Open the official setup guide <span aria-hidden="true">&nearr;</span></a>.</p></div></li>
+						<li><span>2</span><div><h3>Set up CmdImpact on the runner computer</h3><div class="setup-code-block" data-code-block><div><small>TERMINAL / POWERSHELL</small><button type="button" data-copy-code aria-label="Copy remote setup commands">Copy</button></div><pre><code>git clone https://github.com/khajaaijaz26/cmdimpact.git
+cd cmdimpact
+npm run setup -- --origin {remoteDashboardOrigin}</code></pre><span data-copy-status role="status" aria-live="polite"></span></div><p>Copy the <code>Owner access token</code> printed by setup.</p></div></li>
+						<li><span>3</span><div><h3>Start CmdImpact</h3><div class="setup-code-block compact" data-code-block><div><small>FIRST TERMINAL</small><button type="button" data-copy-code aria-label="Copy start command">Copy</button></div><pre><code>npm start</code></pre><span data-copy-status role="status" aria-live="polite"></span></div><p>Leave this terminal, Docker, and the runner computer on.</p></div></li>
+						<li><span>4</span><div><h3>Create the private runner address</h3><p>Open a second terminal on the runner computer and run:</p><div class="setup-code-block compact" data-code-block><div><small>SECOND TERMINAL</small><button type="button" data-copy-code aria-label="Copy Tailscale Serve command">Copy</button></div><pre><code>tailscale serve --bg 4321</code></pre><span data-copy-status role="status" aria-live="polite"></span></div><p>Approve HTTPS if Tailscale asks. Copy the <code>https://...ts.net</code> address it prints. That is your <strong>runner address</strong>.</p></div></li>
+						<li><span>5</span><div><h3>Connect from the other device</h3><p>Keep Tailscale connected, open <a href={`${remoteDashboardOrigin}/app/`}>{remoteDashboardOrigin}/app/</a>, choose <em>I already set it up</em>, then enter the runner address and access token.</p><button class="setup-inline-action" type="button" data-go-setup="connect">Enter runner address and token <span aria-hidden="true">&rarr;</span></button></div></li>
+					</ol>
+					<p class="setup-result important"><span class="setup-result-icon" aria-hidden="true">!</span><span><strong>The runner computer must stay on.</strong> Your phone or browser can close; active sessions continue on the runner.</span></p>
+				</section>
+
+				<section id="setup-connect" class="setup-path-panel login-connect-pane" data-setup-panel="connect" aria-labelledby="connect-setup-heading" hidden>
+					<div class="setup-panel-heading"><span>CONNECT NOW</span><div><h2 id="connect-setup-heading">Show my terminal sessions</h2><p>Enter the two values created during setup.</p></div></div>
+					<form id="login-form" method="dialog">
+						<details id="runner-address-details" class="runner-address-details">
+							<summary><span>1</span><span class="runner-address-copy"><strong>Runner address</strong><small id="runner-address-summary">Required</small></span><b aria-hidden="true">Change</b></summary>
+							<div><label for="runner-url">Runner address</label><input id="runner-url" name="runner" type="url" inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="runner-help" required /><small id="runner-help" class="form-help">Local: <code>http://localhost:4321</code>. Remote: the <code>https://...ts.net</code> address printed by Tailscale. Do not enter the Vercel dashboard address here.</small></div>
+						</details>
+						<label for="access-token"><span>2</span> Paste your access token</label>
+						<input id="access-token" name="token" type="password" autocomplete="current-password" aria-describedby="token-help" required />
+						<small id="token-help" class="form-help">Paste the token or the complete <code>Owner access token: ...</code> line. Both work.</small>
+						<p id="login-error" class="form-error" role="alert" hidden></p>
+						<button class="app-primary large" type="submit">Show my sessions</button>
+					</form>
+					<p class="login-security-note">Your owner token is sent directly to your runner once and is not stored by this dashboard.</p>
 				</section>
 			</div>
+
+			<details class="connection-details">
+				<summary><span aria-hidden="true">?</span><strong>How does the connection work?</strong><b aria-hidden="true">+</b></summary>
+				<div><div class="app-runner-map" aria-label="The browser connects directly to live sessions on the selected CmdImpact runner"><span><small>THIS BROWSER</small><strong>View + keyboard</strong></span><i><small>Direct secure connection</small><b aria-hidden="true">&harr;</b></i><span><small>YOUR RUNNER</small><strong>Terminal processes</strong></span></div><p class="runner-map-caption">Execution and workspace files stay on your runner. Vercel does not relay or archive terminal traffic.</p><p class="managed-session-note"><span aria-hidden="true">i</span> Only terminals created through CmdImpact appear in Sessions. Existing Terminal or PowerShell windows cannot be imported. The recommended setup uses Docker's isolated <code>/workspace</code>.</p></div>
+			</details>
 		</div>
 	</dialog>
 
@@ -258,6 +272,10 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 	const loginError = element<HTMLParagraphElement>('login-error');
 	const tokenInput = element<HTMLInputElement>('access-token');
 	const runnerInput = element<HTMLInputElement>('runner-url');
+	const runnerAddressDetails = element<HTMLDetailsElement>('runner-address-details');
+	const runnerAddressSummary = element<HTMLElement>('runner-address-summary');
+	const setupPathButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-setup-path]'));
+	const setupPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-setup-panel]'));
 	const runnerButton = element<HTMLButtonElement>('runner-button');
 	const runnerOriginLabel = element<HTMLElement>('runner-origin');
 	const sidebarRunner = element<HTMLElement>('sidebar-runner');
@@ -302,6 +320,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 	const RUNNER_ORIGIN_KEY = 'cmdimpact.runnerOrigin';
 	const SESSION_AUTH_KEY = 'cmdimpact.sessionAuth';
 	const NOTIFICATION_KEY = 'cmdimpact.notificationsEnabled';
+	type SetupPath = 'local' | 'remote' | 'connect';
 
 	let sessions: SessionRecord[] = [];
 	let selected: SessionRecord | undefined;
@@ -354,6 +373,18 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 
 	function staleRunnerRequest(error: unknown, generation: number) {
 		return error instanceof StaleRunnerRequest || generation !== runnerGeneration;
+	}
+
+	function updateRunnerAddressSummary() {
+		const address = runnerInput.value.trim();
+		runnerAddressSummary.textContent = address || 'Required';
+		if (!address) runnerAddressDetails.open = true;
+	}
+
+	function selectSetupPath(path: SetupPath) {
+		setupPathButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.setupPath === path)));
+		setupPanels.forEach((panel) => (panel.hidden = panel.dataset.setupPanel !== path));
+		if (path === 'connect') updateRunnerAddressSummary();
 	}
 
 	const fitAddon = new FitAddon();
@@ -657,13 +688,18 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		}
 	}
 
-	function showLogin(message = '') {
+	function showLogin(message = '', path: SetupPath = runnerOrigin ? 'connect' : 'local') {
 		updateRunnerDisplay();
 		if (!runnerInput.value) runnerInput.value = runnerOrigin;
+		selectSetupPath(path);
+		updateRunnerAddressSummary();
 		if (!loginScreen.open) loginScreen.showModal();
 		loginError.hidden = !message;
 		loginError.textContent = message;
-		window.setTimeout(() => (runnerOrigin ? tokenInput : runnerInput).focus(), 0);
+		window.setTimeout(() => {
+			if (path === 'connect') (runnerInput.value ? tokenInput : runnerInput).focus();
+			else setupPathButtons.find((button) => button.dataset.setupPath === path)?.focus();
+		}, 0);
 	}
 
 	function hideLogin() {
@@ -687,7 +723,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		updateRunnerDisplay();
 		if (!runnerOrigin) {
 			runnerState('idle', 'Not configured');
-			showLogin('Enter an HTTPS runner URL, or a loopback HTTP URL for local use.');
+			showLogin('', 'local');
 			return;
 		}
 		const generation = runnerGeneration;
@@ -696,18 +732,18 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 			const response = await api('/api/me', {}, generation);
 			if (!response.ok) {
 				runnerState('error', response.status === 404 ? 'No runner at this address' : 'Runner error');
-				showLogin(response.status === 404 ? 'No runner was found at this dashboard address. Enter the URL of your CmdImpact runner.' : 'The runner could not verify this browser. Check its URL and try again.');
+				showLogin(response.status === 404 ? 'No runner was found at this address. Check the runner address and try again.' : 'The runner could not verify this browser. Check its address and try again.', 'connect');
 				return;
 			}
 			const identity = await responseJsonOr(response, generation, null);
 			if (!identity || typeof identity.authenticated !== 'boolean') {
 				runnerState('error', 'Invalid runner response');
-				showLogin('This address does not appear to be a CmdImpact runner. Enter the runner API origin, not only the dashboard URL.');
+				showLogin('This address does not appear to be a CmdImpact runner. Enter the HTTPS address created during setup.', 'connect');
 				return;
 			}
 			if (identity.authenticated === false) {
 				runnerState('connected', 'Sign in required');
-				showLogin();
+				showLogin('', 'connect');
 				return;
 			}
 			if (Array.isArray(identity.shells)) {
@@ -723,7 +759,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		} catch (error) {
 			if (staleRunnerRequest(error, generation)) return;
 			runnerState('offline', 'Unavailable');
-			showLogin('The selected CmdImpact runner is unavailable. Check its URL and try again.');
+			showLogin('The selected CmdImpact runner is unavailable. Check its address and try again.', 'connect');
 		}
 	}
 
@@ -735,7 +771,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		let generation = runnerGeneration;
 		try {
 			const nextOrigin = normalizeRunnerOrigin(runnerInput.value);
-			const submittedToken = tokenInput.value;
+			const submittedToken = tokenInput.value.trim().replace(/^owner access token:\s*/i, '');
 			if (nextOrigin !== runnerOrigin) disconnectSocket();
 			runnerOrigin = nextOrigin;
 			saveSessionToken();
@@ -752,7 +788,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 				saveSessionToken();
 				updateRunnerDisplay();
 				runnerState('error', 'Invalid runner');
-				showLogin('This address does not appear to be a CmdImpact runner. Check the runner URL and try again.');
+				showLogin('This address does not appear to be a CmdImpact runner. Check the runner address and try again.', 'connect');
 				return;
 			}
 			writeStorage(localStorage, RUNNER_ORIGIN_KEY, runnerOrigin);
@@ -778,7 +814,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		} catch (error) {
 			if (staleRunnerRequest(error, generation)) return;
 			if (runnerButton.dataset.state === 'connecting') runnerState('offline', 'Unavailable');
-			showLogin(error instanceof Error ? error.message : 'Sign-in failed.');
+			showLogin(error instanceof Error ? error.message : 'Sign-in failed.', 'connect');
 		} finally {
 			if (submit) submit.disabled = false;
 		}
@@ -812,7 +848,8 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		renderSessions();
 		showEmpty();
 		runnerState('idle', 'Choose a runner');
-		showLogin('Enter a runner URL and its access token to connect.');
+		showLogin('', 'connect');
+		runnerAddressDetails.open = true;
 		window.setTimeout(() => {
 			runnerInput.focus();
 			runnerInput.select();
@@ -953,7 +990,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 			overlayDetail.textContent = 'The runner returned an invalid browser session. Sign in again.';
 			connectionState('error', 'Sign-in error');
 			saveSessionToken();
-			showLogin('The runner returned an invalid browser session. Enter the access token again.');
+			showLogin('The runner returned an invalid browser session. Enter the access token again.', 'connect');
 			return;
 		}
 		let serverErrorCode = '';
@@ -987,7 +1024,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 					const identity = response.ok ? await responseJsonOr(response, runnerRequestGeneration, { authenticated: false }) : { authenticated: false };
 					if (generation !== connectionGeneration || runnerRequestGeneration !== runnerGeneration) return;
 					if (!identity.authenticated) {
-						showLogin('Your sign-in expired. Enter the access token again.');
+						showLogin('Your sign-in expired. Enter the access token again.', 'connect');
 					} else if (serverErrorCode === 'not-live') {
 						if (!await loadSessions(generation, runnerRequestGeneration)) return;
 						const ended = sessions.find((session) => session.id === failedSessionId);
@@ -999,7 +1036,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 					}
 				} catch (error) {
 					if (generation !== connectionGeneration || staleRunnerRequest(error, runnerRequestGeneration)) return;
-					showLogin('The CmdImpact runner is unavailable. Confirm it is running and refresh this page.');
+					showLogin('The CmdImpact runner is unavailable. Confirm it is running and refresh this page.', 'connect');
 				}
 				return;
 			}
@@ -1076,7 +1113,7 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 		selected = undefined;
 		renderSessions();
 		showEmpty();
-		showLogin(message);
+		showLogin(message, 'connect');
 	}
 
 	terminal.onData((data) => {
@@ -1168,6 +1205,34 @@ npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a tr
 			updateToolActions();
 			renderNotificationPreference();
 			toolsDialog.showModal();
+		});
+	});
+
+	setupPathButtons.forEach((button) => {
+		button.addEventListener('click', () => selectSetupPath(button.dataset.setupPath as SetupPath));
+	});
+
+	document.querySelectorAll<HTMLButtonElement>('[data-go-setup]').forEach((button) => {
+		button.addEventListener('click', () => {
+			selectSetupPath(button.dataset.goSetup as SetupPath);
+			window.setTimeout(() => (runnerInput.value ? tokenInput : runnerInput).focus(), 0);
+		});
+	});
+
+	runnerInput.addEventListener('input', updateRunnerAddressSummary);
+
+	document.querySelectorAll<HTMLButtonElement>('[data-copy-code]').forEach((button) => {
+		button.addEventListener('click', async () => {
+			const block = button.closest<HTMLElement>('[data-code-block]');
+			const command = block?.querySelector('code')?.textContent?.trim() || '';
+			const status = block?.querySelector<HTMLElement>('[data-copy-status]');
+			if (!command || !status) return;
+			try {
+				await navigator.clipboard.writeText(command);
+				status.textContent = 'Copied';
+			} catch {
+				status.textContent = 'Select the commands and copy them manually.';
+			}
 		});
 	});
 
