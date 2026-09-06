@@ -7,12 +7,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		<button id="sidebar-scrim" class="sidebar-scrim" type="button" aria-label="Close sessions"></button>
 		<aside id="session-sidebar" class="session-sidebar" aria-label="Terminal sessions">
 			<div class="session-sidebar-title">
-				<div><span>Workspace</span><h1>Sessions</h1></div>
+				<div><span>Connected runner</span><h1>Sessions</h1></div>
 				<button id="new-session-side" class="round-button" type="button" title="New session" aria-label="New session">+</button>
 			</div>
 			<div class="sidebar-explainer">
-				<strong>Processes stay on this runner.</strong>
-				<span>Closing the browser does not end a session.</span>
+				<strong>These are sessions on this runner.</strong>
+				<span>Detached means no browser is attached; the session can keep running.</span>
 			</div>
 			<div id="session-list" class="session-list" aria-live="polite">
 				<div class="session-loading"><span></span><span></span><span></span></div>
@@ -26,11 +26,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		<main class="terminal-main">
 			<section id="workspace-empty" class="workspace-empty">
 				<div class="empty-mark" aria-hidden="true">ci_</div>
-				<p class="app-kicker">NO SESSION SELECTED</p>
-				<h2>Your terminal will open here.</h2>
-				<p>Create a session to start a real shell on the connected runner, or choose an existing session to reconnect.</p>
-				<button id="new-session-empty" class="app-primary large" type="button">Create your first session</button>
-				<small>Alpha boundary: sessions survive browser disconnects, not server restarts.</small>
+				<p class="app-kicker">RUNNER ONLINE</p>
+				<h2>Create a terminal session.</h2>
+				<p>Choose a shell on the connected runner. It appears in Sessions and can continue without this browser while the runner stays online.</p>
+				<div class="empty-actions"><button id="new-session-empty" class="app-primary large" type="button">Create session</button><button class="empty-help-button" type="button" data-open-tools>How CmdImpact works</button></div>
+				<small>Runner restarts end live sessions; workspace files can persist.</small>
 			</section>
 
 			<section id="active-workspace" class="active-workspace" hidden>
@@ -42,7 +42,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 						<div><h2 id="active-session-name">Terminal</h2><span id="active-session-meta">live session</span></div>
 					</div>
 					<div class="terminal-actions">
-						<button id="open-tools" class="toolbar-button" type="button">Tools</button>
+						<button id="open-tools" class="toolbar-button" type="button" data-open-tools>Help &amp; tools</button>
 						<button id="rename-session" class="toolbar-button" type="button">Rename</button>
 						<button id="take-control" class="toolbar-button control" type="button" hidden>Take control</button>
 						<button id="reconnect-session" class="toolbar-button" type="button" hidden>Reconnect</button>
@@ -78,19 +78,54 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	<dialog id="login-screen" class="login-screen" aria-labelledby="login-heading" aria-describedby="login-copy">
 		<div class="login-card">
 			<a class="login-home" href="/" aria-label="Back to CmdImpact"><span>ci_</span>cmdimpact</a>
-			<p class="app-kicker">SELF-HOSTED ACCESS</p>
-			<h1 id="login-heading">Connect to your runner.</h1>
-			<p id="login-copy">Choose the CmdImpact runner that owns your terminal sessions, then enter that runner's access token.</p>
-			<form id="login-form" method="dialog">
-				<label for="runner-url">Runner URL</label>
-				<input id="runner-url" name="runner" type="url" inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="runner-help" required />
-				<small id="runner-help" class="form-help">Use an HTTPS origin. Local runners may use HTTP on localhost or a loopback address.</small>
-				<label for="access-token">Access token</label>
-				<input id="access-token" name="token" type="password" autocomplete="current-password" required />
-				<p id="login-error" class="form-error" role="alert" hidden></p>
-				<button class="app-primary large" type="submit">Sign in</button>
-			</form>
-			<small>The runner address is remembered on this browser. Your access token is never saved by CmdImpact.</small>
+			<p class="app-kicker">CONNECT TO A RUNNER</p>
+			<h1 id="login-heading">Connect this browser to your terminal runner.</h1>
+			<p id="login-copy">The runner is a service on a computer you control. It owns CmdImpact's terminal sessions; this browser displays and controls them.</p>
+
+			<div class="app-runner-map" aria-label="The browser connects directly to live sessions on the selected CmdImpact runner">
+				<span><small>THIS BROWSER</small><strong>View + keyboard</strong></span>
+				<i><small>Direct API + WebSocket</small><b aria-hidden="true">&harr;</b></i>
+				<span><small>CONNECTED RUNNER</small><strong>Terminal processes</strong></span>
+			</div>
+			<p class="runner-map-caption">Execution and workspace storage stay on the runner. The browser receives live terminal traffic directly; Vercel does not relay or archive it.</p>
+
+			<div class="login-body-grid">
+				<section class="login-connect-pane" aria-label="Runner sign in">
+					<form id="login-form" method="dialog">
+						<div class="login-form-heading"><span>CONNECT</span><strong>Load this runner's sessions</strong></div>
+						<label for="runner-url">Runner URL</label>
+						<input id="runner-url" name="runner" type="url" inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="runner-help" required />
+						<small id="runner-help" class="form-help">Local Docker dashboard: <code>http://localhost:4321</code>. On a hosted dashboard, complete Option B first and enter the external HTTPS runner address.</small>
+						<label for="access-token">Access token</label>
+						<input id="access-token" name="token" type="password" autocomplete="current-password" required />
+						<small class="form-help">Use the owner access token printed by <code>npm run setup</code>.</small>
+						<p id="login-error" class="form-error" role="alert" hidden></p>
+						<button class="app-primary large" type="submit">Connect and show sessions</button>
+					</form>
+					<small>The dashboard does not store your owner access token; it remains in the runner's private <code>.env</code>. The browser keeps only a signed, expiring session credential.</small>
+				</section>
+
+				<section class="login-setup-pane" aria-labelledby="local-setup-heading">
+					<div class="login-section-heading"><span>OPTION A</span><strong id="local-setup-heading">Try it locally on one computer</strong></div>
+					<ol class="onboarding-steps">
+						<li><span>1</span><div><strong>Install and start</strong><p>Requires Git, Node.js 22.12+, npm, and Docker with Compose. Terminals run inside the included lower-privileged Linux container.</p><pre><code>git clone https://github.com/khajaaijaz26/cmdimpact.git
+cd cmdimpact
+npm install
+npm run setup
+npm start</code></pre></div></li>
+						<li><span>2</span><div><strong>Copy the access token</strong><p>Setup prints it when configuration is ready. Keep <code>npm start</code> running and the computer online.</p></div></li>
+						<li><span>3</span><div><strong>Open the local dashboard</strong><p>Visit <code>http://localhost:4321/app/</code> on that computer, enter the printed token, then create a session.</p></div></li>
+					</ol>
+
+					<details class="remote-setup-help">
+						<summary><span>OPTION B</span><strong>Use this dashboard from another device</strong><b aria-hidden="true">+</b></summary>
+						<div><p>On the runner computer, allow the exact dashboard origin you will use, then start the Docker stack:</p><pre><code>npm run setup -- --origin https://YOUR-DASHBOARD-DOMAIN
+npm start</code></pre><p>Publish <code>http://127.0.0.1:4321</code> through a trusted HTTPS/WSS reverse proxy or authenticated tunnel. A private VPN can restrict access to that proxy. Enter its external HTTPS address and the printed token in the form.</p><small>Never expose raw port 8787. Use only the dashboard origin, such as <code>https://dashboard.example</code>&mdash;without <code>/app/</code>, a query, or a fragment.</small></div>
+					</details>
+					<div class="onboarding-links"><a href="/#setup">Local quickstart <span aria-hidden="true">&rarr;</span></a><a href="https://github.com/khajaaijaz26/cmdimpact/blob/main/README.md#L98-L107" rel="external noopener">Remote Docker steps <span aria-hidden="true">&nearr;</span></a></div>
+					<p class="managed-session-note"><span aria-hidden="true">i</span> CmdImpact lists only sessions created by the selected runner. It cannot import unrelated terminal windows already open on the computer.</p>
+				</section>
+			</div>
 		</div>
 	</dialog>
 
@@ -111,9 +146,28 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 	<dialog id="tools-dialog" class="app-dialog tools-dialog" aria-labelledby="tools-heading">
 		<div class="dialog-head"><span class="dialog-icon">$_</span><button type="button" data-close-dialog aria-label="Close tools">&times;</button></div>
-		<p class="app-kicker">COMMAND SHORTCUTS</p>
-		<h2 id="tools-heading">Use your full terminal.</h2>
-		<p>These are optional examples, not a whitelist or built-in integration. Insert places text at the prompt but never presses Enter.</p>
+		<p class="app-kicker">HELP &amp; TOOLS</p>
+		<h2 id="tools-heading">Sessions stay on your connected runner.</h2>
+		<p>The browser is a view and keyboard. The selected CmdImpact runner owns the real terminal processes.</p>
+		<div class="app-runner-map compact" aria-label="The browser connects directly to live sessions on the selected CmdImpact runner">
+			<span><small>THIS BROWSER</small><strong>View + keyboard</strong></span>
+			<i><small>Direct API + WebSocket</small><b aria-hidden="true">&harr;</b></i>
+			<span><small>CONNECTED RUNNER</small><strong>Terminal processes</strong></span>
+		</div>
+		<ol class="onboarding-steps compact" aria-label="How to use a CmdImpact session">
+			<li><span>1</span><div><strong>Create</strong><p>Choose New session, give it a name, and select a shell installed on the runner.</p></div></li>
+			<li><span>2</span><div><strong>Run and leave</strong><p>Start your command or AI agent. It can continue without the browser while the runner stays online and the session remains active.</p></div></li>
+			<li><span>3</span><div><strong>Resume</strong><p>Connect to the same runner later and choose the session from the sidebar.</p></div></li>
+		</ol>
+		<ul class="session-status-key" aria-label="Session status meanings">
+			<li><i class="attached"></i><span><strong>Attached</strong><small>Open in a browser now</small></span></li>
+			<li><i class="running"></i><span><strong>Running / Detached</strong><small>Alive on the runner without this view</small></span></li>
+			<li><i class="needs-you"></i><span><strong>Needs you</strong><small>Likely waiting for input</small></span></li>
+			<li><i class="finished"></i><span><strong>Finished</strong><small>Stopped and cannot resume</small></span></li>
+		</ul>
+		<p class="managed-session-note compact"><span aria-hidden="true">i</span> The Sessions sidebar automatically loads CmdImpact-managed sessions from the connected runner.</p>
+		<div class="tool-section-heading"><p class="app-kicker">COMMAND SHORTCUTS</p><strong>Optional commands for your terminal</strong></div>
+		<p>These are examples, not a whitelist or built-in integration. Insert places text at the prompt but never presses Enter.</p>
 		<div class="tool-snippets">
 			<article data-command="gh auth login"><div><strong>GitHub CLI</strong><small>Sign in with an installed <code>gh</code> CLI.</small></div><code>gh auth login</code><span><button type="button" data-copy-command aria-label="Copy GitHub CLI command">Copy</button><button type="button" data-insert-command aria-label="Insert GitHub CLI command" disabled>Insert</button></span></article>
 			<article data-command="curl -fsSL https://chatgpt.com/codex/install.sh | sh"><div><strong>Codex</strong><small>Official installer; review downloaded scripts before running them.</small></div><code>curl -fsSL https://chatgpt.com/codex/install.sh | sh</code><span><button type="button" data-copy-command aria-label="Copy Codex install command">Copy</button><button type="button" data-insert-command aria-label="Insert Codex install command" disabled>Insert</button></span></article>
@@ -126,6 +180,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 			<button id="notification-toggle" class="dialog-cancel" type="button">Enable notifications</button>
 		</section>
 		<p class="tools-limit">Alerts depend on this page staying open and the browser continuing background polling. Suspended tabs and closed pages will not alert; push is not included.</p>
+		<a class="tools-setup-link" href="https://github.com/khajaaijaz26/cmdimpact#connect-the-global-dashboard-to-your-runner" rel="external noopener">Read the complete runner setup documentation <span aria-hidden="true">&nearr;</span></a>
 		<p id="tools-status" class="form-status" role="status" aria-live="polite"></p>
 	</dialog>
 
@@ -530,9 +585,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 			const empty = document.createElement('div');
 			empty.className = 'sidebar-empty';
 			const strong = document.createElement('strong');
-			strong.textContent = 'No sessions yet';
+			strong.textContent = 'No CmdImpact sessions';
 			const span = document.createElement('span');
-			span.textContent = 'Create one and it will stay listed here.';
+			span.textContent = 'Create one to run it on the selected runner.';
 			empty.append(strong, span);
 			sessionList.append(empty);
 			return;
@@ -1107,11 +1162,13 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		});
 	});
 
-	element<HTMLButtonElement>('open-tools').addEventListener('click', () => {
-		toolsStatus.textContent = '';
-		updateToolActions();
-		renderNotificationPreference();
-		toolsDialog.showModal();
+	document.querySelectorAll<HTMLButtonElement>('[data-open-tools]').forEach((button) => {
+		button.addEventListener('click', () => {
+			toolsStatus.textContent = '';
+			updateToolActions();
+			renderNotificationPreference();
+			toolsDialog.showModal();
+		});
 	});
 
 	document.querySelectorAll<HTMLButtonElement>('[data-copy-command], [data-insert-command]').forEach((button) => {
