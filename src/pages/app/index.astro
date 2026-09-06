@@ -11,15 +11,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
 				<button id="new-session-side" class="round-button" type="button" title="New session" aria-label="New session">+</button>
 			</div>
 			<div class="sidebar-explainer">
-				<strong>Processes stay on this server.</strong>
+				<strong>Processes stay on this runner.</strong>
 				<span>Closing the browser does not end a session.</span>
 			</div>
 			<div id="session-list" class="session-list" aria-live="polite">
 				<div class="session-loading"><span></span><span></span><span></span></div>
 			</div>
 			<div class="session-sidebar-foot">
-				<span class="server-dot"></span>
-				<div><strong>CmdImpact server</strong><small id="server-status">Checking connection...</small></div>
+				<span id="runner-dot" class="server-dot" data-state="idle" aria-hidden="true"></span>
+				<div><strong id="sidebar-runner">CmdImpact runner</strong><small id="server-status">Checking connection...</small></div>
 			</div>
 		</aside>
 
@@ -28,20 +28,21 @@ import AppLayout from '../../layouts/AppLayout.astro';
 				<div class="empty-mark" aria-hidden="true">ci_</div>
 				<p class="app-kicker">NO SESSION SELECTED</p>
 				<h2>Your terminal will open here.</h2>
-				<p>Create a session to start a real shell on this CmdImpact server, or choose an existing session to reconnect.</p>
+				<p>Create a session to start a real shell on the connected runner, or choose an existing session to reconnect.</p>
 				<button id="new-session-empty" class="app-primary large" type="button">Create your first session</button>
 				<small>Alpha boundary: sessions survive browser disconnects, not server restarts.</small>
 			</section>
 
 			<section id="active-workspace" class="active-workspace" hidden>
 				<header class="terminal-toolbar">
-					<button id="sidebar-toggle" class="icon-button mobile-only" type="button" aria-label="Open sessions">
+					<button id="sidebar-toggle" class="icon-button mobile-only" type="button" aria-label="Open sessions" aria-controls="session-sidebar" aria-expanded="false">
 						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
 					</button>
 					<div class="session-identity">
 						<div><h2 id="active-session-name">Terminal</h2><span id="active-session-meta">live session</span></div>
 					</div>
 					<div class="terminal-actions">
+						<button id="open-tools" class="toolbar-button" type="button">Tools</button>
 						<button id="rename-session" class="toolbar-button" type="button">Rename</button>
 						<button id="take-control" class="toolbar-button control" type="button" hidden>Take control</button>
 						<button id="reconnect-session" class="toolbar-button" type="button" hidden>Reconnect</button>
@@ -53,7 +54,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 					<div id="terminal-overlay" class="terminal-overlay" hidden>
 						<div class="overlay-spinner"></div>
 						<strong id="terminal-overlay-title">Connecting...</strong>
-						<span id="terminal-overlay-detail">Opening the session on this server.</span>
+						<span id="terminal-overlay-detail">Opening the session on this runner.</span>
 					</div>
 				</div>
 				<div class="mobile-keybar" aria-label="Terminal shortcut keys">
@@ -74,28 +75,31 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		</main>
 	</div>
 
-	<div id="login-screen" class="login-screen" hidden>
+	<dialog id="login-screen" class="login-screen" aria-labelledby="login-heading" aria-describedby="login-copy">
 		<div class="login-card">
 			<a class="login-home" href="/" aria-label="Back to CmdImpact"><span>ci_</span>cmdimpact</a>
 			<p class="app-kicker">SELF-HOSTED ACCESS</p>
-			<h1>Open your workspace.</h1>
-			<p>Enter the access token configured on this CmdImpact server. The token is sent only to this server.</p>
-			<form id="login-form">
+			<h1 id="login-heading">Connect to your runner.</h1>
+			<p id="login-copy">Choose the CmdImpact runner that owns your terminal sessions, then enter that runner's access token.</p>
+			<form id="login-form" method="dialog">
+				<label for="runner-url">Runner URL</label>
+				<input id="runner-url" name="runner" type="url" inputmode="url" autocomplete="url" spellcheck="false" aria-describedby="runner-help" required />
+				<small id="runner-help" class="form-help">Use an HTTPS origin. Local runners may use HTTP on localhost or a loopback address.</small>
 				<label for="access-token">Access token</label>
-				<input id="access-token" name="token" type="password" autocomplete="current-password" required autofocus />
+				<input id="access-token" name="token" type="password" autocomplete="current-password" required />
 				<p id="login-error" class="form-error" role="alert" hidden></p>
 				<button class="app-primary large" type="submit">Sign in</button>
 			</form>
-			<small>Single-owner alpha. Do not share the token or expose an untrusted development server.</small>
+			<small>The runner address is remembered on this browser. Your access token is never saved by CmdImpact.</small>
 		</div>
-	</div>
+	</dialog>
 
-	<dialog id="new-session-dialog" class="app-dialog">
+	<dialog id="new-session-dialog" class="app-dialog" aria-labelledby="new-session-heading">
 		<form id="new-session-form" method="dialog">
 			<div class="dialog-head"><span class="dialog-icon">+</span><button type="button" data-close-dialog aria-label="Close">&times;</button></div>
 			<p class="app-kicker">NEW TERMINAL</p>
-			<h2>Start a session</h2>
-			<p>The shell runs on this CmdImpact server and stays active when the browser disconnects.</p>
+			<h2 id="new-session-heading">Start a session</h2>
+			<p>The shell runs on the connected CmdImpact runner and stays active when the browser disconnects.</p>
 			<label for="session-name">Session name</label>
 			<input id="session-name" name="name" maxlength="64" placeholder="api migration" autocomplete="off" />
 			<label for="session-shell">Shell</label>
@@ -105,13 +109,38 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		</form>
 	</dialog>
 
-	<dialog id="guard-dialog" class="app-dialog guard-dialog">
+	<dialog id="tools-dialog" class="app-dialog tools-dialog" aria-labelledby="tools-heading">
+		<div class="dialog-head"><span class="dialog-icon">$_</span><button type="button" data-close-dialog aria-label="Close tools">&times;</button></div>
+		<p class="app-kicker">COMMAND SHORTCUTS</p>
+		<h2 id="tools-heading">Use your full terminal.</h2>
+		<p>These are optional examples, not a whitelist or built-in integration. Insert places text at the prompt but never presses Enter.</p>
+		<div class="tool-snippets">
+			<article data-command="gh auth login"><div><strong>GitHub CLI</strong><small>Sign in with an installed <code>gh</code> CLI.</small></div><code>gh auth login</code><span><button type="button" data-copy-command aria-label="Copy GitHub CLI command">Copy</button><button type="button" data-insert-command aria-label="Insert GitHub CLI command" disabled>Insert</button></span></article>
+			<article data-command="curl -fsSL https://chatgpt.com/codex/install.sh | sh"><div><strong>Codex</strong><small>Official installer; review downloaded scripts before running them.</small></div><code>curl -fsSL https://chatgpt.com/codex/install.sh | sh</code><span><button type="button" data-copy-command aria-label="Copy Codex install command">Copy</button><button type="button" data-insert-command aria-label="Insert Codex install command" disabled>Insert</button></span></article>
+			<article data-command="npm install -g @anthropic-ai/claude-code"><div><strong>Claude Code</strong><small>Install the Claude command-line agent.</small></div><code>npm install -g @anthropic-ai/claude-code</code><span><button type="button" data-copy-command aria-label="Copy Claude Code install command">Copy</button><button type="button" data-insert-command aria-label="Insert Claude Code install command" disabled>Insert</button></span></article>
+			<article data-command="npm install -g @google/gemini-cli"><div><strong>Gemini CLI</strong><small>Install the Gemini command-line agent.</small></div><code>npm install -g @google/gemini-cli</code><span><button type="button" data-copy-command aria-label="Copy Gemini CLI install command">Copy</button><button type="button" data-insert-command aria-label="Insert Gemini CLI install command" disabled>Insert</button></span></article>
+			<article data-command="npm install -g vercel"><div><strong>Vercel CLI</strong><small>Install Vercel's deployment CLI.</small></div><code>npm install -g vercel</code><span><button type="button" data-copy-command aria-label="Copy Vercel CLI install command">Copy</button><button type="button" data-insert-command aria-label="Insert Vercel CLI install command" disabled>Insert</button></span></article>
+		</div>
+		<section class="notification-preference" aria-labelledby="notification-heading">
+			<div><strong id="notification-heading">Browser notifications</strong><small id="notification-copy">Get a generic alert without terminal output when a running session needs you.</small></div>
+			<button id="notification-toggle" class="dialog-cancel" type="button">Enable notifications</button>
+		</section>
+		<p class="tools-limit">Alerts depend on this page staying open and the browser continuing background polling. Suspended tabs and closed pages will not alert; push is not included.</p>
+		<p id="tools-status" class="form-status" role="status" aria-live="polite"></p>
+	</dialog>
+
+	<dialog id="guard-dialog" class="app-dialog guard-dialog" aria-labelledby="guard-heading">
 		<div class="dialog-head"><span class="dialog-icon warning">!</span><button type="button" data-guard-action="cancel" aria-label="Close">&times;</button></div>
 		<p class="app-kicker">COMMAND GUARD</p>
-		<h2>Review this paste</h2>
-		<p id="guard-summary">CmdImpact found a supported pattern worth checking before these lines reach your shell.</p>
+		<h2 id="guard-heading">Review this paste</h2>
+		<p id="guard-summary">Review the complete command before it reaches your shell.</p>
+		<section class="guard-preview" aria-labelledby="guard-preview-heading">
+			<div><strong id="guard-preview-heading">Full paste</strong><small>Lossless escaped view: backslashes are doubled and controls use <code>\xNN</code>.</small></div>
+			<pre id="guard-preview" tabindex="0" aria-label="Full paste with visible control characters"></pre>
+		</section>
 		<div id="guard-findings" class="guard-findings"></div>
-		<p class="guard-limit">Pattern check only. CmdImpact cannot inspect remote code or prove this command is safe.</p>
+		<p id="guard-findings-omitted" class="guard-omitted" hidden></p>
+		<p class="guard-limit">Risk indicators are heuristic only. CmdImpact cannot inspect remote code or prove a command is safe.</p>
 		<div class="dialog-actions guard-buttons">
 			<button type="button" class="dialog-cancel" data-guard-action="cancel">Cancel</button>
 			<button type="button" class="dialog-cancel" data-guard-action="paste">Paste as one line</button>
@@ -119,7 +148,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		</div>
 	</dialog>
 
-	<dialog id="end-session-dialog" class="app-dialog">
+	<dialog id="end-session-dialog" class="app-dialog" aria-labelledby="end-dialog-title">
 		<div class="dialog-head"><span class="dialog-icon danger">!</span><button type="button" data-close-dialog aria-label="Close">&times;</button></div>
 		<p class="app-kicker">DESTRUCTIVE ACTION</p>
 		<h2 id="end-dialog-title">End this session?</h2>
@@ -135,7 +164,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	import { WebLinksAddon } from '@xterm/addon-web-links';
 	import '@xterm/xterm/css/xterm.css';
 	import { analyzeCommand, type CommandFinding } from '../../lib/command-check';
-	import { pasteAsOneLine, pasteNeedsReview, terminalInputFits } from '../../lib/terminal-paste';
+	import { pasteAsOneLine, terminalInputFits, visiblePaste } from '../../lib/terminal-paste';
+	import { defaultRunnerOrigin, isRunnerHealth, normalizeRunnerOrigin } from '../../lib/runner-url';
 
 	interface SessionRecord {
 		id: string;
@@ -148,6 +178,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		exitedAt: string | null;
 		exitCode: number | null;
 		exitReason: string | null;
+		attentionAt: string | null;
+		attentionKind: 'bell' | 'approval' | 'input' | null;
 		clients: number;
 		writable: boolean;
 	}
@@ -166,10 +198,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	};
 
 	const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-	const loginScreen = element<HTMLDivElement>('login-screen');
+	const loginScreen = element<HTMLDialogElement>('login-screen');
 	const loginForm = element<HTMLFormElement>('login-form');
 	const loginError = element<HTMLParagraphElement>('login-error');
 	const tokenInput = element<HTMLInputElement>('access-token');
+	const runnerInput = element<HTMLInputElement>('runner-url');
+	const runnerButton = element<HTMLButtonElement>('runner-button');
+	const runnerOriginLabel = element<HTMLElement>('runner-origin');
+	const sidebarRunner = element<HTMLElement>('sidebar-runner');
+	const runnerDot = element<HTMLElement>('runner-dot');
 	const sessionList = element<HTMLDivElement>('session-list');
 	const emptyState = element<HTMLElement>('workspace-empty');
 	const activeWorkspace = element<HTMLElement>('active-workspace');
@@ -189,7 +226,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	const sessionError = element<HTMLParagraphElement>('session-error');
 	const guardDialog = element<HTMLDialogElement>('guard-dialog');
 	const guardSummary = element<HTMLElement>('guard-summary');
+	const guardPreview = element<HTMLElement>('guard-preview');
 	const guardFindings = element<HTMLElement>('guard-findings');
+	const guardFindingsOmitted = element<HTMLElement>('guard-findings-omitted');
 	const endDialog = element<HTMLDialogElement>('end-session-dialog');
 	const endName = element<HTMLElement>('end-session-name');
 	const endTitle = element<HTMLElement>('end-dialog-title');
@@ -197,8 +236,17 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	const endError = element<HTMLParagraphElement>('end-error');
 	const endButton = element<HTMLButtonElement>('confirm-end-session');
 	const takeControlButton = element<HTMLButtonElement>('take-control');
+	const toolsDialog = element<HTMLDialogElement>('tools-dialog');
+	const toolsStatus = element<HTMLParagraphElement>('tools-status');
+	const notificationToggle = element<HTMLButtonElement>('notification-toggle');
+	const notificationCopy = element<HTMLElement>('notification-copy');
 	const sidebar = element<HTMLElement>('session-sidebar');
+	const sidebarToggle = element<HTMLButtonElement>('sidebar-toggle');
 	const scrim = element<HTMLButtonElement>('sidebar-scrim');
+	const mobileSidebar = window.matchMedia('(max-width: 54rem)');
+	const RUNNER_ORIGIN_KEY = 'cmdimpact.runnerOrigin';
+	const SESSION_AUTH_KEY = 'cmdimpact.sessionAuth';
+	const NOTIFICATION_KEY = 'cmdimpact.notificationsEnabled';
 
 	let sessions: SessionRecord[] = [];
 	let selected: SessionRecord | undefined;
@@ -211,6 +259,47 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	let availableShells: string[] = [];
 	let writable = false;
 	let heartbeatTimer = 0;
+	let runnerOrigin = defaultRunnerOrigin(readStorage(localStorage, RUNNER_ORIGIN_KEY), location.origin);
+	let sessionToken = loadSessionToken();
+	let runnerGeneration = 0;
+	let sessionLoadGeneration = 0;
+	let notificationRegistration: Promise<ServiceWorkerRegistration> | undefined;
+	let notificationsEnabled = readStorage(localStorage, NOTIFICATION_KEY) === 'true';
+	const knownAttention = new Map<string, string>();
+	const seenAttention = new Map<string, string>();
+	class StaleRunnerRequest extends Error {}
+
+	function readStorage(storage: Storage, key: string) {
+		try { return storage.getItem(key); } catch { return null; }
+	}
+
+	function writeStorage(storage: Storage, key: string, value?: string) {
+		try {
+			if (value === undefined) storage.removeItem(key);
+			else storage.setItem(key, value);
+		} catch { /* Storage may be blocked by the browser. */ }
+	}
+
+	function loadSessionToken() {
+		try {
+			const stored = JSON.parse(readStorage(sessionStorage, SESSION_AUTH_KEY) || 'null');
+			return stored?.origin === runnerOrigin && typeof stored?.token === 'string' ? stored.token : '';
+		} catch { return ''; }
+	}
+
+	function saveSessionToken(token = '') {
+		sessionToken = token;
+		runnerGeneration += 1;
+		writeStorage(sessionStorage, SESSION_AUTH_KEY, token ? JSON.stringify({ origin: runnerOrigin, token }) : undefined);
+	}
+
+	function assertCurrentRunner(generation: number) {
+		if (generation !== runnerGeneration) throw new StaleRunnerRequest();
+	}
+
+	function staleRunnerRequest(error: unknown, generation: number) {
+		return error instanceof StaleRunnerRequest || generation !== runnerGeneration;
+	}
 
 	const fitAddon = new FitAddon();
 	const terminal = new Terminal({
@@ -253,25 +342,84 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		return session.name.trim() || 'Untitled session';
 	}
 
+	function validSessionId(value: unknown): value is string {
+		return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+	}
+
+	function requestedSessionId() {
+		const candidate = new URLSearchParams(location.hash.slice(1)).get('session');
+		return validSessionId(candidate) ? candidate : '';
+	}
+
+	function updateRunnerDisplay() {
+		const label = runnerOrigin || 'Choose runner';
+		runnerOriginLabel.textContent = label;
+		runnerOriginLabel.title = label;
+		sidebarRunner.textContent = runnerOrigin ? new URL(runnerOrigin).host : 'CmdImpact runner';
+	}
+
+	function runnerState(state: 'idle' | 'connecting' | 'connected' | 'offline' | 'error', label: string) {
+		runnerButton.dataset.state = state;
+		runnerDot.dataset.state = state;
+		element<HTMLElement>('server-status').textContent = label;
+		runnerButton.setAttribute('aria-label', 'Change terminal runner. ' + label + (runnerOrigin ? ': ' + runnerOrigin : ''));
+	}
+
 	function connectionState(state: 'idle' | 'connecting' | 'connected' | 'offline' | 'error', label: string) {
 		globalConnection.dataset.state = state;
 		terminalConnection.dataset.state = state;
 		const globalLabel = globalConnection.querySelector('span');
 		if (globalLabel) globalLabel.textContent = label;
 		terminalConnection.lastChild!.textContent = label;
-		element<HTMLElement>('server-status').textContent = state === 'connected' ? 'Online' : label;
 		reconnectButton.hidden = state !== 'offline' && state !== 'error';
 	}
 
-	async function api(path: string, options: RequestInit = {}) {
+	async function api(path: string, options: RequestInit = {}, generation = runnerGeneration) {
+		assertCurrentRunner(generation);
+		const origin = runnerOrigin;
+		const token = sessionToken;
+		if (!origin) throw new Error('Choose a valid runner URL first.');
 		const headers = new Headers(options.headers);
 		if (options.body) headers.set('Content-Type', 'application/json');
-		const response = await fetch(path, { ...options, headers, credentials: 'include' });
-		if (response.status === 401 && path !== '/api/auth/login') {
+		if (token) headers.set('Authorization', 'Bearer ' + token);
+		let response: Response;
+		try {
+			response = await fetch(origin + path, {
+				...options,
+				headers,
+				credentials: origin === location.origin ? 'include' : 'omit',
+			});
+		} catch (error) {
+			assertCurrentRunner(generation);
+			throw error;
+		}
+		assertCurrentRunner(generation);
+		if (response.status === 401 && path !== '/api/auth/login' && path !== '/api/me') {
 			const hadWorkspace = Boolean(selected || sessions.length);
 			handleUnauthorized(hadWorkspace ? 'Your sign-in expired. Enter the access token again.' : '');
+			throw new StaleRunnerRequest();
 		}
 		return response;
+	}
+
+	async function responseJson(response: Response, generation: number) {
+		try {
+			const body = await response.json();
+			assertCurrentRunner(generation);
+			return body;
+		} catch (error) {
+			assertCurrentRunner(generation);
+			throw error;
+		}
+	}
+
+	async function responseJsonOr(response: Response, generation: number, fallback: unknown) {
+		try {
+			return await responseJson(response, generation);
+		} catch (error) {
+			assertCurrentRunner(generation);
+			return fallback;
+		}
 	}
 
 	function normalizeSessions(value: unknown): SessionRecord[] {
@@ -285,6 +433,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 	function groupFor(session: SessionRecord) {
 		if (session.state === 'exited') return 'Finished';
+		if (needsAttention(session)) return 'Needs you';
 		if (session.state === 'detached') return 'Detached';
 		return session.clients > 0 ? 'Attached' : 'Running';
 	}
@@ -298,6 +447,81 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
 		if (seconds < 86400) return Math.floor(seconds / 3600) + 'h';
 		return Math.floor(seconds / 86400) + 'd';
+	}
+
+	function needsAttention(session: SessionRecord) {
+		if (!session.attentionAt || !Number.isFinite(Date.parse(session.attentionAt))) return false;
+		const seen = seenAttention.get(session.id);
+		return !seen || Date.parse(session.attentionAt) > Date.parse(seen);
+	}
+
+	function notificationsSupported() {
+		return 'Notification' in window && 'serviceWorker' in navigator;
+	}
+
+	async function notificationServiceWorker() {
+		if (!notificationsSupported()) throw new Error('Browser notifications are not supported.');
+		notificationRegistration ??= navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }).then(() => navigator.serviceWorker.ready);
+		try {
+			return await notificationRegistration;
+		} catch (error) {
+			notificationRegistration = undefined;
+			throw error;
+		}
+	}
+
+	async function notifyAttention(session: SessionRecord) {
+		if (!document.hidden || !notificationsEnabled || !notificationsSupported() || Notification.permission !== 'granted') return;
+		const generation = runnerGeneration;
+		try {
+			const registration = await notificationServiceWorker();
+			if (!document.hidden || !notificationsEnabled || generation !== runnerGeneration || Notification.permission !== 'granted') return;
+			await registration.showNotification('CmdImpact session needs you', {
+				body: 'Open the browser terminal to continue.',
+				tag: 'cmdimpact-attention-' + session.id,
+				data: { sessionId: session.id },
+			});
+		} catch { /* Permission or service-worker availability may change while hidden. */ }
+	}
+
+	function processAttention(nextSessions: SessionRecord[]) {
+		nextSessions.forEach((session) => {
+			const next = session.attentionAt || '';
+			const tracked = knownAttention.has(session.id);
+			const previous = knownAttention.get(session.id) || '';
+			if (tracked && next && next !== previous) void notifyAttention(session);
+			knownAttention.set(session.id, next);
+			if (!next) seenAttention.delete(session.id);
+		});
+	}
+
+	function renderNotificationPreference() {
+		if (!notificationsSupported()) {
+			notificationsEnabled = false;
+			notificationToggle.disabled = true;
+			notificationToggle.textContent = 'Not supported';
+			notificationCopy.textContent = 'This browser does not support service-worker notifications.';
+			return;
+		}
+		if (Notification.permission === 'denied') {
+			notificationsEnabled = false;
+			writeStorage(localStorage, NOTIFICATION_KEY, 'false');
+			notificationToggle.disabled = true;
+			notificationToggle.textContent = 'Blocked in browser';
+			notificationCopy.textContent = 'Allow notifications in browser settings to enable session alerts.';
+			return;
+		}
+		if (Notification.permission !== 'granted') notificationsEnabled = false;
+		notificationToggle.disabled = false;
+		notificationToggle.textContent = notificationsEnabled ? 'Disable notifications' : 'Enable notifications';
+		notificationToggle.setAttribute('aria-pressed', String(notificationsEnabled));
+		notificationCopy.textContent = notificationsEnabled
+			? 'Generic alerts are enabled while this open page continues polling.'
+			: 'Get a generic alert without terminal output when a running session needs you.';
+	}
+
+	function markAttentionSeen(session: SessionRecord) {
+		if (session.attentionAt) seenAttention.set(session.id, session.attentionAt);
 	}
 
 	function renderSessions() {
@@ -314,7 +538,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 			return;
 		}
 
-		['Attached', 'Running', 'Detached', 'Finished'].forEach((group) => {
+		['Needs you', 'Attached', 'Running', 'Detached', 'Finished'].forEach((group) => {
 			const matching = sessions.filter((session) => groupFor(session) === group);
 			if (!matching.length) return;
 			const heading = document.createElement('p');
@@ -326,12 +550,14 @@ import AppLayout from '../../layouts/AppLayout.astro';
 				button.type = 'button';
 				button.className = 'session-item' + (selected?.id === session.id ? ' is-current' : '');
 				button.dataset.status = group.toLowerCase().replace(' ', '-');
+				if (selected?.id === session.id) button.setAttribute('aria-current', 'true');
 				const status = document.createElement('i');
+				status.setAttribute('aria-hidden', 'true');
 				const copy = document.createElement('span');
 				const title = document.createElement('strong');
 				title.textContent = sessionLabel(session);
 				const meta = document.createElement('small');
-				meta.textContent = session.shell + ' / ' + session.state;
+				meta.textContent = session.shell + ' / ' + (needsAttention(session) ? 'needs attention' : session.state);
 				const age = document.createElement('time');
 				age.textContent = formatAge(session.exitedAt || session.detachedAt || session.lastAttachedAt || session.createdAt);
 				copy.append(title, meta);
@@ -342,40 +568,51 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		});
 	}
 
-	async function loadSessions(expectedGeneration?: number) {
-		const response = await api('/api/sessions');
-		if (expectedGeneration !== undefined && expectedGeneration !== connectionGeneration) return false;
-		if (!response.ok) throw new Error('Could not load sessions.');
-		const body = await response.json();
-		if (expectedGeneration !== undefined && expectedGeneration !== connectionGeneration) return false;
-		sessions = normalizeSessions(body);
-		if (Array.isArray(body.shells)) {
-			availableShells = body.shells.filter((shell: unknown): shell is string => typeof shell === 'string');
-			renderShellOptions();
-		}
-		renderSessions();
-		if (selected) {
-			selected = sessions.find((item) => item.id === selected?.id);
-			if (!selected) {
-				showEmpty();
-			} else {
-				activeName.textContent = sessionLabel(selected);
-				activeMeta.textContent = selected.shell + ' / ' + selected.state + (writable ? ' / keyboard control' : ' / view only');
-				element<HTMLButtonElement>('end-session').textContent = selected.state === 'exited' ? 'Remove' : 'End';
+	async function loadSessions(expectedConnectionGeneration?: number, generation = runnerGeneration) {
+		const loadGeneration = ++sessionLoadGeneration;
+		try {
+			const response = await api('/api/sessions', {}, generation);
+			if (loadGeneration !== sessionLoadGeneration || (expectedConnectionGeneration !== undefined && expectedConnectionGeneration !== connectionGeneration)) return false;
+			if (!response.ok) throw new Error('Could not load sessions.');
+			const body = await responseJson(response, generation);
+			if (loadGeneration !== sessionLoadGeneration || (expectedConnectionGeneration !== undefined && expectedConnectionGeneration !== connectionGeneration)) return false;
+			const nextSessions = normalizeSessions(body);
+			processAttention(nextSessions);
+			sessions = nextSessions;
+			if (Array.isArray(body.shells)) {
+				availableShells = body.shells.filter((shell: unknown): shell is string => typeof shell === 'string');
+				renderShellOptions();
 			}
+			runnerState('connected', 'Online');
+			renderSessions();
+			if (selected) {
+				selected = sessions.find((item) => item.id === selected?.id);
+				if (!selected) {
+					showEmpty();
+				} else {
+					activeName.textContent = sessionLabel(selected);
+					activeMeta.textContent = selected.shell + ' / ' + selected.state + (writable ? ' / keyboard control' : ' / view only');
+					element<HTMLButtonElement>('end-session').textContent = selected.state === 'exited' ? 'Remove' : 'End';
+				}
+			}
+			return true;
+		} catch (error) {
+			if (staleRunnerRequest(error, generation)) return false;
+			throw error;
 		}
-		return true;
 	}
 
 	function showLogin(message = '') {
-		loginScreen.hidden = false;
+		updateRunnerDisplay();
+		if (!runnerInput.value) runnerInput.value = runnerOrigin;
+		if (!loginScreen.open) loginScreen.showModal();
 		loginError.hidden = !message;
 		loginError.textContent = message;
-		window.setTimeout(() => tokenInput.focus(), 0);
+		window.setTimeout(() => (runnerOrigin ? tokenInput : runnerInput).focus(), 0);
 	}
 
 	function hideLogin() {
-		loginScreen.hidden = true;
+		if (loginScreen.open) loginScreen.close();
 		tokenInput.value = '';
 		loginError.hidden = true;
 	}
@@ -386,20 +623,35 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		shells.forEach((shell) => {
 			const option = document.createElement('option');
 			option.value = shell === 'default' ? '' : shell;
-			option.textContent = shell === 'default' ? 'Server default' : shell;
+			option.textContent = shell === 'default' ? 'Runner default' : shell;
 			sessionShellInput.append(option);
 		});
 	}
 
 	async function bootstrap() {
+		updateRunnerDisplay();
+		if (!runnerOrigin) {
+			runnerState('idle', 'Not configured');
+			showLogin('Enter an HTTPS runner URL, or a loopback HTTP URL for local use.');
+			return;
+		}
+		const generation = runnerGeneration;
+		runnerState('connecting', 'Checking connection...');
 		try {
-			const response = await api('/api/me');
+			const response = await api('/api/me', {}, generation);
 			if (!response.ok) {
-				showLogin();
+				runnerState('error', response.status === 404 ? 'No runner at this address' : 'Runner error');
+				showLogin(response.status === 404 ? 'No runner was found at this dashboard address. Enter the URL of your CmdImpact runner.' : 'The runner could not verify this browser. Check its URL and try again.');
 				return;
 			}
-			const identity = await response.json().catch(() => ({ authenticated: true }));
-			if (identity && identity.authenticated === false) {
+			const identity = await responseJsonOr(response, generation, null);
+			if (!identity || typeof identity.authenticated !== 'boolean') {
+				runnerState('error', 'Invalid runner response');
+				showLogin('This address does not appear to be a CmdImpact runner. Enter the runner API origin, not only the dashboard URL.');
+				return;
+			}
+			if (identity.authenticated === false) {
+				runnerState('connected', 'Sign in required');
 				showLogin();
 				return;
 			}
@@ -408,13 +660,15 @@ import AppLayout from '../../layouts/AppLayout.astro';
 				renderShellOptions();
 			}
 			hideLogin();
-			await loadSessions();
-			element<HTMLElement>('server-status').textContent = 'Online';
-			const requested = new URLSearchParams(location.search).get('session');
+			if (!await loadSessions(undefined, generation)) return;
+			runnerState('connected', 'Online');
+			const requested = requestedSessionId();
 			const first = sessions.find((item) => item.id === requested) || sessions.find((item) => item.state !== 'exited');
 			if (first) selectSession(first);
-		} catch {
-			showLogin('The CmdImpact server is unavailable. Confirm it is running and refresh this page.');
+		} catch (error) {
+			if (staleRunnerRequest(error, generation)) return;
+			runnerState('offline', 'Unavailable');
+			showLogin('The selected CmdImpact runner is unavailable. Check its URL and try again.');
 		}
 	}
 
@@ -423,21 +677,52 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		const submit = loginForm.querySelector<HTMLButtonElement>('button[type="submit"]');
 		if (submit) submit.disabled = true;
 		loginError.hidden = true;
+		let generation = runnerGeneration;
 		try {
+			const nextOrigin = normalizeRunnerOrigin(runnerInput.value);
+			const submittedToken = tokenInput.value;
+			if (nextOrigin !== runnerOrigin) disconnectSocket();
+			runnerOrigin = nextOrigin;
+			saveSessionToken();
+			generation = runnerGeneration;
+			updateRunnerDisplay();
+			runnerState('connecting', 'Checking runner...');
+			const probe = await api('/api/health', {}, generation);
+			const health = probe.ok ? await responseJsonOr(probe, generation, null) : null;
+			if (!probe.ok || !isRunnerHealth(health)) {
+				writeStorage(localStorage, RUNNER_ORIGIN_KEY);
+				runnerOrigin = '';
+				runnerInput.value = '';
+				tokenInput.value = '';
+				saveSessionToken();
+				updateRunnerDisplay();
+				runnerState('error', 'Invalid runner');
+				showLogin('This address does not appear to be a CmdImpact runner. Check the runner URL and try again.');
+				return;
+			}
+			writeStorage(localStorage, RUNNER_ORIGIN_KEY, runnerOrigin);
+			runnerState('connecting', 'Signing in...');
 			const response = await api('/api/auth/login', {
 				method: 'POST',
-				body: JSON.stringify({ token: tokenInput.value }),
-			});
+				body: JSON.stringify({ token: submittedToken }),
+			}, generation);
+			const body = await responseJsonOr(response, generation, {});
 			if (!response.ok) {
-				const body = await response.json().catch(() => ({}));
+				runnerState('error', 'Sign-in failed');
 				throw new Error(body.error || 'That access token was not accepted.');
 			}
+			const nextToken = typeof body.sessionToken === 'string' && body.sessionToken.length <= 4096 ? body.sessionToken : '';
+			saveSessionToken(nextToken);
+			generation = runnerGeneration;
 			hideLogin();
-			await loadSessions();
-			element<HTMLElement>('server-status').textContent = 'Online';
-			const first = sessions.find((item) => item.state !== 'exited');
+			if (!await loadSessions(undefined, generation)) return;
+			runnerState('connected', 'Online');
+			const requested = requestedSessionId();
+			const first = sessions.find((item) => item.id === requested) || sessions.find((item) => item.state !== 'exited');
 			if (first) selectSession(first);
 		} catch (error) {
+			if (staleRunnerRequest(error, generation)) return;
+			if (runnerButton.dataset.state === 'connecting') runnerState('offline', 'Unavailable');
 			showLogin(error instanceof Error ? error.message : 'Sign-in failed.');
 		} finally {
 			if (submit) submit.disabled = false;
@@ -445,17 +730,45 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	});
 
 	element<HTMLButtonElement>('logout-button').addEventListener('click', async () => {
-		const response = await api('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
-		if (!response || (!response.ok && response.status !== 401)) {
+		const generation = runnerGeneration;
+		let response: Response;
+		try {
+			response = await api('/api/auth/logout', { method: 'POST' }, generation);
+		} catch (error) {
+			if (staleRunnerRequest(error, generation)) return;
 			window.alert('Sign-out was not confirmed. You are still signed in; check the connection and try again.');
 			return;
 		}
-		if (response.status !== 401) handleUnauthorized();
+		if (!response.ok) {
+			window.alert('Sign-out was not confirmed. You are still signed in; check the connection and try again.');
+			return;
+		}
+		handleUnauthorized();
+	});
+
+	runnerButton.addEventListener('click', () => {
+		selected = undefined;
+		sessions = [];
+		availableShells = [];
+		knownAttention.clear();
+		seenAttention.clear();
+		saveSessionToken();
+		tokenInput.value = '';
+		renderSessions();
+		showEmpty();
+		runnerState('idle', 'Choose a runner');
+		showLogin('Enter a runner URL and its access token to connect.');
+		window.setTimeout(() => {
+			runnerInput.focus();
+			runnerInput.select();
+		}, 0);
 	});
 
 	function socketUrl() {
-		const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
-		return scheme + '//' + location.host + '/ws';
+		const url = new URL(runnerOrigin);
+		url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+		url.pathname = '/ws';
+		return url.href;
 	}
 
 	function send(message: object) {
@@ -470,6 +783,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		send({ type: 'input', data });
 	}
 
+	function updateToolActions() {
+		const canInsert = Boolean(writable && selected && selected.state !== 'exited' && socket?.readyState === WebSocket.OPEN);
+		document.querySelectorAll<HTMLButtonElement>('[data-insert-command]').forEach((button) => { button.disabled = !canInsert; });
+	}
+
 	function setWritable(next: boolean, reason = '') {
 		writable = next;
 		terminal.options.disableStdin = !next;
@@ -478,6 +796,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 			selected.writable = next;
 			activeMeta.textContent = selected.shell + ' / ' + selected.state + (next ? ' / keyboard control' : ' / view only');
 		}
+		updateToolActions();
 		if (reason && !next) terminal.writeln('\r\n\x1b[38;2;201;160;100m[view only] ' + reason + '\x1b[0m');
 	}
 
@@ -487,7 +806,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		try {
 			message = JSON.parse(event.data) as SocketMessage;
 		} catch {
-			terminal.writeln('\r\n\x1b[38;2;214;109;104m[invalid server frame]\x1b[0m');
+			terminal.writeln('\r\n\x1b[38;2;214;109;104m[invalid runner frame]\x1b[0m');
 			return;
 		}
 		if (message.type === 'hello') {
@@ -496,6 +815,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		} else if (message.type === 'ready') {
 			const readySession = message.session;
 			if (readySession && selected?.id === readySession.id) {
+				sessionLoadGeneration += 1;
 				selected = readySession;
 				sessions = sessions.map((item) => item.id === readySession.id ? readySession : item);
 			}
@@ -519,6 +839,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 			connectionState('offline', 'Session ended');
 			manualDisconnect = true;
 			if (selected) {
+				sessionLoadGeneration += 1;
 				selected.state = 'exited';
 				selected.exitCode = message.exitCode ?? null;
 				selected.exitReason = message.reason || null;
@@ -563,10 +884,23 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		terminal.writeln('\x1b[38;2;146;155;171mConnecting to ' + sessionLabel(session) + '...\x1b[0m');
 		overlay.hidden = false;
 		overlayTitle.textContent = reconnectAttempts ? 'Reconnecting...' : 'Connecting...';
-		overlayDetail.textContent = 'The shell process remains on this server.';
+		overlayDetail.textContent = 'The shell process remains on this runner.';
 		connectionState('connecting', 'Connecting');
 		setWritable(false);
-		const nextSocket = new WebSocket(socketUrl());
+		let nextSocket: WebSocket;
+		try {
+			nextSocket = sessionToken
+				? new WebSocket(socketUrl(), 'cmdimpact.auth.' + sessionToken)
+				: new WebSocket(socketUrl());
+		} catch {
+			manualDisconnect = true;
+			overlayTitle.textContent = 'Connection refused';
+			overlayDetail.textContent = 'The runner returned an invalid browser session. Sign in again.';
+			connectionState('error', 'Sign-in error');
+			saveSessionToken();
+			showLogin('The runner returned an invalid browser session. Enter the access token again.');
+			return;
+		}
 		let serverErrorCode = '';
 		socket = nextSocket;
 		nextSocket.addEventListener('open', () => {
@@ -590,26 +924,27 @@ import AppLayout from '../../layouts/AppLayout.astro';
 				manualDisconnect = true;
 				overlay.hidden = false;
 				overlayTitle.textContent = 'Connection refused';
-				overlayDetail.textContent = 'Checking your sign-in and server origin settings...';
+				overlayDetail.textContent = 'Checking your sign-in and runner origin settings...';
+				const runnerRequestGeneration = runnerGeneration;
 				try {
-					const response = await api('/api/me');
-					if (generation !== connectionGeneration) return;
-					const identity = response.ok ? await response.json().catch(() => ({ authenticated: false })) : { authenticated: false };
-					if (generation !== connectionGeneration) return;
+					const response = await api('/api/me', {}, runnerRequestGeneration);
+					if (generation !== connectionGeneration || runnerRequestGeneration !== runnerGeneration) return;
+					const identity = response.ok ? await responseJsonOr(response, runnerRequestGeneration, { authenticated: false }) : { authenticated: false };
+					if (generation !== connectionGeneration || runnerRequestGeneration !== runnerGeneration) return;
 					if (!identity.authenticated) {
 						showLogin('Your sign-in expired. Enter the access token again.');
 					} else if (serverErrorCode === 'not-live') {
-						if (!await loadSessions(generation)) return;
+						if (!await loadSessions(generation, runnerRequestGeneration)) return;
 						const ended = sessions.find((session) => session.id === failedSessionId);
 						if (ended?.state === 'exited') selectSession(ended);
 						else if (selected?.id === failedSessionId) showEmpty();
 					} else {
-						overlayDetail.textContent = 'The server rejected this terminal attachment. Refresh or check the server settings.';
+						overlayDetail.textContent = 'The runner rejected this terminal attachment. Refresh or check the runner settings.';
 						connectionState('error', 'Attachment refused');
 					}
-				} catch {
-					if (generation !== connectionGeneration) return;
-					showLogin('The CmdImpact server is unavailable. Confirm it is running and refresh this page.');
+				} catch (error) {
+					if (generation !== connectionGeneration || staleRunnerRequest(error, runnerRequestGeneration)) return;
+					showLogin('The CmdImpact runner is unavailable. Confirm it is running and refresh this page.');
 				}
 				return;
 			}
@@ -622,7 +957,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 	function selectSession(session: SessionRecord) {
 		disconnectSocket();
+		const generation = connectionGeneration;
 		selected = session;
+		markAttentionSeen(session);
 		writable = false;
 		emptyState.hidden = true;
 		activeWorkspace.hidden = false;
@@ -631,8 +968,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		element<HTMLButtonElement>('end-session').textContent = session.state === 'exited' ? 'Remove' : 'End';
 		renderSessions();
 		closeSidebar();
-		history.replaceState(null, '', '/app/?session=' + encodeURIComponent(session.id));
+		history.replaceState(null, '', '/app/#session=' + encodeURIComponent(session.id));
 		requestAnimationFrame(() => {
+			if (generation !== connectionGeneration || selected?.id !== session.id) return;
 			fitAddon.fit();
 			if (session.state === 'exited') {
 				terminal.reset();
@@ -655,7 +993,30 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		history.replaceState(null, '', '/app/');
 	}
 
+	async function openNotifiedSession(sessionId: unknown) {
+		if (!validSessionId(sessionId)) return;
+		if (loginScreen.open) {
+			history.replaceState(null, '', '/app/#session=' + encodeURIComponent(sessionId));
+			return;
+		}
+		const generation = runnerGeneration;
+		let requested = sessions.find((session) => session.id === sessionId);
+		if (!requested) {
+			if (!await loadSessions(undefined, generation)) return;
+			requested = sessions.find((session) => session.id === sessionId);
+		}
+		if (requested && generation === runnerGeneration && selected?.id !== requested.id) selectSession(requested);
+	}
+
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (event.data?.type === 'cmdimpact:open-session') void openNotifiedSession(event.data.sessionId);
+		});
+	}
+
 	function handleUnauthorized(message = '') {
+		saveSessionToken();
+		runnerState('connected', 'Sign in required');
 		sessions = [];
 		selected = undefined;
 		renderSessions();
@@ -686,26 +1047,33 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		if (!text) return;
 		const report = analyzeCommand(text);
 		const hasLineBreaks = /[\r\n]/.test(text);
-		if (!pasteNeedsReview(text, report.findings.length)) return;
 		event.preventDefault();
 		event.stopPropagation();
 		pendingPaste = text;
+		guardPreview.textContent = visiblePaste(text);
 		guardFindings.replaceChildren();
+		const omittedFindings = Math.max(0, report.findings.length - 6);
+		guardFindingsOmitted.hidden = omittedFindings === 0;
+		guardFindingsOmitted.textContent = omittedFindings
+			? omittedFindings + ' additional risk indicator' + (omittedFindings === 1 ? ' is' : 's are') + ' omitted from this summary. Review the full paste above.'
+			: '';
 		guardSummary.textContent = report.findings.length
-			? 'CmdImpact found ' + report.findings.length + ' supported pattern' + (report.findings.length === 1 ? '' : 's') + ' worth checking before this paste reaches your shell.' + (hasLineBreaks ? ' It also contains line breaks that may submit more than one command.' : '')
-			: 'This paste contains line breaks. Sending it unchanged may run multiple commands immediately.';
+			? 'CmdImpact found ' + report.findings.length + ' risk indicator' + (report.findings.length === 1 ? '' : 's') + '. Review the complete paste before sending it.' + (hasLineBreaks ? ' It also contains line breaks that may submit more than one command.' : '')
+			: 'No known risk indicator matched. This is not proof the command is safe.' + (hasLineBreaks ? ' The paste also contains line breaks that may submit more than one command.' : '');
 		if (!report.findings.length) {
 			const item = document.createElement('article');
 			const icon = document.createElement('span');
 			icon.textContent = '!';
 			const copy = document.createElement('div');
 			const heading = document.createElement('strong');
-			heading.textContent = 'Multiple commands may run';
+			heading.textContent = hasLineBreaks ? 'Multiple commands may run' : 'No known indicator matched';
 			const detail = document.createElement('p');
-			detail.textContent = 'Line breaks can submit earlier lines before you have reviewed the rest.';
+			detail.textContent = hasLineBreaks
+				? 'Line breaks can submit earlier lines before you have reviewed the rest.'
+				: 'Review this command yourself. The checker cannot prove that it is safe.';
 			const evidence = document.createElement('code');
 			const lines = text.split(/\r\n|\r|\n/).filter((line) => line.length > 0).length;
-			evidence.textContent = String(Math.max(1, lines)) + ' non-empty lines';
+			evidence.textContent = hasLineBreaks ? String(Math.max(1, lines)) + ' non-empty lines' : '1 command to review';
 			copy.append(heading, detail, evidence);
 			item.append(icon, copy);
 			guardFindings.append(item);
@@ -739,6 +1107,63 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		});
 	});
 
+	element<HTMLButtonElement>('open-tools').addEventListener('click', () => {
+		toolsStatus.textContent = '';
+		updateToolActions();
+		renderNotificationPreference();
+		toolsDialog.showModal();
+	});
+
+	document.querySelectorAll<HTMLButtonElement>('[data-copy-command], [data-insert-command]').forEach((button) => {
+		button.addEventListener('click', async () => {
+			const command = button.closest<HTMLElement>('[data-command]')?.dataset.command || '';
+			if (!command) return;
+			if (button.hasAttribute('data-copy-command')) {
+				try {
+					await navigator.clipboard.writeText(command);
+					toolsStatus.textContent = 'Command copied. Review it before running it.';
+				} catch {
+					toolsStatus.textContent = 'Clipboard access was blocked. Select and copy the command manually.';
+				}
+				return;
+			}
+			if (!writable || !selected || selected.state === 'exited' || socket?.readyState !== WebSocket.OPEN) {
+				toolsStatus.textContent = 'Connect to a live session with keyboard control before inserting a command.';
+				updateToolActions();
+				return;
+			}
+			sendInput(command);
+			toolsDialog.close();
+			terminal.focus();
+		});
+	});
+
+	notificationToggle.addEventListener('click', async () => {
+		if (!notificationsSupported()) return;
+		toolsStatus.textContent = '';
+		if (notificationsEnabled) {
+			notificationsEnabled = false;
+			writeStorage(localStorage, NOTIFICATION_KEY, 'false');
+			toolsStatus.textContent = 'Browser notifications disabled.';
+			renderNotificationPreference();
+			return;
+		}
+		try {
+			const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+			if (permission === 'granted') await notificationServiceWorker();
+			notificationsEnabled = permission === 'granted';
+			writeStorage(localStorage, NOTIFICATION_KEY, String(notificationsEnabled));
+			toolsStatus.textContent = notificationsEnabled
+				? 'Notifications enabled while this page stays open and continues polling.'
+				: 'Notifications were not enabled. You can change permission in browser settings.';
+		} catch {
+			notificationsEnabled = false;
+			writeStorage(localStorage, NOTIFICATION_KEY, 'false');
+			toolsStatus.textContent = 'The browser could not enable notifications.';
+		}
+		renderNotificationPreference();
+	});
+
 	const shortcuts: Record<string, string> = {
 		escape: '\x1b',
 		'control-c': '\x03',
@@ -770,6 +1195,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		sessionError.hidden = true;
 		const submit = newForm.querySelector<HTMLButtonElement>('button[type="submit"]');
 		if (submit) submit.disabled = true;
+		const generation = runnerGeneration;
 		try {
 			const response = await api('/api/sessions', {
 				method: 'POST',
@@ -779,19 +1205,21 @@ import AppLayout from '../../layouts/AppLayout.astro';
 					cols: terminal.cols,
 					rows: terminal.rows,
 				}),
-			});
+			}, generation);
 			if (!response.ok) {
-				const body = await response.json().catch(() => ({}));
+				const body = await responseJsonOr(response, generation, {});
 				throw new Error(body.error || 'Could not create the session.');
 			}
-			const body = await response.json();
+			const body = await responseJson(response, generation);
 			const created = (body.session || body) as SessionRecord;
-			if (!created.id) throw new Error('The server returned an invalid session.');
+			if (!created.id) throw new Error('The runner returned an invalid session.');
+			sessionLoadGeneration += 1;
 			sessions.unshift(created);
 			newDialog.close();
 			renderSessions();
 			selectSession(created);
 		} catch (error) {
+			if (staleRunnerRequest(error, generation)) return;
 			sessionError.textContent = error instanceof Error ? error.message : 'Could not create the session.';
 			sessionError.hidden = false;
 		} finally {
@@ -801,27 +1229,34 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
 	element<HTMLButtonElement>('rename-session').addEventListener('click', async () => {
 		if (!selected) return;
-		const name = window.prompt('Rename this session', sessionLabel(selected))?.trim();
-		if (!name || name === sessionLabel(selected)) return;
+		const renaming = selected;
+		const name = window.prompt('Rename this session', sessionLabel(renaming))?.trim();
+		if (!name || name === sessionLabel(renaming)) return;
 		if (name.length > 64) {
 			window.alert('Session names can be at most 64 characters.');
 			return;
 		}
-		const response = await api('/api/sessions/' + encodeURIComponent(selected.id), {
-			method: 'PATCH',
-			body: JSON.stringify({ name }),
-		}).catch(() => undefined);
-		if (!response) {
-			window.alert('Could not reach the CmdImpact server. Try again.');
+		const generation = runnerGeneration;
+		let response: Response;
+		try {
+			response = await api('/api/sessions/' + encodeURIComponent(renaming.id), {
+				method: 'PATCH',
+				body: JSON.stringify({ name }),
+			}, generation);
+		} catch (error) {
+			if (staleRunnerRequest(error, generation) || selected?.id !== renaming.id) return;
+			window.alert('Could not reach the CmdImpact runner. Try again.');
 			return;
 		}
-		if (response.status === 401) return;
+		if (generation !== runnerGeneration || selected?.id !== renaming.id) return;
 		if (!response.ok) {
-			const body = await response.json().catch(() => ({}));
+			const body = await responseJsonOr(response, generation, {});
+			if (selected?.id !== renaming.id) return;
 			const message = typeof body.error === 'string' ? body.error : body.error?.message;
 			window.alert(message || 'CmdImpact could not rename this session.');
 			return;
 		}
+		sessionLoadGeneration += 1;
 		selected.name = name;
 		activeName.textContent = name;
 		renderSessions();
@@ -842,15 +1277,26 @@ import AppLayout from '../../layouts/AppLayout.astro';
 	endButton.addEventListener('click', async () => {
 		if (!selected) return;
 		const ending = selected;
+		const generation = runnerGeneration;
 		endError.hidden = true;
 		const remove = ending.state === 'exited';
 		const endpoint = '/api/sessions/' + encodeURIComponent(ending.id) + (remove ? '' : '/stop');
-		const response = await api(endpoint, { method: remove ? 'DELETE' : 'POST' }).catch(() => undefined);
-		if (!response?.ok) {
-			endError.textContent = 'The server could not ' + (remove ? 'remove' : 'end') + ' this session.';
+		let response: Response;
+		try {
+			response = await api(endpoint, { method: remove ? 'DELETE' : 'POST' }, generation);
+		} catch (error) {
+			if (staleRunnerRequest(error, generation) || selected?.id !== ending.id) return;
+			endError.textContent = 'The runner could not ' + (remove ? 'remove' : 'end') + ' this session.';
 			endError.hidden = false;
 			return;
 		}
+		if (generation !== runnerGeneration || selected?.id !== ending.id) return;
+		if (!response.ok) {
+			endError.textContent = 'The runner could not ' + (remove ? 'remove' : 'end') + ' this session.';
+			endError.hidden = false;
+			return;
+		}
+		sessionLoadGeneration += 1;
 		if (remove) {
 			sessions = sessions.filter((item) => item.id !== ending.id);
 		} else {
@@ -875,23 +1321,60 @@ import AppLayout from '../../layouts/AppLayout.astro';
 		connectionState('connecting', 'Requesting control');
 	});
 
+	function setSidebarOpen(open: boolean) {
+		const expanded = mobileSidebar.matches && open;
+		sidebar.classList.toggle('is-open', expanded);
+		scrim.classList.toggle('is-open', expanded);
+		sidebarToggle.setAttribute('aria-expanded', String(expanded));
+		sidebarToggle.setAttribute('aria-label', expanded ? 'Close sessions' : 'Open sessions');
+		if (mobileSidebar.matches && !expanded) {
+			sidebar.setAttribute('inert', '');
+			sidebar.setAttribute('aria-hidden', 'true');
+		} else {
+			sidebar.removeAttribute('inert');
+			sidebar.removeAttribute('aria-hidden');
+		}
+	}
 	function openSidebar() {
-		sidebar.classList.add('is-open');
-		scrim.classList.add('is-open');
+		if (!mobileSidebar.matches) return;
+		setSidebarOpen(true);
+		requestAnimationFrame(() => element<HTMLButtonElement>('new-session-side').focus());
 	}
-	function closeSidebar() {
-		sidebar.classList.remove('is-open');
-		scrim.classList.remove('is-open');
+	function closeSidebar(restoreFocus = true) {
+		const wasOpen = sidebar.classList.contains('is-open');
+		if (restoreFocus && wasOpen) sidebarToggle.focus();
+		setSidebarOpen(false);
 	}
-	element<HTMLButtonElement>('sidebar-toggle').addEventListener('click', openSidebar);
-	scrim.addEventListener('click', closeSidebar);
+	sidebarToggle.addEventListener('click', () => sidebar.classList.contains('is-open') ? closeSidebar() : openSidebar());
+	scrim.addEventListener('click', () => closeSidebar());
+	mobileSidebar.addEventListener('change', () => closeSidebar(false));
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+			event.preventDefault();
+			closeSidebar();
+		}
+	});
+	setSidebarOpen(false);
+	loginScreen.addEventListener('cancel', (event) => event.preventDefault());
 
 	document.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach((button) => {
 		button.addEventListener('click', () => button.closest('dialog')?.close());
 	});
 
+	if (notificationsEnabled && (!notificationsSupported() || Notification.permission !== 'granted')) {
+		notificationsEnabled = false;
+		writeStorage(localStorage, NOTIFICATION_KEY, 'false');
+	} else if (notificationsEnabled) {
+		void notificationServiceWorker().catch(() => {
+			notificationsEnabled = false;
+			writeStorage(localStorage, NOTIFICATION_KEY, 'false');
+		});
+	}
+
 	window.setInterval(() => {
-		if (document.visibilityState === 'visible' && loginScreen.hidden) void loadSessions().catch(() => undefined);
+		if (!loginScreen.open) void loadSessions().catch((error) => {
+			if (!(error instanceof StaleRunnerRequest)) runnerState('offline', 'Unavailable');
+		});
 	}, 15000);
 	bootstrap();
 </script>

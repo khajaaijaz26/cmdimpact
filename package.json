@@ -1,13 +1,13 @@
 {
   "name": "cmdimpact",
   "type": "module",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "private": true,
-  "description": "A self-hosted web terminal with reconnectable sessions and guarded paste.",
+  "description": "A global web dashboard for reconnectable, self-hosted terminal runners.",
   "license": "Apache-2.0",
   "repository": "github:khajaaijaz26/cmdimpact",
   "bugs": "https://github.com/khajaaijaz26/cmdimpact/issues",
-  "homepage": "https://github.com/khajaaijaz26/cmdimpact#readme",
+  "homepage": "https://cmdimpact.vercel.app",
   "engines": {
     "node": ">=22.12.0"
   },

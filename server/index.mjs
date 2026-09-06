@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as pty from 'node-pty';
 import { WebSocketServer } from 'ws';
-import { parseAllowedOrigins, originAllowed, createAuthenticator, LoginLimiter } from './security.mjs';
+import { parseAllowedOrigins, originAllowed, isLoopbackHostname, createAuthenticator, LoginLimiter } from './security.mjs';
 import { MAX_FRAME_BYTES, parseClientMessage, ProtocolError } from './protocol.mjs';
 import { SessionStore } from './store.mjs';
 import { SessionManager } from './session-manager.mjs';
@@ -31,19 +31,37 @@ function accessToken(environment) {
 	}
 }
 
-function shellEnvironment(platform, shellFile, workspace, source) {
+function shellEnvironment(platform, shellFile, workspace, source, isolated = false) {
 	if (platform === 'win32') {
-		const names = ['SystemRoot', 'WINDIR', 'COMSPEC', 'PATH', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'USERNAME', 'APPDATA', 'LOCALAPPDATA'];
+		const names = ['SystemRoot', 'WINDIR', 'COMSPEC', 'PATH', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'USERNAME', 'APPDATA', 'LOCALAPPDATA', 'SSH_AUTH_SOCK'];
 		return Object.fromEntries([
 			...names.flatMap((name) => source[name] ? [[name, source[name]]] : []),
 			['TERM', 'xterm-256color'], ['COLORTERM', 'truecolor'],
 		]);
 	}
+	if (!isolated) {
+		const home = source.HOME || workspace;
+		return {
+			HOME: home,
+			...Object.fromEntries(['XDG_CONFIG_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME', 'NPM_CONFIG_PREFIX', 'PIPX_HOME', 'PIPX_BIN_DIR', 'SSH_AUTH_SOCK']
+				.flatMap((name) => source[name] ? [[name, source[name]]] : [])),
+			USER: source.USER || source.LOGNAME || 'terminal',
+			LOGNAME: source.LOGNAME || source.USER || 'terminal',
+			SHELL: shellFile,
+			TERM: 'xterm-256color',
+			COLORTERM: 'truecolor',
+			LANG: source.LANG || 'C.UTF-8',
+			PATH: source.PATH || '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+		};
+	}
 	return {
 		HOME: workspace,
 		XDG_CONFIG_HOME: `${workspace}/.config`,
 		XDG_CACHE_HOME: `${workspace}/.cache`,
+		XDG_DATA_HOME: `${workspace}/.local/share`,
 		NPM_CONFIG_PREFIX: `${workspace}/.local`,
+		PIPX_HOME: `${workspace}/.local/pipx`,
+		PIPX_BIN_DIR: `${workspace}/.local/bin`,
 		USER: 'terminal',
 		LOGNAME: 'terminal',
 		SHELL: shellFile,
@@ -51,6 +69,7 @@ function shellEnvironment(platform, shellFile, workspace, source) {
 		COLORTERM: 'truecolor',
 		LANG: source.LANG || 'C.UTF-8',
 		PATH: `${workspace}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
+		...(source.SSH_AUTH_SOCK ? { SSH_AUTH_SOCK: source.SSH_AUTH_SOCK } : {}),
 	};
 }
 
@@ -85,7 +104,7 @@ export function fixedShells(platform, workspace, environment = process.env, ptyI
 				file,
 				...args,
 			] : args,
-			env: shellEnvironment(platform, file, workspace, environment),
+			env: shellEnvironment(platform, file, workspace, environment, Boolean(ptyIdentity)),
 		};
 	}
 	return definitions;
@@ -96,12 +115,13 @@ export function loadConfig(environment) {
 	if (production && !environment.TERMINAL_ALLOWED_ORIGINS) throw new Error('TERMINAL_ALLOWED_ORIGINS is required in production.');
 	const allowedOrigins = parseAllowedOrigins(environment.TERMINAL_ALLOWED_ORIGINS);
 	const insecureOrigins = [...allowedOrigins].filter((origin) => new URL(origin).protocol !== 'https:');
+	const insecureLoopbackOnly = insecureOrigins.every((origin) => isLoopbackHostname(new URL(origin).hostname));
 	const localHttpOriginsOnly = [...allowedOrigins].every((origin) => {
 		const url = new URL(origin);
-		return url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname);
+		return url.protocol === 'http:' && isLoopbackHostname(url.hostname);
 	});
-	if (production && insecureOrigins.length && !(truthy(environment.TERMINAL_ALLOW_INSECURE_LOCALHOST) && localHttpOriginsOnly)) {
-		throw new Error('Production origins must use HTTPS, or be all loopback HTTP with TERMINAL_ALLOW_INSECURE_LOCALHOST enabled.');
+	if (production && insecureOrigins.length && !(truthy(environment.TERMINAL_ALLOW_INSECURE_LOCALHOST) && insecureLoopbackOnly)) {
+		throw new Error('Production origins must use HTTPS, except loopback HTTP may be enabled with TERMINAL_ALLOW_INSECURE_LOCALHOST.');
 	}
 	const ptyUid = integer(environment.TERMINAL_PTY_UID, undefined, 1, 2_147_483_647, 'TERMINAL_PTY_UID');
 	const ptyGid = integer(environment.TERMINAL_PTY_GID, undefined, 1, 2_147_483_647, 'TERMINAL_PTY_GID');
@@ -111,8 +131,8 @@ export function loadConfig(environment) {
 		production,
 		accessToken: accessToken(environment),
 		allowedOrigins,
-		secureCookie: insecureOrigins.length === 0,
-		host: environment.TERMINAL_HOST || (production ? '0.0.0.0' : '127.0.0.1'),
+		secureCookie: insecureOrigins.length === 0 || (production && !localHttpOriginsOnly),
+		host: environment.TERMINAL_HOST || '127.0.0.1',
 		port: integer(environment.TERMINAL_PORT, 8787, 0, 65535, 'TERMINAL_PORT'),
 		workspace,
 		stateFile: resolve(environment.TERMINAL_STATE_FILE || '.data/sessions.json'),
@@ -120,8 +140,8 @@ export function loadConfig(environment) {
 		trustProxy: truthy(environment.TRUST_PROXY),
 		limits: {
 			maxSessions: integer(environment.TERMINAL_MAX_SESSIONS, 4, 1, 16, 'TERMINAL_MAX_SESSIONS'),
-			idleTimeoutMs: integer(environment.TERMINAL_IDLE_MINUTES, 30, 1, 1440, 'TERMINAL_IDLE_MINUTES') * 60_000,
-			hardTimeoutMs: integer(environment.TERMINAL_HARD_HOURS, 8, 1, 168, 'TERMINAL_HARD_HOURS') * 60 * 60_000,
+			idleTimeoutMs: integer(environment.TERMINAL_IDLE_MINUTES, 0, 0, 1440, 'TERMINAL_IDLE_MINUTES') * 60_000,
+			hardTimeoutMs: integer(environment.TERMINAL_HARD_HOURS, 0, 0, 168, 'TERMINAL_HARD_HOURS') * 60 * 60_000,
 			maxBacklogBytes: 256 * 1024,
 			maxOutputBytesPerSecond: 1024 * 1024,
 			maxInputBytesPerSecond: 128 * 1024,
@@ -172,6 +192,16 @@ function responseHeaders(request, allowedOrigins) {
 	return headers;
 }
 
+function bearerToken(header) {
+	if (typeof header !== 'string') return undefined;
+	return /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i.exec(header)?.[1];
+}
+
+function websocketSessionToken(header) {
+	if (typeof header !== 'string') return undefined;
+	return /^cmdimpact\.auth\.([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.exec(header.trim())?.[1];
+}
+
 function json(request, response, allowedOrigins, status, body, extraHeaders = {}) {
 	response.writeHead(status, { ...responseHeaders(request, allowedOrigins), ...extraHeaders });
 	response.end(JSON.stringify(body));
@@ -188,6 +218,7 @@ export async function createTerminalService({ environment = process.env, ptyModu
 	const auth = createAuthenticator(config.accessToken, {
 		secure: config.secureCookie,
 		maxAgeSeconds: config.cookieHours * 60 * 60,
+		sessionTokenSeconds: config.cookieHours * 60 * 60,
 	});
 	if (environment === process.env) {
 		process.env.TERMINAL_ACCESS_TOKEN = '';
@@ -210,6 +241,8 @@ export async function createTerminalService({ environment = process.env, ptyModu
 	});
 	await manager.initialize();
 	const loginLimiter = new LoginLimiter();
+	const requestAuthenticated = (request) => auth.verifyCookie(request.headers.cookie || '')
+		|| auth.verifySessionToken(bearerToken(request.headers.authorization));
 
 	const server = createServer(async (request, response) => {
 		const origin = request.headers.origin;
@@ -218,11 +251,15 @@ export async function createTerminalService({ environment = process.env, ptyModu
 		catch { return json(request, response, config.allowedOrigins, 400, { error: 'Invalid request URL.' }); }
 		if (request.method === 'OPTIONS') {
 			if (!originAllowed(origin, config.allowedOrigins)) return json(request, response, config.allowedOrigins, 403, { error: 'Origin not allowed.' });
+			const privateNetwork = request.headers['access-control-request-private-network'] === 'true'
+				? { 'Access-Control-Allow-Private-Network': 'true' }
+				: {};
 			response.writeHead(204, {
 				...responseHeaders(request, config.allowedOrigins),
-				'Access-Control-Allow-Headers': 'Content-Type',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 				'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
 				'Access-Control-Max-Age': '600',
+				...privateNetwork,
 			});
 			return response.end();
 		}
@@ -242,11 +279,15 @@ export async function createTerminalService({ environment = process.env, ptyModu
 					return json(request, response, config.allowedOrigins, 401, { error: 'Invalid access token.' });
 				}
 				loginLimiter.reset(address);
-				return json(request, response, config.allowedOrigins, 200, { authenticated: true }, { 'Set-Cookie': auth.issueCookie() });
+				return json(request, response, config.allowedOrigins, 200, {
+					authenticated: true,
+					sessionToken: auth.issueSessionToken(),
+					expiresIn: auth.sessionTokenSeconds,
+				}, { 'Set-Cookie': auth.issueCookie() });
 			}
 
 			if (request.method === 'GET' && ['/api/me', '/api/auth/session'].includes(url.pathname)) {
-				const authenticated = auth.verifyCookie(request.headers.cookie || '');
+				const authenticated = requestAuthenticated(request);
 				return json(request, response, config.allowedOrigins, 200, {
 					authenticated,
 					shells: authenticated ? manager.availableShells() : [],
@@ -255,12 +296,12 @@ export async function createTerminalService({ environment = process.env, ptyModu
 
 			if (request.method === 'POST' && url.pathname === '/api/auth/logout') {
 				if (!originAllowed(origin, config.allowedOrigins)) return json(request, response, config.allowedOrigins, 403, { error: 'Origin not allowed.' });
-				if (!auth.verifyCookie(request.headers.cookie || '')) return json(request, response, config.allowedOrigins, 401, { error: 'Authentication required.' });
+				if (!requestAuthenticated(request)) return json(request, response, config.allowedOrigins, 401, { error: 'Authentication required.' });
 				for (const websocket of wss.clients) websocket.close(1008, 'Signed out');
 				return json(request, response, config.allowedOrigins, 200, { authenticated: false }, { 'Set-Cookie': auth.clearCookie() });
 			}
 
-			if (!auth.verifyCookie(request.headers.cookie || '')) return json(request, response, config.allowedOrigins, 401, { error: 'Authentication required.' });
+			if (!requestAuthenticated(request)) return json(request, response, config.allowedOrigins, 401, { error: 'Authentication required.' });
 			if (['POST', 'PATCH', 'DELETE'].includes(request.method || '') && !originAllowed(origin, config.allowedOrigins)) {
 				return json(request, response, config.allowedOrigins, 403, { error: 'Origin not allowed.' });
 			}
@@ -311,10 +352,13 @@ export async function createTerminalService({ environment = process.env, ptyModu
 		let url;
 		try { url = new URL(request.url || '/', 'http://localhost'); }
 		catch { return rejectUpgrade(socket, 400, 'Invalid request URL.'); }
-		if (url.pathname !== '/ws') return rejectUpgrade(socket, 403, 'Unknown WebSocket endpoint.');
+		if (url.pathname !== '/ws' || url.search) return rejectUpgrade(socket, 403, 'Unknown WebSocket endpoint.');
 		if (!originAllowed(request.headers.origin, config.allowedOrigins)) return rejectUpgrade(socket, 403, 'Origin not allowed.');
-		if (!auth.verifyCookie(request.headers.cookie || '')) return rejectUpgrade(socket, 401, 'Authentication required.');
+		const sessionToken = websocketSessionToken(request.headers['sec-websocket-protocol']);
+		if (request.headers['sec-websocket-protocol'] && !sessionToken) return rejectUpgrade(socket, 401, 'Authentication required.');
+		if (!auth.verifyCookie(request.headers.cookie || '') && !auth.verifySessionToken(sessionToken)) return rejectUpgrade(socket, 401, 'Authentication required.');
 		if (wss.clients.size >= config.limits.maxSessions * 3) return rejectUpgrade(socket, 503, 'Connection limit reached.');
+		request.cmdimpactSessionToken = sessionToken;
 		wss.handleUpgrade(request, socket, head, (websocket) => wss.emit('connection', websocket, request));
 	});
 
@@ -322,6 +366,7 @@ export async function createTerminalService({ environment = process.env, ptyModu
 		websocket.on('error', reportBackgroundError);
 		websocket.isAlive = true;
 		websocket.authCookie = request.headers.cookie || '';
+		websocket.authSessionToken = request.cmdimpactSessionToken || '';
 		let attachedId;
 		let pendingAttachedId;
 		let queue = Promise.resolve();
@@ -380,7 +425,7 @@ export async function createTerminalService({ environment = process.env, ptyModu
 
 	const heartbeat = setInterval(() => {
 		for (const websocket of wss.clients) {
-			if (!auth.verifyCookie(websocket.authCookie || '')) websocket.close(1008, 'Session expired');
+			if (!auth.verifyCookie(websocket.authCookie || '') && !auth.verifySessionToken(websocket.authSessionToken || '')) websocket.close(1008, 'Session expired');
 			else if (!websocket.isAlive) websocket.terminate();
 			else {
 				websocket.isAlive = false;

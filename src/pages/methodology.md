@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/MarkdownLayout.astro
-title: "How CmdImpact checks a command"
-description: "The supported shells, deterministic pattern checks, result language, privacy boundary and known limits behind CmdImpact."
+title: "How CmdImpact reviews a command"
+description: "How CmdImpact reviews every paste, highlights broad command risks, protects secrets and states the limits honestly."
 section: "Method"
 ---
 
@@ -13,13 +13,13 @@ The same browser-side analysis powers both the standalone checker and the guarde
 
 ## Supported input
 
-The first release recognizes common Bash/sh and PowerShell syntax, plus familiar commands from npm, npx, pnpm, yarn, pip, pipx and several system package managers. Input is capped at 50,000 characters to keep the browser check predictable.
+The checker recognizes common Bash/sh and PowerShell syntax plus familiar developer, package, Git, container, cloud and system commands. Input is capped at 50,000 characters to keep the browser check predictable.
 
 It works best with the exact command block rather than an entire conversation.
 
 ## Checks
 
-Each non-empty line is inspected for known patterns in these categories:
+Every non-empty paste is paused for review. Each action is inspected for known indicators including:
 
 - **Install:** package installation or one-off package execution.
 - **Download:** curl, wget, PowerShell web requests, Git clones and container pulls.
@@ -28,14 +28,18 @@ Each non-empty line is inspected for known patterns in these categories:
 - **Elevation:** common administrator or root requests.
 - **Network:** commands that can contact or transfer data to another system.
 - **Secret:** credential-shaped literal values that could enter history, logs or process details.
+- **Permissions and system changes:** ownership, access modes, services, scheduled tasks, disks, registry and firewall operations.
+- **Dynamic execution:** inline, evaluated, decoded or encoded program text.
+- **Source control and deployment:** Git history changes, production publishing, infrastructure changes and remote resource deletion.
+- **Databases and containers:** destructive SQL and container options that can cross an expected isolation boundary.
 
-A separate high-impact rule detects a download whose output is piped directly to a shell or expression evaluator.
+A separate high-impact rule detects a download whose output is piped directly to a shell or expression evaluator. If no specific indicator matches, CmdImpact still adds a human-review item rather than treating the command as verified.
 
 ## Result language
 
 - **Do not run yet:** at least one known pattern can request administrator access, forcefully delete or overwrite data, directly execute downloaded content, or expose a possible password or token.
-- **Check before running:** a supported pattern such as installation, download or network access was found.
-- **No supported warning found:** none of the current rules matched. This is not a safety verdict.
+- **Check before running:** at least one review item was found, including the fallback used for otherwise unclassified commands.
+- **Nothing executable found:** the input did not contain an action the checker could identify.
 
 There is no numerical score because an unexplained 92/100 would hide the decision the user actually needs to make.
 
@@ -47,14 +51,14 @@ Redaction is a precaution, not a complete secret scanner. Replace real credentia
 
 ## What this cannot prove
 
-Static pattern matching cannot:
+Static pattern matching still cannot:
 
 - inspect the contents returned by a URL;
 - resolve shell aliases, functions, variables or environment state;
 - know which directory or user account will run the command;
 - understand every command-line program or scripting language;
 - verify that a package publisher or remote server is trustworthy; or
-- guarantee that an unmatched command is safe.
+- guarantee that any command is safe, even when all displayed items look expected.
 
 Review official documentation, inspect downloaded code, use least privilege, keep recoverable backups and test uncertain commands in an appropriate isolated environment.
 

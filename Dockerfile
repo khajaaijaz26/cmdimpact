@@ -19,7 +19,9 @@ RUN npm run build && npm prune --omit=dev
 
 FROM node:22-bookworm-slim AS terminal
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends ca-certificates curl git openssh-client util-linux \
+	&& apt-get install -y --no-install-recommends \
+		build-essential ca-certificates curl file gh git jq less nano openssh-client \
+		pipx procps python3 python3-venv ripgrep rsync unzip util-linux zip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& groupadd --gid 10002 terminal \
 	&& useradd --uid 10002 --gid terminal --create-home --home-dir /home/terminal --shell /bin/bash terminal
@@ -39,7 +41,9 @@ ENV NODE_ENV=production \
 	TERMINAL_WORKSPACE=/workspace \
 	TERMINAL_STATE_FILE=/app/.data/sessions.json \
 	TERMINAL_PTY_UID=10002 \
-	TERMINAL_PTY_GID=10002
+	TERMINAL_PTY_GID=10002 \
+	PIPX_HOME=/workspace/.local/pipx \
+	PIPX_BIN_DIR=/workspace/.local/bin
 USER root
 EXPOSE 8787
 CMD ["node", "server/index.mjs"]

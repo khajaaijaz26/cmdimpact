@@ -2,9 +2,13 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
+const vercelSite = process.env.VERCEL_PROJECT_PRODUCTION_URL
+	? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+	: undefined;
+
 // https://astro.build/config
 export default defineConfig({
-	site: process.env.PUBLIC_SITE_URL || 'http://localhost:4321',
+	site: process.env.PUBLIC_SITE_URL || vercelSite || 'http://localhost:4321',
 	integrations: [sitemap()],
 	build: { format: 'directory' },
 	vite: {

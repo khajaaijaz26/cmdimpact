@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir } from 'node:fs/promises';
+import { stripVTControlCharacters } from 'node:util';
 import { cleanSessionName, ProtocolError } from './protocol.mjs';
+
+const APPROVAL_PROMPT = /(?:^|\n)[^\n]{0,160}\b(?:approve|allow|confirm|proceed|continue|apply|accept|execute|run)\b[^\n]{0,120}\?\s*(?:\[[yn/]+\]|\([yn/]+\)|(?:\n[^\n]{0,48}\b(?:yes|no|allow|deny|approve|cancel)\b[^\n]{0,160}){2,6})?\s*$/i;
+const INPUT_PROMPT = /(?:^|\n)\s*(?:(?:press (?:enter|return)(?: to continue)?|type [^\n]{1,80} to continue)\s*|(?:enter|select|choose) [^:\n]{1,80}:\s*|(?:password|passphrase)(?: for [^:\n]{1,80})?:\s*|\?\s+\S[^\n]{0,160})$/i;
 
 function iso(now = Date.now()) {
 	return new Date(now).toISOString();
@@ -8,6 +12,14 @@ function iso(now = Date.now()) {
 
 function defaultName(now = Date.now()) {
 	return `Terminal ${new Date(now).toLocaleString('en', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}`;
+}
+
+function attentionKind(data) {
+	if (data.includes('\x07')) return 'bell';
+	const text = stripVTControlCharacters(data).replace(/\r/g, '');
+	if (APPROVAL_PROMPT.test(text)) return 'approval';
+	if (INPUT_PROMPT.test(text)) return 'input';
+	return undefined;
 }
 
 function send(client, message) {
@@ -61,8 +73,8 @@ export class SessionManager {
 		this.maxBacklogBytes = limits.maxBacklogBytes ?? 256 * 1024;
 		this.maxOutputBytesPerSecond = limits.maxOutputBytesPerSecond ?? 1024 * 1024;
 		this.maxInputBytesPerSecond = limits.maxInputBytesPerSecond ?? 128 * 1024;
-		this.idleTimeoutMs = limits.idleTimeoutMs ?? 30 * 60_000;
-		this.hardTimeoutMs = limits.hardTimeoutMs ?? 8 * 60 * 60_000;
+		this.idleTimeoutMs = limits.idleTimeoutMs ?? 0;
+		this.hardTimeoutMs = limits.hardTimeoutMs ?? 0;
 		this.stopGraceMs = limits.stopGraceMs ?? 2_000;
 	}
 
@@ -93,6 +105,8 @@ export class SessionManager {
 			createdAt: iso(createdAt),
 			lastAttachedAt: null,
 			detachedAt: null,
+			attentionAt: null,
+			attentionKind: null,
 			exitedAt: null,
 			exitCode: null,
 			exitReason: null,
@@ -128,6 +142,7 @@ export class SessionManager {
 			outputWindowBytes: 0,
 			inputWindowStarted: createdAt,
 			inputWindowBytes: 0,
+			attentionBuffer: '',
 			finished: false,
 			osExited: false,
 			exitPromise,
@@ -166,14 +181,18 @@ export class SessionManager {
 		return this.describe(runtime);
 	}
 
+	describeRecord(record, clients = 0, writable = false) {
+		return { ...structuredClone(record), attentionAt: record.attentionAt ?? null, attentionKind: record.attentionKind ?? null, clients, writable };
+	}
+
 	describe(runtime) {
-		return { ...structuredClone(runtime.meta), clients: runtime.clients.size, writable: Boolean(runtime.controller) };
+		return this.describeRecord(runtime.meta, runtime.clients.size, Boolean(runtime.controller));
 	}
 
 	list() {
 		return this.store.list().map((record) => {
 			const runtime = this.sessions.get(record.id);
-			return runtime ? this.describe(runtime) : { ...record, clients: 0, writable: false };
+			return runtime ? this.describe(runtime) : this.describeRecord(record);
 		});
 	}
 
@@ -181,7 +200,7 @@ export class SessionManager {
 		const runtime = this.sessions.get(id);
 		if (runtime) return this.describe(runtime);
 		const record = this.store.get(id);
-		return record ? { ...record, clients: 0, writable: false } : undefined;
+		return record ? this.describeRecord(record) : undefined;
 	}
 
 	async rename(id, name) {
@@ -193,7 +212,7 @@ export class SessionManager {
 		record.name = clean;
 		if (runtime) runtime.meta = record;
 		await this.store.put(record);
-		return runtime ? this.describe(runtime) : { ...record, clients: 0, writable: false };
+		return runtime ? this.describe(runtime) : this.describeRecord(record);
 	}
 
 	async attach(id, client, { takeover = false } = {}) {
@@ -240,6 +259,12 @@ export class SessionManager {
 		}
 		runtime.inputWindowBytes += Buffer.byteLength(data, 'utf8');
 		if (runtime.inputWindowBytes > this.maxInputBytesPerSecond) throw new ProtocolError('input-rate', 'Terminal input rate is too high.', 1009);
+		if (runtime.meta.attentionAt) {
+			runtime.meta.attentionAt = null;
+			runtime.meta.attentionKind = null;
+			this.store.put(runtime.meta).catch(this.onError);
+		}
+		runtime.attentionBuffer = '';
 		runtime.terminal.write(data);
 	}
 
@@ -275,6 +300,13 @@ export class SessionManager {
 			this.broadcast(runtime, { type: 'error', code: 'output-rate', message: 'The session was stopped after exceeding its output limit.' });
 			this.stop(runtime.meta.id, 'output-limit').catch(this.onError);
 			return;
+		}
+		runtime.attentionBuffer = `${runtime.attentionBuffer}${data}`.slice(-512);
+		const attention = attentionKind(runtime.attentionBuffer);
+		if (attention && !runtime.meta.attentionAt) {
+			runtime.meta.attentionAt = iso(now);
+			runtime.meta.attentionKind = attention;
+			this.store.put(runtime.meta).catch(this.onError);
 		}
 
 		for (let index = 0; index < data.length; index += 12_000) {
@@ -381,6 +413,8 @@ export class SessionManager {
 			if (runtime.finished) return;
 			runtime.finished = true;
 			runtime.meta.state = 'exited';
+			runtime.meta.attentionAt = null;
+			runtime.meta.attentionKind = null;
 			runtime.meta.exitedAt = iso(this.now());
 			runtime.meta.exitCode = Number.isInteger(exitCode) ? exitCode : null;
 			runtime.meta.exitReason = runtime.stopReason ?? fallbackReason;
@@ -403,8 +437,8 @@ export class SessionManager {
 		for (const runtime of [...this.sessions.values()]) {
 			const age = now - Date.parse(runtime.meta.createdAt);
 			const detachedFor = runtime.meta.detachedAt ? now - Date.parse(runtime.meta.detachedAt) : 0;
-			if (age >= this.hardTimeoutMs) await this.stop(runtime.meta.id, 'hard-timeout');
-			else if (!runtime.clients.size && detachedFor >= this.idleTimeoutMs) await this.stop(runtime.meta.id, 'idle-timeout');
+			if (this.hardTimeoutMs > 0 && age >= this.hardTimeoutMs) await this.stop(runtime.meta.id, 'hard-timeout');
+			else if (this.idleTimeoutMs > 0 && !runtime.clients.size && detachedFor >= this.idleTimeoutMs) await this.stop(runtime.meta.id, 'idle-timeout');
 		}
 	}
 

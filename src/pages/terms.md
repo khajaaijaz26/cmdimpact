@@ -15,13 +15,13 @@ CmdImpact provides remote browser access to a shell on its host. Commands execut
 
 You are responsible for securing the host and network connection, protecting the access token, choosing appropriate process permissions, reviewing commands, keeping recoverable backups and complying with the policies that apply to your device, employer and data.
 
-Browser disconnects do not immediately end an attached process, but a CmdImpact server restart does. Do not rely on CmdImpact as the only place where important work or output exists.
+Locking a phone, closing a tab or disconnecting a browser does not end an attached process. The runner machine and CmdImpact runner must remain online; a runner restart still ends live PTYs. Do not rely on CmdImpact as the only place where important work or output exists.
 
 ## Command guard
 
-The command guard and standalone checker provide static pattern checks and general educational information. They are not a security audit, sandbox, antivirus product or professional advice. A finding means a supported text pattern matched. No finding does not mean a command is safe, correct or suitable for your environment.
+The command guard reviews every non-empty paste and the standalone checker reviews submitted text using static indicators and general educational information. They are not a security audit, sandbox, antivirus product or professional advice. Neither a finding nor the absence of a recognized risk means a command was fully understood, safe, correct or suitable for your environment.
 
-The safe review action converts control characters in the proposed paste to spaces before sending one line. Choosing "Send anyway" sends the original paste and may execute one or more commands immediately.
+"Paste as one line" replaces line breaks and other control characters with spaces. It does not remove shell operators such as `;`, `&&`, pipes, substitutions or redirects, and it does not make the paste safe or limit it to one action. Choosing "Send anyway" sends the original paste and may execute one or more commands immediately.
 
 ## No warranty
 

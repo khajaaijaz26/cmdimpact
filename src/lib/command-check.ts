@@ -6,6 +6,7 @@ export const commandCategories = [
 	'elevation',
 	'network',
 	'secret',
+	'other',
 ] as const;
 
 export type CommandCategory = (typeof commandCategories)[number];
@@ -20,7 +21,16 @@ export type FindingCode =
 	| 'elevation'
 	| 'network'
 	| 'literal-secret'
-	| 'remote-execution';
+	| 'remote-execution'
+	| 'permission-change'
+	| 'process-or-service-change'
+	| 'system-change'
+	| 'inline-or-encoded-execution'
+	| 'source-control-change'
+	| 'deployment-change'
+	| 'database-change'
+	| 'dangerous-container'
+	| 'command-review';
 
 export type CommandFinding = {
 	code: FindingCode;
@@ -302,6 +312,62 @@ function inspectCommand(command: string, line: number): CommandFinding[] {
 		);
 	}
 
+	if (/^(?:chmod|chown|chgrp|icacls|takeown|set-acl)\b/i.test(executable)) {
+		add('permission-change', 'overwrite', 'review', 'Permissions or ownership may change', 'This can change who may read, modify, or execute files. Confirm the target and intended access.');
+	}
+
+	if (/^(?:kill|pkill|killall|taskkill|stop-process|systemctl|service|sc(?:\.exe)?|launchctl|schtasks|crontab)\b/i.test(executable)) {
+		add('process-or-service-change', 'overwrite', 'review', 'Process or service operation', 'This may stop, restart, configure, or schedule a process. Check the exact target and scope.');
+	}
+
+	if (/^(?:mount|umount|mkfs(?:\.[a-z0-9]+)?|fdisk|parted|diskpart|reg(?:\.exe)?|set-executionpolicy|ufw|iptables|nft|firewall-cmd)\b/i.test(executable)) {
+		add('system-change', 'elevation', 'high', 'System configuration may change', 'This can affect disks, startup policy, the registry, mounts, or network security for the machine.');
+	}
+
+	const encodedExecution =
+		/\b(?:pwsh|powershell)(?:\.exe)?\b[^\r\n]*(?:-(?:e|enc|encodedcommand)\b)/i.test(patternSource) ||
+		/\b(?:eval|Invoke-Expression)\b/i.test(patternSource) ||
+		/\bbase64\b[^|;\r\n]*(?:-d|--decode)[^|;\r\n]*\|/i.test(patternSource);
+	const inlineExecution =
+		/^(?:node|deno|bun|python3?|ruby|perl|php)\b[^\r\n]*(?:\s-(?:e|c)\s)/i.test(patternSource) ||
+		/^(?:bash|sh|zsh|pwsh|powershell)(?:\.exe)?\b[^\r\n]*\s-(?:c|command)\b/i.test(patternSource);
+	if (encodedExecution || inlineExecution) {
+		add(
+			'inline-or-encoded-execution',
+			'other',
+			encodedExecution ? 'high' : 'review',
+			encodedExecution ? 'Hidden or dynamic code may run' : 'Inline code will run',
+			encodedExecution
+				? 'Decoded, evaluated, or encoded instructions are harder to inspect. Decode and review them before execution.'
+				: 'This passes code directly to an interpreter. Read the complete code and confirm its inputs and working directory.',
+		);
+	}
+
+	if (/^git\s+(?:add|commit|merge|rebase|reset|restore|checkout|clean|push|tag)\b|^gh\s+(?:pr\s+merge|release\s+(?:create|delete))\b/i.test(patternSource)) {
+		const high = /^git\s+push\b[^\r\n]*(?:--force|-f\b)|^git\s+(?:reset\s+--hard|clean\b[^\r\n]*-[a-z]*f)/i.test(patternSource);
+		add(
+			'source-control-change',
+			high ? 'overwrite' : 'network',
+			high ? 'high' : 'review',
+			high ? 'Git history or untracked files may be replaced' : 'Source-control state may change',
+			high ? 'This can discard work or rewrite shared history. Verify the repository, branch, and recovery point.' : 'This may stage, publish, merge, or rewrite project state. Confirm the repository and branch.',
+		);
+	}
+
+	const deployment = /^(?:vercel|netlify|wrangler|firebase|flyctl|fly|railway|render|surge)\b[^\r\n]*(?:deploy|--prod|\bup\b)|^kubectl\s+(?:apply|create|delete|replace|patch|rollout)\b|^helm\s+(?:install|upgrade|uninstall|rollback)\b|^(?:terraform|tofu|pulumi)\s+(?:apply|destroy|up|refresh)\b/i.test(patternSource);
+	if (deployment) {
+		const high = /\b(?:destroy|delete|uninstall)\b/i.test(patternSource);
+		add('deployment-change', 'network', high ? 'high' : 'review', high ? 'Remote resources may be removed' : 'Remote deployment may change', 'This may alter a live environment, spend money, publish code, or affect users. Confirm the account, project, and target environment.');
+	}
+
+	if (!textOnly && /\b(?:DROP\s+(?:DATABASE|SCHEMA|TABLE)|TRUNCATE\s+TABLE|DELETE\s+FROM|UPDATE\s+[^\s;]+\s+SET)\b/i.test(command)) {
+		add('database-change', /\b(?:DROP|TRUNCATE|DELETE)\b/i.test(command) ? 'delete' : 'overwrite', 'high', 'Database data may change', 'This appears able to delete or modify database records or schema. Verify the database, transaction, backup, and WHERE clause.');
+	}
+
+	if (/^(?:docker|podman)\s+run\b[^\r\n]*(?:--privileged|--pid[= ]host|--network[= ]host|(?:-v|--volume)\s+(?:\/|[A-Za-z]:\\):|docker\.sock)|^kubectl\s+exec\b/i.test(patternSource)) {
+		add('dangerous-container', 'elevation', 'high', 'Container may reach powerful host or cluster access', 'Privileged execution, broad mounts, host namespaces, Docker sockets, or cluster exec can cross the expected isolation boundary.');
+	}
+
 	const withoutAssignments = stripLeadingAssignments(command.trim().replace(/^&\s*/, ''));
 	if (/^(?:sudo|doas|gsudo|runas)\b|\bsu\s+-c\b|\bStart-Process\b[^\r\n]*-Verb\s+RunAs\b/i.test(withoutAssignments)) {
 		add('elevation', 'elevation', 'high', 'Administrator access requested', 'This requests administrator or root access and may change the whole system, not just this project.');
@@ -315,6 +381,10 @@ function inspectCommand(command: string, line: number): CommandFinding[] {
 	const secret = literalSecret(command);
 	if (secret) {
 		add('literal-secret', 'secret', 'high', 'Possible password or token in command', `A value associated with ${secret} appears directly in the command. It could be exposed through shell history, logs, or process details.`);
+	}
+
+	if (!findings.length) {
+		add('command-review', 'other', 'review', 'Command requires human review', 'No known high-risk indicator matched. CmdImpact cannot simulate every program or prove this command is safe; confirm its purpose, arguments, and current directory.');
 	}
 
 	return findings;

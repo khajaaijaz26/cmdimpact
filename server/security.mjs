@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 const COOKIE_VERSION = 1;
+const SESSION_TOKEN_SECONDS = 12 * 60 * 60;
 
 function digest(value) {
 	return createHash('sha256').update(value, 'utf8').digest();
@@ -56,6 +57,16 @@ export function originAllowed(origin, allowedOrigins) {
 	}
 }
 
+export function isLoopbackHostname(hostname) {
+	const host = hostname.toLowerCase();
+	const octets = host.split('.');
+	return host === 'localhost'
+		|| host.endsWith('.localhost')
+		|| host === '[::1]'
+		|| host === '::1'
+		|| (octets.length === 4 && octets[0] === '127' && octets.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255));
+}
+
 export function createAuthenticator(accessToken, options = {}) {
 	if (typeof accessToken !== 'string' || accessToken.length < 20) {
 		throw new Error('TERMINAL_ACCESS_TOKEN must contain at least 20 characters.');
@@ -63,6 +74,7 @@ export function createAuthenticator(accessToken, options = {}) {
 
 	const secure = options.secure ?? false;
 	const maxAgeSeconds = options.maxAgeSeconds ?? 12 * 60 * 60;
+	const sessionTokenSeconds = options.sessionTokenSeconds ?? SESSION_TOKEN_SECONDS;
 	const cookieName = options.cookieName ?? (secure ? '__Host-cmdimpact_session' : 'cmdimpact_session');
 	const expectedTokenDigest = digest(accessToken);
 	const signingKey = createHash('sha256').update('cmdimpact-cookie-v1\0').update(accessToken).digest();
@@ -86,6 +98,31 @@ export function createAuthenticator(accessToken, options = {}) {
 		return `${cookieName}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure ? '; Secure' : ''}`;
 	}
 
+	function issueSessionToken(now = Date.now()) {
+		const payload = Buffer.from(JSON.stringify({
+			v: COOKIE_VERSION,
+			t: 'session',
+			exp: Math.floor(now / 1000) + sessionTokenSeconds,
+			n: randomBytes(16).toString('base64url'),
+		})).toString('base64url');
+		return `${payload}.${sign(payload, signingKey)}`;
+	}
+
+	function verifySessionToken(value, now = Date.now()) {
+		if (typeof value !== 'string' || value.length > 2048) return false;
+		const separator = value.lastIndexOf('.');
+		if (separator < 1) return false;
+		const payload = value.slice(0, separator);
+		const signature = value.slice(separator + 1);
+		if (!sameDigest(signature, sign(payload, signingKey))) return false;
+		try {
+			const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+			return decoded.v === COOKIE_VERSION && decoded.t === 'session' && Number.isInteger(decoded.exp) && decoded.exp >= Math.floor(now / 1000);
+		} catch {
+			return false;
+		}
+	}
+
 	function verifyCookie(header, now = Date.now()) {
 		const value = parseCookies(header).get(cookieName);
 		if (!value || value.length > 1024) return false;
@@ -102,7 +139,7 @@ export function createAuthenticator(accessToken, options = {}) {
 		}
 	}
 
-	return { cookieName, verifyAccessToken, issueCookie, clearCookie, verifyCookie };
+	return { cookieName, sessionTokenSeconds, verifyAccessToken, issueCookie, clearCookie, verifyCookie, issueSessionToken, verifySessionToken };
 }
 
 export class LoginLimiter {

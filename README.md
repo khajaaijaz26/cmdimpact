@@ -4,51 +4,84 @@
 
 <h1 align="center">CmdImpact</h1>
 
-<p align="center"><strong>Your terminal, wherever you work.</strong></p>
+<p align="center"><strong>Your terminal, on every screen.</strong></p>
 
 <p align="center">
+  <a href="https://cmdimpact.vercel.app"><img alt="Open the live dashboard" src="https://img.shields.io/badge/live-dashboard-405fd2.svg"></a>
   <a href="https://github.com/khajaaijaz26/cmdimpact/actions/workflows/ci.yml"><img alt="Validation status" src="https://github.com/khajaaijaz26/cmdimpact/actions/workflows/ci.yml/badge.svg"></a>
   <a href="./LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-315b78.svg"></a>
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkhajaaijaz26%2Fcmdimpact"><img alt="Deploy the dashboard with Vercel" src="https://vercel.com/button"></a>
 </p>
 
-CmdImpact is an open-source, self-hosted web terminal. Start a real shell session, leave the browser, and reconnect from another browser or device while the CmdImpact server stays online.
+CmdImpact is an open-source web terminal with a globally deployable dashboard and a runner you control. Start a real shell on your computer or isolated Docker host, close the browser, then reconnect from another phone, tablet, or computer while that runner stays online.
+
+Live dashboard: **[cmdimpact.vercel.app](https://cmdimpact.vercel.app)**
 
 > [!WARNING]
-> CmdImpact `0.2` is a single-owner alpha that provides real shell access. It is not a managed cloud service or a multi-user security boundary. Sessions survive browser and device disconnects, but terminal processes do not survive a server or container restart.
+> CmdImpact `0.2` is a single-owner alpha with real shell access. It is not a managed terminal service or a multi-user security boundary. Anyone with a valid owner credential can run commands with the runner's permissions.
 
-## What works today
+## What it does
 
 | Capability | `0.2` status |
 | --- | --- |
-| Live interactive PTY terminal | Included |
-| Create, list, rename, reconnect, and terminate sessions | Included |
-| Reconnect from another device while the server remains online | Included |
-| Guard multi-line and potentially destructive paste | Included |
-| Docker-based isolated deployment | Included and recommended |
-| Preserve a terminal across server or container restart | Not supported |
-| Multiple isolated users | Planned |
-| Per-device registration and revocation | Planned |
-| Managed cloud service | Planned |
+| Interactive PowerShell, cmd, bash, or sh terminal | Included when installed on the runner |
+| Create, rename, reconnect to, and end sessions | Included |
+| Keep work running after a tab, browser, or phone closes | Included while the runner and host stay online |
+| Reconnect from another device | Included |
+| Run Git, GitHub CLI, package managers, deploy CLIs, and AI-agent CLIs | Uses the real installed commands and their permissions |
+| Review every non-empty pasted command | Included; heuristic warnings never prove safety |
+| Notify a background tab when a session needs attention | Included while the page remains open |
+| Resume a PTY after the runner or host restarts | Not supported |
+| Multiple isolated owners on one runner | Not supported |
 
-The access token represents the single owner. Anyone who obtains it can control every CmdImpact session.
+CmdImpact does not imitate GitHub, Claude, ChatGPT, Codex, or deployment tools. It gives their real CLIs a reconnectable terminal. You install and authenticate each CLI on your runner, and its normal files, permissions, network access, and billing still apply.
 
-## How it works
+## Architecture
 
 ```text
-Browser or mobile browser
-        |  authenticated HTTP + WebSocket
+Any modern browser
+        |
+        | loads static HTML/CSS/JS
         v
-CmdImpact session server
-        |  live PTY registry + metadata-only state file
+Global Vercel dashboard
+        |
+        | direct HTTPS API + WSS to the exact origin you choose
         v
-Docker-isolated PTY and shell
+Your persistent CmdImpact runner
+        |
+        v
+Real PTY -> real shell -> your projects and installed CLIs
 ```
 
-The server keeps the PTY alive when a browser disconnects. Reconnecting clients attach to that same running session. Because the registry and PTY belong to the running server environment, restarting the server or container ends them.
+Vercel serves only the static dashboard. It does not host the PTY, proxy `/api` or `/ws`, or receive the runner access token, terminal commands, or terminal output. The browser talks directly to the runner origin you enter.
 
-## Quick start with Docker
+Each person runs their own single-owner runner. Direct-host mode works on Windows, macOS, and Linux with the host user's permissions. The Linux Docker stack is the recommended isolation boundary for terminal workloads.
 
-Requirements: Node.js 22.12 or newer, npm, Docker, and Docker Compose.
+## Connect the global dashboard to your runner
+
+Requirements: Node.js 22.12 or newer, npm, and an HTTPS/WSS reverse proxy or private tunnel for cross-device access.
+
+On the computer that will keep the terminal processes alive:
+
+```bash
+git clone https://github.com/khajaaijaz26/cmdimpact.git
+cd cmdimpact
+npm install
+npm run setup -- --origin https://YOUR-VERCEL-DOMAIN --workspace /path/to/projects
+npm run server
+```
+
+`--origin` is the exact origin of the browser dashboard, such as `https://cmdimpact.example`. It is not the runner URL. A PowerShell path such as `C:\Users\you\Projects` also works for `--workspace`.
+
+An external HTTPS dashboard origin makes setup write `NODE_ENV=production`. HTTP origins are accepted only for loopback development. Setup also creates `.env`, generates the owner access token, and keeps the runner bound to loopback by default.
+
+Publish the runner through an HTTPS/WSS reverse proxy, private VPN, or authenticated tunnel that forwards to `http://127.0.0.1:8787`. Open the deployed dashboard, choose that exact runner origin—for example `https://runner.example.com`—and enter the access token printed by setup. The proxy must support WebSocket upgrades.
+
+Do not forward port `8787` directly to the public internet. Direct-host mode runs every command as your host user and is not an isolation boundary.
+
+## Local isolated start
+
+For a private local evaluation with Docker and Docker Compose:
 
 ```bash
 git clone https://github.com/khajaaijaz26/cmdimpact.git
@@ -58,99 +91,85 @@ npm run setup
 npm start
 ```
 
-Open <http://localhost:4321/app/>. The web container is bound to `127.0.0.1:4321`, so it is reachable only from the host by default. `npm run setup` adds terminal configuration when `.env` does not already contain it and generates a strong `TERMINAL_ACCESS_TOKEN`; treat that token like a password and never commit or post it.
+Open <http://localhost:4321/app/> and use the generated owner access token. The stack binds to `127.0.0.1:4321`, runs PTYs as a lower-privileged Linux user, and stores the workspace and bounded session metadata in named volumes.
 
-`npm start` launches the supported Compose stack. `docker compose up --build` is the equivalent direct command.
+The Docker workspace survives container recreation, but live terminal processes do not. `npm run docker:down` keeps the volumes. Do not run `docker compose down -v` unless you intend to delete their contents.
 
-The Compose volumes retain workspace files and session metadata when containers are recreated, but they do not keep PTY processes alive. `npm run docker:down` stops the stack without deleting those volumes. Do not run `docker compose down -v` unless you intend to delete the stored workspace and metadata.
+Do not add privileged mode, the Docker socket, broad host mounts, or unnecessary access to private networks. The container boundary reduces accidental host access; it is not a guarantee against hostile code.
 
-Docker is the supported isolated path. Do not add privileged mode, the Docker socket, broad host mounts, or unnecessary network access to the terminal container.
-
-## Reconnect from another device
-
-Keep the CmdImpact server and its container running, then make it reachable through an HTTPS/WSS reverse proxy, private VPN, or an authenticated tunnel. Use the same owner access token on the other device.
-
-Do not expose the development server or forward port `4321` directly to the public internet. The default container port is intentionally bound to `127.0.0.1:4321`. Per-device credentials and remote revocation are not part of `0.2`; rotate `TERMINAL_ACCESS_TOKEN` and restart CmdImpact if it may have been disclosed.
-
-For a public production endpoint, configure the exact HTTPS origins in `TERMINAL_ALLOWED_ORIGINS` and place the resource-limited Compose stack behind an external HTTPS/WSS reverse proxy. This remains a single-owner alpha. Direct-host mode is for localhost development on Windows, macOS, or Linux; it is not the production isolation boundary.
-
-For a private, cross-device endpoint, [Tailscale Serve](https://tailscale.com/docs/reference/tailscale-cli/serve) is the shortest supported pattern. Install Tailscale on the server and each trusted device. With CmdImpact already running, publish its loopback listener inside your tailnet and read the HTTPS URL:
+To connect the isolated Compose runner from a Vercel dashboard, configure the dashboard origin and start the stack:
 
 ```bash
-tailscale serve --bg http://127.0.0.1:4321
-tailscale serve status
+npm run setup -- --origin https://YOUR-VERCEL-DOMAIN
+npm start
 ```
 
-Replace the local origins in `.env` with that one exact HTTPS origin:
+Publish `http://127.0.0.1:4321` through the runner's HTTPS/WSS proxy or trusted tunnel, then enter that external runner origin in the Vercel dashboard. Compose always uses its named `/workspace` volume; `--workspace` configures direct-host mode only.
 
-```dotenv
-PUBLIC_SITE_URL=https://your-machine.your-tailnet.ts.net
-TERMINAL_ALLOWED_ORIGINS=https://your-machine.your-tailnet.ts.net
-TERMINAL_ALLOW_INSECURE_LOCALHOST=false
-```
+## Sessions that outlive the browser
 
-Recreate the terminal service, then use the reported HTTPS URL on every device:
+`TERMINAL_IDLE_MINUTES=0` and `TERMINAL_HARD_HOURS=0` are the defaults. Zero disables both automatic expiry limits, so closing a tab, browser, or phone does not end the PTY. A process keeps running until you end it, the shell exits, the runner restarts, or its host goes offline.
 
-```bash
-docker compose up -d --build
-```
+The runner retains bounded in-memory output for reconnecting clients and persists limited session metadata. It does not write terminal transcripts. Commands and shells may still write their own files, logs, history, credentials, and output into the workspace.
 
-Do not use a public Funnel for this single-owner alpha. After switching to HTTPS-only origins, use the tailnet URL on the server too; mixed HTTP and HTTPS origins are intentionally rejected.
+Set either limit to a positive integer if you prefer automatic cleanup. A runner restart cannot restore a `node-pty` process; stale metadata is marked exited honestly.
 
-## Host development
+## Browser authentication
 
-Docker is the supported isolation boundary. For faster UI and backend development on a trusted host, run these in separate terminals:
+For a cross-site Vercel dashboard:
 
-```bash
-npm run dev:server
-```
+1. The chosen runner origin is stored in `localStorage`; it is not a credential.
+2. The owner access token is sent only to `POST /api/auth/login` and is never stored by the dashboard.
+3. Login returns a signed, expiring bearer session token scoped in the browser to that runner origin. Its default lifetime is 12 hours and follows `TERMINAL_COOKIE_HOURS`.
+4. The session token is kept in `sessionStorage`, sent in the `Authorization` header for API calls, and carried in a WebSocket subprotocol—not a URL.
+5. Session storage is scoped to that browser tab/session rather than a durable account store; browser restore behavior can preserve a restored tab. When the session token expires, the dashboard asks for the owner access token again, while the running PTY is unaffected.
 
-```bash
-npm run dev:ui
-```
+Same-origin local deployments can also use the signed HttpOnly cookie. Every runner independently checks the exact browser `Origin`; wildcards are not used.
 
-`npm run server` starts only the direct host backend. Host development does not provide Docker isolation and must not be exposed to another device.
+The bearer token is stateless. Logout closes currently connected sockets but cannot individually revoke a copied token before expiry; rotate the owner access token and restart the runner if disclosure is possible.
+
+## Command review and attention alerts
+
+Every non-empty terminal paste opens a review step before text reaches the PTY. Static checks highlight common destructive operations, secret-shaped values, downloads piped to shells, and similar risk. Shell syntax is too expressive for static rules to prove that any command is safe. Read the entire command and understand the target before running it.
+
+Attention notifications are optional and generic. An app-scoped service worker displays alerts triggered by the open dashboard, but it has no fetch, cache, or push handler. Alerts require permission and the page to remain open; CmdImpact has no SMS, email, or delivery after the page is closed.
 
 ## Configuration
 
-`npm run setup` writes safe local defaults. Change only the settings required by your deployment.
-
-Compose reads the token, exact origins, localhost escape hatch, session/time limits, cookie lifetime, and `TRUST_PROXY` from `.env`. It passes the token only to the trusted gateway, which derives the login verifier and removes the token from its live JavaScript environment before any shell starts. Host and Docker administrators can still inspect container configuration and are part of the trusted boundary. `TERMINAL_HOST`, `TERMINAL_PORT`, `TERMINAL_WORKSPACE`, and `TERMINAL_STATE_FILE` are direct-host settings; the supported container image fixes those values internally, so changing them in `.env` does not override Compose.
+Run `npm run setup` to generate `.env`; never commit it. The runner accepts these settings:
 
 | Variable | Purpose |
 | --- | --- |
-| `PUBLIC_SITE_URL` | Public origin used for canonical, social, and sitemap URLs; defaults to localhost |
-| `TERMINAL_ACCESS_TOKEN` | Required owner credential; minimum 20 characters |
-| `TERMINAL_ALLOWED_ORIGINS` | Comma-separated exact browser origins; required for production |
-| `TERMINAL_ALLOW_INSECURE_LOCALHOST` | Allows HTTP only for an all-loopback local deployment; never use with a public hostname |
-| `TERMINAL_HOST`, `TERMINAL_PORT` | Server bind address and port |
-| `TERMINAL_WORKSPACE` | Working directory exposed to terminal sessions |
+| `TERMINAL_ACCESS_TOKEN` | Required full-owner login credential; minimum 20 characters |
+| `TERMINAL_ACCESS_TOKEN_FILE` | Optional file-based alternative for the runner secret |
+| `TERMINAL_ALLOWED_ORIGINS` | Comma-separated exact dashboard origins; HTTPS required outside loopback |
+| `TERMINAL_ALLOW_INSECURE_LOCALHOST` | Enables HTTP only for an all-loopback development deployment |
+| `TERMINAL_HOST`, `TERMINAL_PORT` | Direct-runner bind address and port |
+| `TERMINAL_WORKSPACE` | Directory exposed to direct-host terminal sessions |
 | `TERMINAL_STATE_FILE` | Metadata-only session-state file |
-| `TERMINAL_MAX_SESSIONS` | Maximum concurrent PTYs |
-| `TERMINAL_IDLE_MINUTES` | Idle session lifetime |
-| `TERMINAL_HARD_HOURS` | Maximum session lifetime |
-| `TERMINAL_COOKIE_HOURS` | Owner-login cookie lifetime |
-| `TRUST_PROXY` | Trust proxy headers only behind a proxy you control |
-| `PUBLIC_SPONSOR_NAME`, `PUBLIC_SPONSOR_TEXT`, `PUBLIC_SPONSOR_URL` | Optional build-time, guide-only static sponsor message; all three required and URL must be HTTPS |
+| `TERMINAL_MAX_SESSIONS` | Maximum concurrent PTYs, from 1 to 16 |
+| `TERMINAL_IDLE_MINUTES` | Detached-session timeout; `0` disables it |
+| `TERMINAL_HARD_HOURS` | Absolute session timeout; `0` disables it |
+| `TERMINAL_COOKIE_HOURS` | Browser session lifetime for the same-origin cookie and cross-site bearer token; defaults to 12 hours |
+| `TRUST_PROXY` | Trust forwarding headers only behind a proxy you control |
 
-Changing `PUBLIC_SITE_URL` or sponsor settings requires rebuilding the web image.
+The static dashboard recognizes these build-time values:
 
-## Guarded paste
+| Variable | Purpose |
+| --- | --- |
+| `PUBLIC_SITE_URL` | Optional canonical site override |
+| `VERCEL_PROJECT_PRODUCTION_URL` | Automatic Vercel canonical fallback; CmdImpact adds `https://` |
+| `PUBLIC_SPONSOR_NAME`, `PUBLIC_SPONSOR_TEXT`, `PUBLIC_SPONSOR_URL` | Optional first-party static sponsor text; all three required and the URL must use HTTPS |
 
-CmdImpact pauses multi-line and potentially destructive pasted text for review before sending it to the PTY. This reduces accidental execution; it does not understand every shell construct or make a command safe. Read the complete paste and cancel anything unexpected.
+There is deliberately no build-time default runner URL or terminal credential.
 
-## Security model
+## Deploy only the dashboard to Vercel
 
-- `TERMINAL_ACCESS_TOKEN` is a bearer credential with full owner access.
-- The token is accepted only by the login endpoint and exchanged for a signed, HttpOnly, SameSite cookie that is also Secure on HTTPS deployments. It is not placed in browser storage or a WebSocket URL.
-- Mutating HTTP requests and WebSocket connections require an authenticated owner and an exact allowed origin.
-- Terminal input and output pass through the self-hosted server and must be treated as sensitive.
-- Live PTY state and bounded output scrollback are memory-only. `.data/sessions.json` keeps every non-exited record and the 100 newest exited metadata records; CmdImpact does not write terminal transcripts. The shell and commands can still write history, logs, and files into the persistent workspace.
-- In the terminal container, the trusted Node gateway runs as UID 0 with only `KILL`, `SETUID`, and `SETGID`. Session metadata stays root-only, and the access token is never forwarded to a shell; a fixed `setpriv` launcher drops shells to UID/GID 10002, clears supplementary groups and inheritable/ambient capabilities, and applies `no-new-privileges`.
-- Docker limits accidental host access but is not a guarantee against every hostile workload.
-- No page on the terminal origin loads third-party runtime scripts. Optional guide sponsorship is escaped static text plus an HTTPS link.
+Import this repository into Vercel or use the Deploy button above. `vercel.json` selects Astro, runs `npm run build`, publishes `dist/`, and applies the production security headers. No Astro server adapter or Vercel Function is needed.
 
-Review [SECURITY.md](./SECURITY.md) before exposing CmdImpact beyond localhost. Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/khajaaijaz26/cmdimpact/security/advisories/new), never a public issue.
+Do not add runner secrets to Vercel. Do not add `/api` or `/ws` rewrites: a serverless function is not the persistent PTY runner. If you use a custom canonical domain, set `PUBLIC_SITE_URL=https://your-domain.example`; otherwise the build falls back to Vercel's production project URL.
+
+The dashboard includes no analytics, Speed Insights, ad-network runtime, or third-party scripts. Its Content Security Policy permits outbound connections to HTTPS/WSS runner origins and loopback development origins because every user chooses a different runner. The client still rejects insecure remote runner URLs, and each runner enforces its own exact origin allowlist.
 
 ## Validate a checkout
 
@@ -161,19 +180,15 @@ npm run verify:container # with the Compose stack running
 
 The same validation runs for every push and pull request.
 
-## Project direction
+## Security, roadmap, and contributing
 
-The next priorities are durable supervised sessions, device registration and revocation, stronger isolation tests, and clearer recovery controls. Multi-user hosting and a managed cloud service come later because they require a substantially stronger trust boundary.
+Read the [security model](./docs/SECURITY-MODEL.md) and [security policy](./SECURITY.md) before making a runner reachable beyond localhost. Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/khajaaijaz26/cmdimpact/security/advisories/new), never a public issue.
 
-See the [roadmap](./ROADMAP.md) and [changelog](./CHANGELOG.md) for the honest current scope.
-
-## Contributing
-
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) and the [Code of Conduct](./CODE_OF_CONDUCT.md). Bug reports must use harmless commands and sanitized output. Security findings belong in a private advisory.
+Current limits and planned work are tracked in the [roadmap](./ROADMAP.md) and [changelog](./CHANGELOG.md). Contributions follow [CONTRIBUTING.md](./CONTRIBUTING.md) and the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Sponsorship and privacy
 
-Optional sponsorship may appear only as clearly labeled, first-party static text on selected guides. CmdImpact loads no sponsor scripts, pixels, images, cookies, or analytics. Any future ad network must live on a separate origin that is excluded from the terminal's allowed-origin list.
+Optional sponsorship is clearly labeled, first-party static text plus an HTTPS link. CmdImpact loads no sponsor scripts, pixels, cookies, images, analytics, or ad networks. A future advertising system must remain isolated from terminal credentials and traffic.
 
 ## License
 

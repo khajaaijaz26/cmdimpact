@@ -107,6 +107,41 @@ test('HTTP login, session creation, and authenticated WebSocket attach work toge
 		});
 		assert.equal(login.status, 200);
 		const cookie = login.headers.get('set-cookie').split(';', 1)[0];
+		const loginBody = await login.json();
+		assert.equal(loginBody.authenticated, true);
+		assert.equal(loginBody.expiresIn, 12 * 60 * 60);
+		assert.match(loginBody.sessionToken, /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+		const sessionToken = loginBody.sessionToken;
+
+		const preflight = await fetch(`${base}/api/sessions`, {
+			method: 'OPTIONS',
+			headers: {
+				Origin: origin,
+				'Access-Control-Request-Method': 'GET',
+				'Access-Control-Request-Headers': 'Authorization',
+				'Access-Control-Request-Private-Network': 'true',
+			},
+		});
+		assert.equal(preflight.status, 204);
+		assert.match(preflight.headers.get('access-control-allow-headers'), /Authorization/i);
+		assert.equal(preflight.headers.get('access-control-allow-private-network'), 'true');
+		const rejectedPreflight = await fetch(`${base}/api/sessions`, {
+			method: 'OPTIONS',
+			headers: {
+				Origin: 'https://app.example.test.evil.invalid',
+				'Access-Control-Request-Method': 'GET',
+				'Access-Control-Request-Private-Network': 'true',
+			},
+		});
+		assert.equal(rejectedPreflight.status, 403);
+		assert.equal(rejectedPreflight.headers.get('access-control-allow-private-network'), null);
+		assert.equal((await fetch(`${base}/api/sessions`, {
+			headers: { Origin: origin, Authorization: 'Bearer integration-test-owner-token' },
+		})).status, 401);
+		assert.equal((await fetch(`${base}/api/sessions?token=integration-test-owner-token`, {
+			headers: { Origin: origin },
+		})).status, 401);
+
 		const malformedSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`, { headers: { Origin: origin, Cookie: cookie } });
 		malformedSocket.on('error', () => {});
 		await new Promise((resolveOpen, reject) => {
@@ -119,17 +154,19 @@ test('HTTP login, session creation, and authenticated WebSocket attach work toge
 		assert.equal((await fetch(`${base}/api/health`)).status, 200);
 
 		const created = await fetch(`${base}/api/sessions`, {
-			method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' },
+			method: 'POST', headers: { Origin: origin, Authorization: `Bearer ${sessionToken}`, 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: 'Integration shell' }),
 		});
 		assert.equal(created.status, 201);
 		const { session } = await created.json();
 
-		socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`, { headers: { Origin: origin, Cookie: cookie } });
+		const websocketProtocol = `cmdimpact.auth.${sessionToken}`;
+		socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`, websocketProtocol, { headers: { Origin: origin } });
 		await new Promise((resolveOpen, reject) => {
 			socket.once('open', resolveOpen);
 			socket.once('error', reject);
 		});
+		assert.equal(socket.protocol, websocketProtocol);
 		const readyPromise = waitFor(socket, 'ready');
 		socket.send(JSON.stringify({ type: 'attach', sessionId: session.id }));
 		const ready = await readyPromise;

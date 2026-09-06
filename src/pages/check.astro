@@ -29,7 +29,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 				<textarea
 					id="command-input"
 					class="command-input"
-					name="command"
 					maxlength="50000"
 					spellcheck="false"
 					autocapitalize="off"
@@ -100,6 +99,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		elevation: '#',
 		network: 'N',
 		secret: '*',
+		other: '?',
 	};
 
 	function setText(element: Element | null, value: string) {
@@ -137,10 +137,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		results.dataset.risk = report.risk;
 		const highCount = report.findings.filter((finding) => finding.severity === 'high').length;
 		const resultCopy = report.risk === 'high'
-			? ['Do not run yet', report.findings.length + ' supported patterns matched, including ' + highCount + ' urgent warning' + (highCount === 1 ? '' : 's') + '.']
+			? ['Do not run yet', report.findings.length + ' risk indicator' + (report.findings.length === 1 ? '' : 's') + ' found, including ' + highCount + ' urgent warning' + (highCount === 1 ? '' : 's') + '.']
 			: report.risk === 'review'
-				? ['Check before running', report.findings.length + ' supported pattern' + (report.findings.length === 1 ? '' : 's') + ' matched. Confirm each one.']
-				: ['No supported warning found', 'CmdImpact did not verify this command. Read it and confirm its purpose.'];
+				? ['Check before running', report.findings.length + ' review item' + (report.findings.length === 1 ? '' : 's') + ' found. Confirm each one.']
+				: ['Nothing executable found', 'CmdImpact did not find a command to review.'];
 		setText(title, resultCopy[0]);
 		setText(detail, resultCopy[1]);
 		setText(mark, report.risk === 'high' ? '!' : report.risk === 'review' ? '?' : '.');
@@ -188,7 +188,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		const findings = currentReport.findings.map((finding) => '- ' + finding.title + ' (line ' + finding.line + '): ' + finding.detail + ' Evidence: ' + finding.evidence).join('\n');
 		const request = 'Review these redacted command excerpts without executing anything:\n\n' +
 			(commands || '- No command excerpt available.') + '\n\n' +
-			(findings ? 'CmdImpact patterns:\n' + findings : 'No supported CmdImpact warning matched.') +
+			(findings ? 'CmdImpact review items:\n' + findings : 'No executable action was identified.') +
 			'\n\nExplain the command line by line, identify anything this static check may have missed, and propose a version with the smallest necessary access. Remind me to review any replacement before running it.';
 		try {
 			await navigator.clipboard.writeText(request);

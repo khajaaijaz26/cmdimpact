@@ -99,6 +99,96 @@ test('a live PTY survives browser disconnect and replays bounded memory output',
 	}
 });
 
+test('terminal attention metadata detects prompts without persisting output and clears on input', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'cmdimpact-attention-'));
+	let manager;
+	try {
+		let now = 1_700_000_000_000;
+		const store = new SessionStore(join(directory, 'sessions.json'));
+		const pty = fakePty();
+		manager = new SessionManager({
+			pty,
+			store,
+			shells: { test: { file: 'fixed-shell', args: [], env: {} } },
+			workspace: join(directory, 'workspace'),
+			now: () => now,
+			platform: 'win32',
+		});
+		await manager.initialize();
+		const session = await manager.create({ shell: 'test' });
+		const client = fakeClient();
+		await manager.attach(session.id, client);
+		assert.equal(manager.get(session.id).attentionAt, null);
+		assert.equal(manager.get(session.id).attentionKind, null);
+
+		pty.terminals[0].emitData('\x1b[32m$ \x1b[0m');
+		assert.equal(manager.get(session.id).attentionKind, null);
+		pty.terminals[0].emitData('\x1b[33mDo you want to con');
+		pty.terminals[0].emitData('tinue? [Y/n]\x1b[0m');
+		assert.equal(manager.get(session.id).attentionAt, new Date(now).toISOString());
+		assert.equal(manager.get(session.id).attentionKind, 'approval');
+		await store.writeQueue;
+		assert.equal((await readFile(join(directory, 'sessions.json'), 'utf8')).includes('Do you want to continue'), false);
+
+		manager.write(session.id, client, 'n\r');
+		assert.equal(manager.get(session.id).attentionKind, null);
+		now += 1_000;
+		pty.terminals[0].emitData('\x1b[36mEnter deployment name:\x1b[0m');
+		assert.equal(manager.get(session.id).attentionKind, 'input');
+		manager.write(session.id, client, 'preview\r');
+		now += 1_000;
+		pty.terminals[0].emitData('Would you like to run this command?\r\n\x1b[1m1. Yes\x1b[0m\r\n2. No');
+		assert.equal(manager.get(session.id).attentionKind, 'approval');
+		manager.write(session.id, client, '2\r');
+		now += 1_000;
+		pty.terminals[0].emitData('Press Enter to continue');
+		assert.equal(manager.get(session.id).attentionKind, 'input');
+		manager.write(session.id, client, '\r');
+		now += 1_000;
+		pty.terminals[0].emitData('\x07');
+		assert.equal(manager.get(session.id).attentionKind, 'bell');
+
+		await manager.stop(session.id);
+		assert.equal(manager.get(session.id).attentionAt, null);
+		assert.equal(manager.get(session.id).attentionKind, null);
+	} finally {
+		await manager?.shutdown();
+		await rm(directory, { recursive: true, force: true });
+	}
+});
+
+test('disabled lifetime limits never sweep live or detached sessions', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'cmdimpact-no-timeout-'));
+	try {
+		let now = 1_700_000_000_000;
+		const store = new SessionStore(join(directory, 'sessions.json'));
+		const pty = fakePty();
+		const manager = new SessionManager({
+			pty,
+			store,
+			shells: { test: { file: 'fixed-shell', args: [], env: {} } },
+			workspace: join(directory, 'workspace'),
+			now: () => now,
+			platform: 'win32',
+			limits: { idleTimeoutMs: 0, hardTimeoutMs: 0 },
+		});
+		await manager.initialize();
+		const session = await manager.create({ shell: 'test' });
+		const client = fakeClient();
+		await manager.attach(session.id, client);
+		await manager.detach(session.id, client);
+
+		now += 10 * 365 * 24 * 60 * 60_000;
+		await manager.sweep();
+		assert.equal(manager.get(session.id).state, 'detached');
+		assert.equal(pty.terminals[0].killed, false);
+
+		await manager.stop(session.id);
+	} finally {
+		await rm(directory, { recursive: true, force: true });
+	}
+});
+
 test('Linux stop empties the PTY session across process groups before completing', async () => {
 	const directory = await mkdtemp(join(tmpdir(), 'cmdimpact-stop-'));
 	try {
@@ -249,11 +339,13 @@ test('metadata cannot claim a PTY survived a server restart', async () => {
 	try {
 		const file = join(directory, 'sessions.json');
 		const first = new SessionStore(file);
-		await first.put({ id: 'session', name: 'Old shell', shell: 'bash', state: 'detached', createdAt: new Date(0).toISOString() });
+		await first.put({ id: 'session', name: 'Old shell', shell: 'bash', state: 'detached', createdAt: new Date(0).toISOString(), attentionAt: new Date(1).toISOString(), attentionKind: 'input' });
 		const second = new SessionStore(file);
 		await second.load(10_000);
 		assert.equal(second.get('session').state, 'exited');
 		assert.equal(second.get('session').exitReason, 'server-restarted');
+		assert.equal(second.get('session').attentionAt, null);
+		assert.equal(second.get('session').attentionKind, null);
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}

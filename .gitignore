@@ -1,6 +1,7 @@
 # build output
 dist/
 graphify-out/
+.vercel/
 # generated types
 .astro/
 
@@ -27,3 +28,5 @@ workspace/
 
 # jetbrains setting folder
 .idea/
+
+.vercel

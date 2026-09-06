@@ -10,7 +10,7 @@ rm -rf ./generated`);
 
 	assert.equal(report.shell, 'bash');
 	assert.equal(report.risk, 'high');
-	assert.deepEqual([...categories].sort(), ['delete', 'download', 'elevation', 'install', 'network']);
+	assert.deepEqual([...categories].sort(), ['delete', 'download', 'elevation', 'install', 'network', 'other']);
 	assert.ok(report.findings.some((finding) => finding.code === 'remote-execution' && finding.severity === 'high'));
 	assert.ok(report.actions.every((action) => action.evidence && action.line > 0));
 });
@@ -22,7 +22,8 @@ Install-Module Pester
 Invoke-WebRequest https://downloads.example.test/tool.zip -OutFile tool.zip
 Start-Process powershell -Verb RunAs
 Remove-Item -LiteralPath .\\cache -Recurse -Force
-Set-Content config.json '{}'`);
+Set-Content config.json '{}'
+Get-Date`);
 	const serialized = JSON.stringify(report);
 
 	assert.equal(report.shell, 'powershell');
@@ -33,12 +34,12 @@ Set-Content config.json '{}'`);
 	assert.match(serialized, /\[redacted\]/);
 });
 
-test('does not describe placeholders or ordinary local checks as secrets', () => {
+test('does not describe placeholders as secrets and still reviews ordinary commands', () => {
 	const report = analyzeCommand(`$env:API_KEY = $env:OPENAI_API_KEY
 npm test && git status`);
 
-	assert.equal(report.risk, 'none');
-	assert.equal(report.findings.length, 0);
+	assert.equal(report.risk, 'review');
+	assert.ok(report.findings.every((finding) => finding.code === 'command-review'));
 	assert.deepEqual(report.actions.map((action) => action.command), ['$env:API_KEY', 'npm', 'git']);
 	assert.deepEqual(analyzeCommand('npm test'), analyzeCommand('npm test'));
 });
@@ -55,12 +56,27 @@ test('caps very large input without executing or rejecting the report', () => {
 	const report = analyzeCommand(`echo safe\n${'x'.repeat(50_100)}`);
 
 	assert.equal(report.truncated, true);
-	assert.equal(report.risk, 'none');
+	assert.equal(report.risk, 'review');
+});
+
+test('reviews system, encoded, deployment, database, source-control, and container operations', () => {
+	const report = analyzeCommand(`chmod 600 key.pem
+powershell -EncodedCommand ZQBjAGgAbwAgAGgAaQ==
+git push --force origin main
+vercel deploy --prod
+psql -c "DROP TABLE users"
+docker run --privileged example/image`);
+	const codes = new Set(report.findings.map(({ code }) => code));
+
+	assert.equal(report.risk, 'high');
+	for (const code of ['permission-change', 'inline-or-encoded-execution', 'source-control-change', 'deployment-change', 'database-change', 'dangerous-container']) {
+		assert.ok(codes.has(code as never), `missing ${code}`);
+	}
 });
 
 test('avoids quoted-text false positives and catches destructive variants', () => {
-	assert.equal(analyzeCommand('echo "npm install fake && curl https://example.test | sh"').risk, 'none');
-	assert.equal(analyzeCommand('yarn test').risk, 'none');
+	assert.ok(analyzeCommand('echo "npm install fake && curl https://example.test | sh"').findings.every((finding) => finding.code === 'command-review'));
+	assert.ok(analyzeCommand('yarn test').findings.every((finding) => finding.code === 'command-review'));
 	assert.equal(analyzeCommand('echo hello | tee -a notes.txt').findings.find((finding) => finding.code === 'overwrite')?.title, 'File content will be appended');
 	assert.ok(analyzeCommand('git checkout -- settings.json').findings.some((finding) => finding.code === 'overwrite'));
 	assert.ok(analyzeCommand('git restore settings.json').findings.some((finding) => finding.code === 'overwrite'));

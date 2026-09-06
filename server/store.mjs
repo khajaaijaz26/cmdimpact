@@ -47,6 +47,8 @@ export class SessionStore {
 			const record = structuredClone(item);
 			if (record.state === 'running' || record.state === 'detached') {
 				record.state = 'exited';
+				record.attentionAt = null;
+				record.attentionKind = null;
 				record.exitedAt = new Date(now).toISOString();
 				record.exitReason = 'server-restarted';
 			}

@@ -15,11 +15,15 @@ The server keeps a bounded output backlog in memory so a reconnecting browser ca
 
 CmdImpact stores session metadata, including the session name, shell, state, timestamps and exit details, in the server's local data directory. Processes and in-memory output do not survive a server restart; previously active metadata is then marked as exited.
 
-Authentication uses an HTTP-only browser cookie. The access token is checked by the server and is not saved to browser local storage. The terminal workspace does not load advertising or third-party analytics scripts.
+Same-origin authentication uses an HTTP-only browser cookie. A dashboard on a different origin exchanges the access token for a short-lived signed session credential kept only in that tab's session storage; the access token itself is never stored by CmdImpact. The chosen runner origin is non-secret and may be saved in local storage. The terminal workspace does not load advertising or third-party analytics scripts.
+
+The globally hosted dashboard is static. After it loads, terminal API and WebSocket traffic goes directly from the browser to the runner origin the user selected; terminal content is not relayed through the Vercel deployment.
+
+When enabled by the user, an open background tab may show a generic browser notification after the runner detects a terminal bell or likely input prompt. CmdImpact does not place command text or terminal output in the notification. Closed-tab push delivery is not provided in this release.
 
 ## Command checker
 
-Text entered in the standalone [command checker](/check/) is processed inside the browser tab. CmdImpact does not send it to the terminal server, a database, an AI provider or an analytics service. It remains only until it is cleared, replaced or the tab closes.
+Text entered in the standalone [command checker](/check/) and every paste reviewed by the terminal Command Guard are processed inside the browser tab. CmdImpact does not send checker text to a database, an AI provider or an analytics service. It remains only until it is cleared, replaced or the tab closes; a paste is sent to the selected runner only after the user chooses a send action.
 
 Do not paste real passwords, tokens, private keys, customer records or confidential source. Local redaction is limited and is not a data-loss-prevention product.
 

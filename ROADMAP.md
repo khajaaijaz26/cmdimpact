@@ -1,34 +1,39 @@
 # CmdImpact Roadmap
 
-CmdImpact is being built in small, verifiable stages. This roadmap describes direction, not promised dates.
+CmdImpact is built in small, testable releases. This is direction, not a promise of dates.
 
-## Now: `0.2` self-hosted alpha
+## Now: `0.2.0-alpha.1`
 
-- Live PTY sessions in a responsive web terminal.
-- Create, list, reconnect to, and terminate sessions.
-- Reconnect from another browser or device while the same server process remains online.
-- Guard multi-line and potentially destructive paste before it reaches the shell.
-- Run terminal workloads through the documented Docker isolation boundary.
-- Keep the product single-owner and self-hosted while the security model matures.
+- Deploy one static dashboard globally on Vercel with no terminal secrets or traffic in Vercel.
+- Let each owner select an exact HTTPS runner and connect to it directly from any modern browser.
+- Run real PowerShell, cmd, bash, or sh sessions on Windows, macOS, Linux, or the isolated Linux Docker stack.
+- Create, rename, reconnect to, take control of, and end sessions across devices.
+- Keep PTYs running after the browser or phone closes while the runner and host remain online; idle and hard expiry are disabled by default.
+- Use a login-only owner access token and an expiring cross-site session token kept in tab-scoped storage.
+- Review every non-empty paste while stating clearly that static rules cannot prove command safety.
+- Offer open-tab background attention notifications without claiming closed-tab push delivery.
+- Run installed Git, package, GitHub, deployment, and AI-agent CLIs through the real shell and its existing permissions.
 
-The current server keeps live PTY state in memory. Limited session metadata and workspace files may persist, but terminal processes do not survive a server restart. The alpha does not provide multi-user isolation or per-device revocation.
+The current runner is a single-owner boundary. Live PTYs and scrollback are in memory, so they do not survive a runner or host restart. The release does not provide multiple isolated owners, provider-managed credentials, or a hosted terminal backend.
 
-## Next: durable owner sessions
+## Next: durable owner operation
 
-- Explicit device registration, session visibility, and remote device revocation.
-- A durable process supervisor so approved sessions can survive application restarts.
-- Encrypted persistent session metadata with clear retention and deletion controls.
-- Stronger network, filesystem, resource-limit, and terminal escape-sequence testing.
-- Documented backup, update, and recovery paths for self-hosters.
+- A durable process supervisor so opted-in sessions can survive application restarts.
+- Device registration, named devices, session visibility, and targeted revocation.
+- Short-lived session renewal without retaining the owner access token.
+- Clear update, restart, recovery, backup, and workspace-retention controls.
+- Stronger proxy, origin, network, filesystem, resource-limit, and terminal escape-sequence tests.
+- Optional notification delivery beyond an open browser, with an explicit privacy model.
+- A runner-focused container deployment that does not bundle the local dashboard.
 
 ## Later: shared infrastructure
 
-- Multiple users with tested tenant isolation.
-- A managed cloud option.
-- Scoped team access and deliberately shared sessions.
+- Strongly isolated per-owner or per-session runtimes.
+- Scoped teams and deliberately shared sessions.
 - Auditable file transfer and workspace management.
-- Optional integrations with developer tools and AI assistants.
+- Optional managed runners without moving terminal credentials into the public static site.
+- Quotas, billing controls, abuse response, egress policy, and independent penetration testing required for public accounts.
 
 ## Not promised by the alpha
 
-CmdImpact `0.2` is not a general-purpose cloud shell, a collaboration platform, or a guarantee that containers contain every hostile workload. Features move forward only when their authentication, ownership, privacy, and isolation boundaries can be tested.
+CmdImpact `0.2` is not a multi-tenant cloud shell, a guarantee that containers contain hostile workloads, a command-safety oracle, or a provider integration broker. Features advance only when their authentication, ownership, privacy, cost, and isolation boundaries can be tested.

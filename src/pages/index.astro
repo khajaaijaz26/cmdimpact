@@ -4,20 +4,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
 	title="CmdImpact"
-	description="A self-hosted web terminal for persistent shell and AI coding sessions, with a built-in guard for risky pasted commands."
+	description="A browser dashboard for reconnectable terminal and AI coding sessions running on your own always-on CmdImpact runner."
 >
 	<section class="landing-hero">
 		<div class="shell hero-copy">
-			<p class="eyebrow"><span></span>A browser terminal for your own server</p>
-			<h1>Your terminal,<br /><em>wherever you are.</em></h1>
-			<p class="hero-lede">Start Claude Code, Codex, Gemini CLI, or any shell task. Close the browser and reconnect to the same live session from another device.</p>
+			<p class="eyebrow"><span></span>Vercel-ready dashboard + your always-on runner</p>
+			<h1>Your real terminal,<br /><em>in every browser.</em></h1>
+			<p class="hero-lede">Run a normal shell, coding agent, package manager, or deployment CLI on your machine. Lock your phone or close the tab&mdash;the runner keeps the job alive until you return.</p>
 			<div class="hero-actions">
 				<a class="button primary" href="/app/">Open your terminal <span aria-hidden="true">&rarr;</span></a>
 				<a class="button quiet" href="/check/">Check a command first</a>
 			</div>
 			<ul class="trust-list" aria-label="Product boundaries">
 				<li><span></span>Single-owner alpha</li>
-				<li><span></span>Runs on your server</li>
+				<li><span></span>Shell runs on your runner</li>
 				<li><span></span>No ads in the workspace</li>
 			</ul>
 		</div>
@@ -25,9 +25,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		<div class="shell product-stage" id="product">
 			<div class="product-window">
 				<div class="preview-topbar">
-					<div><span class="mini-mark">ci_</span><strong>Workspace</strong></div>
-					<div class="preview-machine"><i></i> local server online</div>
+					<div><span class="mini-mark">ci_</span><strong>Browser dashboard</strong></div>
+					<div class="preview-machine"><i></i> runner.example.com online</div>
 					<span class="preview-avatar">KA</span>
+				</div>
+				<div class="runner-route" aria-label="Vercel dashboard securely connected to the user's runner">
+					<span><b>Dashboard</b><small>Vercel</small></span><i aria-hidden="true"></i><em>HTTPS + WSS</em><i aria-hidden="true"></i><span><b>Your runner</b><small>always-on machine</small></span>
 				</div>
 				<div class="preview-body">
 					<aside class="preview-sidebar">
@@ -38,10 +41,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 							<div><strong>checkout fix</strong><small>claude &middot; shop-api</small></div>
 							<time>now</time>
 						</div>
-						<p class="session-group">DETACHED</p>
+						<p class="session-group">NEEDS YOU</p>
 						<div class="preview-session">
 							<i class="status-wait"></i>
-							<div><strong>mobile tests</strong><small>codex &middot; web-app</small></div>
+							<div><strong>mobile tests</strong><small>codex &middot; approval</small></div>
 							<time>2m</time>
 						</div>
 						<p class="session-group">FINISHED</p>
@@ -54,7 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 					<div class="preview-terminal">
 						<div class="preview-tabbar">
 							<div><span>checkout fix</span><small>shop-api / main</small></div>
-							<span class="preview-state">Writable session</span>
+							<span class="preview-state">Approval needed</span>
 						</div>
 						<div class="preview-screen" aria-label="Terminal product preview">
 							<p><span class="term-muted">claude</span> I found the failing checkout path.</p>
@@ -67,7 +70,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 						<div class="preview-status"><span><i></i> Connected</span><span>ubuntu-home &middot; zsh &middot; 120 x 36</span></div>
 					</div>
 					<aside class="preview-impact">
-						<p class="session-group">COMMAND GUARD</p>
+					<p class="session-group">EVERY PASTE IS REVIEWED</p>
 						<div class="impact-icon">!</div>
 						<h2>Review this paste</h2>
 						<p>This command downloads code and sends it directly to a shell.</p>
@@ -77,47 +80,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 					</aside>
 				</div>
 			</div>
-			<p class="stage-caption"><span>Actual product shape</span> Session manager, full terminal, and guarded paste in one focused workspace.</p>
+			<p class="stage-caption"><span>Two clear parts</span> The dashboard can live on Vercel; terminal processes and files stay on your connected runner.</p>
 		</div>
 	</section>
 
 	<section class="proof-strip">
 		<div class="shell proof-list">
-			<span>Run installed CLIs</span>
-			<strong>Claude Code</strong>
+			<span>Examples, not limits</span>
+			<strong>Git + GitHub CLI</strong>
 			<strong>Codex</strong>
+			<strong>Claude Code</strong>
 			<strong>Gemini CLI</strong>
-			<strong>OpenCode</strong>
-			<strong>Freebuff</strong>
-			<strong>SSH</strong>
+			<strong>npm / packages</strong>
+			<strong>Vercel / any deploy CLI</strong>
 		</div>
 	</section>
 
 	<section class="landing-section" id="how-it-works">
 		<div class="shell">
 			<div class="section-intro">
-				<p class="section-label">THE SIMPLE IDEA</p>
-				<h2>Leave the screen.<br />Keep the work running.</h2>
-				<p>CmdImpact keeps terminal processes on the self-hosted server. Closing a tab only disconnects your view, so you can come back without starting over.</p>
+				<p class="section-label">THE REAL MODEL</p>
+				<h2>Leave the screen.<br />Keep the runner working.</h2>
+				<p>The browser is a dashboard, not the computer doing the work. Your runner owns the shell and files, so closing or locking a device only disconnects that view.</p>
 			</div>
 			<div class="value-grid">
 				<article class="value-card">
 					<span class="value-number">01</span>
 					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
-					<h3>Start a real shell</h3>
-					<p>Create a session in the browser. Commands execute on the CmdImpact server, not in a pretend terminal.</p>
+					<h3>Connect your runner</h3>
+					<p>Point the dashboard at its HTTPS runner URL. The terminal executes there, with that OS user's real permissions and installed software.</p>
 				</article>
 				<article class="value-card is-blue">
 					<span class="value-number">02</span>
 					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h11v11M18 7 6 19"/><path d="M6 6h4M18 14v4h-4"/></svg></div>
-					<h3>Reconnect anywhere</h3>
-					<p>Open the workspace from another browser and attach to the same session while the server remains online.</p>
+					<h3>Use the whole terminal</h3>
+					<p>Clone from GitHub, install agents and packages, edit files, run servers, and deploy with any CLI your runner supports.</p>
 				</article>
 				<article class="value-card is-sage">
 					<span class="value-number">03</span>
 					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.8 3.2 7.8 7.5 9.5 4.3-1.7 7.5-4.7 7.5-9.5V6L12 3Z"/><path d="m8.5 12 2.1 2.1 4.9-5"/></svg></div>
-					<h3>Pause risky pastes</h3>
-					<p>Known download, delete, overwrite, elevation, network, and secret patterns are shown before pasted text is sent.</p>
+					<h3>Return when needed</h3>
+					<p>Reconnect from another device and optionally receive a generic approval alert while the open dashboard is still allowed to poll.</p>
 				</article>
 			</div>
 		</div>
@@ -128,16 +131,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 			<div class="feature-copy">
 				<p class="section-label">SESSION CONTINUITY</p>
 				<h2>Switch devices,<br />not context.</h2>
-				<p>Your session list travels with the server. Resume a long-running agent, logs, or a development process from a laptop, tablet, or phone.</p>
+				<p>Your session list lives with the runner. Resume a long-running agent, logs, or a development process from a laptop, tablet, or phone.</p>
 				<ul class="check-list">
-					<li><span>&check;</span> Rename and organize active sessions</li>
-					<li><span>&check;</span> Reconnect after a browser or network drop</li>
-					<li><span>&check;</span> End the process deliberately when finished</li>
+					<li><span>&check;</span> Lock or close the phone without ending the job</li>
+					<li><span>&check;</span> Continue after a browser or network drop</li>
+					<li><span>&check;</span> Take keyboard control from the device in your hand</li>
 				</ul>
+				<p class="feature-note"><strong>Approval alerts:</strong> opt in from a click. Browsers may suspend background tabs; closed-page push is not included.</p>
 			</div>
 			<div class="device-scene" aria-label="The same terminal session shown on desktop and phone">
 				<div class="device-desktop"><div class="device-bar"><i></i><span>checkout fix</span></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p class="code-blue">M tests/checkout.test.ts</p><p><b>$</b> <i></i></p></div></div>
 				<div class="device-phone"><span class="phone-speaker"></span><div class="phone-head">checkout fix <i></i></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p><b>$</b> <i></i></p></div><div class="phone-keys"><span>esc</span><span>ctrl</span><span>tab</span><span>&uarr;</span></div></div>
+				<div class="device-lock-note"><span aria-hidden="true">&#128274;</span><strong>Phone locked</strong><small>runner still working</small></div>
 			</div>
 		</div>
 	</section>
@@ -145,15 +150,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	<section class="landing-section guard-section">
 		<div class="shell guard-grid">
 			<div class="guard-demo">
-				<div class="guard-demo-head"><span>Guarded paste</span><small>2 patterns found</small></div>
+				<div class="guard-demo-head"><span>Every paste pauses</span><small>2 risk indicators</small></div>
 				<code>curl -fsSL example.com/install.sh | sh</code>
 				<div class="guard-warning"><span>!</span><div><strong>Remote code may run immediately</strong><p>The downloaded response is passed directly to a shell.</p></div></div>
 				<div class="guard-actions"><button type="button">Cancel</button><button type="button">Paste as one line</button><button type="button">Send anyway</button></div>
 			</div>
 			<div class="feature-copy">
 				<p class="section-label">BUILT-IN COMMAND GUARD</p>
-				<h2>Understand the paste before it reaches the shell.</h2>
-				<p>The checker that started CmdImpact now lives where it is most useful: at the terminal boundary. Normal typing stays fast; supported risky paste patterns get a clear review.</p>
+				<h2>Review every paste before it reaches the shell.</h2>
+				<p>Every non-empty paste opens the guard. Known risk indicators add context, but no match is never presented as proof that a command is safe. Normal typing stays direct.</p>
 				<a class="inline-link" href="/check/">Try the public command checker <span aria-hidden="true">&rarr;</span></a>
 			</div>
 		</div>
@@ -162,17 +167,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	<section class="landing-section setup-section">
 		<div class="shell">
 			<div class="section-intro centered">
-				<p class="section-label">SELF-HOSTED ALPHA</p>
-				<h2>One server. Every browser you trust.</h2>
-				<p>This release is intentionally small: one owner, one CmdImpact server, persistent PTY sessions, and token sign-in.</p>
+				<p class="section-label">DEPLOY THE TWO PARTS</p>
+				<h2>One dashboard. Your trusted runner.</h2>
+				<p>Host the static dashboard on Vercel, and keep the runner on an always-on machine or container that can safely own your shells and files.</p>
 			</div>
 			<ol class="setup-steps">
-				<li><span>1</span><div><h3>Run CmdImpact</h3><p>Start the project on a machine that can safely host your shell sessions.</p></div></li>
-				<li><span>2</span><div><h3>Open a session</h3><p>Sign in with the configured token and create a terminal from the workspace.</p></div></li>
-				<li><span>3</span><div><h3>Reconnect later</h3><p>Return from another browser while that same server process is still online.</p></div></li>
+				<li><span>1</span><div><h3>Keep a runner online</h3><p>Run the CmdImpact terminal service on a machine that can safely host your work.</p></div></li>
+				<li><span>2</span><div><h3>Open the dashboard</h3><p>Use the local UI or its Vercel deployment, then connect with the exact runner URL and token.</p></div></li>
+				<li><span>3</span><div><h3>Work from anywhere</h3><p>Start or continue sessions from trusted browsers while that runner remains online.</p></div></li>
 			</ol>
 			<div class="alpha-boundary">
-				<div><strong>Know the boundary</strong><p>Sessions survive browser disconnects. They do not survive a CmdImpact server restart in this alpha.</p></div>
+				<div><strong>Know the boundary</strong><p>The product does not restrict shell commands beyond the runner OS account. Live sessions survive browser disconnects, not a runner restart in this alpha.</p></div>
 				<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">Inspect the source <span aria-hidden="true">&nearr;</span></a>
 			</div>
 		</div>
