@@ -5,7 +5,7 @@ const pathname = Astro.url.pathname;
 const links = [
 	{ href: '/#product', label: 'Product' },
 	{ href: '/#how-it-works', label: 'How it works' },
-	{ href: '/check/', label: 'Command guard' },
+	{ href: '/#security', label: 'Security' },
 	{ href: '/guides/', label: 'Guides' },
 ];
 const isCurrent = (href: string) => {
@@ -22,14 +22,14 @@ const isCurrent = (href: string) => {
 			<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">GitHub</a>
 		</nav>
 		<div class="header-actions">
-			<a class="text-action" href="/app/">Sign in</a>
-			<a class="header-cta" href="/app/">Open terminal</a>
+			<a class="header-cta" href="/app/">Open dashboard</a>
 			<details class="mobile-menu">
 				<summary aria-label="Open navigation"><span></span><span></span></summary>
 				<nav aria-label="Mobile navigation">
 					{links.map((link) => <a href={link.href}>{link.label}</a>)}
 					<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">GitHub</a>
-					<a href="/app/">Open terminal</a>
+					<a href="/check/">Command guard</a>
+					<a href="/app/">Open dashboard</a>
 				</nav>
 			</details>
 		</div>

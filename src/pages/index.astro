@@ -4,189 +4,265 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
 	title="CmdImpact"
-	description="A browser dashboard for reconnectable terminal and AI coding sessions running on your own always-on CmdImpact runner."
+	description="A self-hosted browser terminal for persistent shells and AI coding sessions you can leave and resume from any device."
 >
-	<section class="landing-hero">
-		<div class="shell hero-copy">
-			<p class="eyebrow"><span></span>Vercel-ready dashboard + your always-on runner</p>
-			<h1>Your real terminal,<br /><em>in every browser.</em></h1>
-			<p class="hero-lede">Run a normal shell, coding agent, package manager, or deployment CLI on your machine. Lock your phone or close the tab&mdash;the runner keeps the job alive until you return.</p>
-			<div class="hero-actions">
-				<a class="button primary" href="/app/">Open your terminal <span aria-hidden="true">&rarr;</span></a>
-				<a class="button quiet" href="/check/">Check a command first</a>
-			</div>
-			<ul class="trust-list" aria-label="Product boundaries">
-				<li><span></span>Single-owner alpha</li>
-				<li><span></span>Shell runs on your runner</li>
-				<li><span></span>No ads in the workspace</li>
-			</ul>
-		</div>
-
-		<div class="shell product-stage" id="product">
-			<div class="product-window">
-				<div class="preview-topbar">
-					<div><span class="mini-mark">ci_</span><strong>Browser dashboard</strong></div>
-					<div class="preview-machine"><i></i> runner.example.com online</div>
-					<span class="preview-avatar">KA</span>
-				</div>
-				<div class="runner-route" aria-label="Vercel dashboard securely connected to the user's runner">
-					<span><b>Dashboard</b><small>Vercel</small></span><i aria-hidden="true"></i><em>HTTPS + WSS</em><i aria-hidden="true"></i><span><b>Your runner</b><small>always-on machine</small></span>
-				</div>
-				<div class="preview-body">
-					<aside class="preview-sidebar">
-						<div class="preview-sidebar-head"><span>Sessions</span><b>3</b></div>
-						<p class="session-group">ATTACHED</p>
-						<div class="preview-session is-active">
-							<i class="status-run"></i>
-							<div><strong>checkout fix</strong><small>claude &middot; shop-api</small></div>
-							<time>now</time>
-						</div>
-						<p class="session-group">NEEDS YOU</p>
-						<div class="preview-session">
-							<i class="status-wait"></i>
-							<div><strong>mobile tests</strong><small>codex &middot; approval</small></div>
-							<time>2m</time>
-						</div>
-						<p class="session-group">FINISHED</p>
-						<div class="preview-session">
-							<i class="status-idle"></i>
-							<div><strong>server logs</strong><small>bash &middot; home-server</small></div>
-							<time>18m</time>
-						</div>
-					</aside>
-					<div class="preview-terminal">
-						<div class="preview-tabbar">
-							<div><span>checkout fix</span><small>shop-api / main</small></div>
-							<span class="preview-state">Approval needed</span>
-						</div>
-						<div class="preview-screen" aria-label="Terminal product preview">
-							<p><span class="term-muted">claude</span> I found the failing checkout path.</p>
-							<p class="term-gap">The migration changes the order status index and<br />updates 3 tests. Apply these edits?</p>
-							<p><span class="term-choice">1</span> Yes, apply the edits</p>
-							<p><span class="term-choice">2</span> Show the diff first</p>
-							<p><span class="term-choice">3</span> Cancel</p>
-							<p class="term-prompt"><span>&gt;</span><i></i></p>
-						</div>
-						<div class="preview-status"><span><i></i> Connected</span><span>ubuntu-home &middot; zsh &middot; 120 x 36</span></div>
+	<div class="landing-page">
+		<section class="home-hero">
+			<div class="shell home-hero-grid">
+				<div class="home-hero-copy">
+					<a class="release-pill" href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">
+						<span></span> Open-source single-owner alpha <b aria-hidden="true">&nearr;</b>
+					</a>
+					<h1>Your terminal keeps running. <em>Pick it up anywhere.</em></h1>
+					<p>Start a real shell or coding agent on your own runner, close the tab, and reconnect from any trusted browser. The process continues while the runner host stays online.</p>
+					<div class="home-hero-actions">
+						<a class="button primary" href="#setup">Set up your runner <span aria-hidden="true">&rarr;</span></a>
+						<a class="button quiet" href="/app/">Open dashboard</a>
 					</div>
-					<aside class="preview-impact">
-					<p class="session-group">EVERY PASTE IS REVIEWED</p>
-						<div class="impact-icon">!</div>
-						<h2>Review this paste</h2>
-						<p>This command downloads code and sends it directly to a shell.</p>
-						<div class="impact-detail"><span>Remote execution</span><strong>High attention</strong></div>
-						<button type="button">Paste as one line</button>
-						<small>Pattern check only. It cannot prove a command is safe.</small>
-					</aside>
+					<a class="hero-source-link" href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">View source on GitHub <span aria-hidden="true">&nearr;</span></a>
+					<ul class="hero-facts" aria-label="Product facts">
+						<li><span aria-hidden="true">&check;</span> Your machine, your shell</li>
+						<li><span aria-hidden="true">&check;</span> Browser connects directly</li>
+						<li><span aria-hidden="true">&check;</span> No ads in the terminal</li>
+					</ul>
+				</div>
+
+				<figure class="hero-workspace" aria-label="CmdImpact workspace showing a terminal session that remains active after a phone disconnects">
+					<div class="workspace-chrome" aria-hidden="true">
+						<div class="workspace-topbar">
+							<div class="window-controls"><i></i><i></i><i></i></div>
+							<span>CmdImpact workspace</span>
+							<b><i></i> runner online</b>
+						</div>
+						<div class="workspace-body">
+							<aside class="workspace-sessions">
+								<div class="workspace-brand"><span>ci_</span><b>Sessions</b><i>3</i></div>
+								<small>RUNNING</small>
+								<div class="workspace-session is-current"><i></i><span><b>auth refactor</b><small>claude &middot; api</small></span></div>
+								<div class="workspace-session"><i></i><span><b>build release</b><small>codex &middot; web</small></span></div>
+								<small>NEEDS YOU</small>
+								<div class="workspace-session needs-you"><i></i><span><b>database fix</b><small>approval needed</small></span></div>
+							</aside>
+							<div class="workspace-terminal">
+								<div class="terminal-title"><span><b>auth refactor</b><small>~/projects/api &middot; main</small></span><i>Attached</i></div>
+								<div class="terminal-output">
+									<p><b>$</b> claude</p>
+									<p class="output-muted">Analyzing the authentication flow&hellip;</p>
+									<p><span>&check;</span> Updated <em>src/auth/session.ts</em></p>
+									<p><span>&check;</span> Added expiry regression test</p>
+									<p class="output-muted">Running test suite&hellip;</p>
+									<p><span>&#9679;</span> 34 passed <i>in 8.2s</i></p>
+									<p class="terminal-cursor"><b>&gt;</b><i></i></p>
+								</div>
+								<div class="terminal-footer"><span><i></i> Connected</span><span>ubuntu-home &middot; zsh</span></div>
+							</div>
+						</div>
+					</div>
+					<div class="resume-toast" aria-hidden="true"><span>&check;</span><div><small>PHONE DISCONNECTED</small><b>Session is still running</b><p>Reconnect from another browser.</p></div></div>
+					<figcaption>Closing the browser detaches the view. The runner keeps the PTY alive.</figcaption>
+				</figure>
+			</div>
+
+			<div class="shell proof-ribbon" aria-label="CmdImpact project facts">
+				<span><b>Apache-2.0</b><small>open source</small></span>
+				<span><b>Windows &middot; macOS &middot; Linux</b><small>direct-host runners</small></span>
+				<span><b>Direct HTTPS + WSS</b><small>browser to runner</small></span>
+				<span><b>No analytics</b><small>no terminal ad runtime</small></span>
+			</div>
+			<div class="shell hero-boundary"><span aria-hidden="true">i</span><p>Vercel serves the interface only; runner tokens, commands, and terminal output do not pass through it. A runner restart ends live PTYs, while workspace files persist.</p></div>
+		</section>
+
+		<section class="home-section architecture-section" id="how-it-works">
+			<div class="shell architecture-grid">
+				<div class="section-heading">
+					<p class="section-label">A SIMPLE, HONEST ARCHITECTURE</p>
+					<h2>The browser is the window. Your runner does the work.</h2>
+					<p>CmdImpact separates the global dashboard from the computer that owns your processes and files. Leaving the page detaches your view; it does not send an exit command.</p>
+					<a class="inline-link" href="https://github.com/khajaaijaz26/cmdimpact/blob/main/docs/ARCHITECTURE.md" rel="external noopener">Read the architecture <span aria-hidden="true">&nearr;</span></a>
+				</div>
+
+				<div class="architecture-card">
+					<div class="architecture-row">
+						<div class="architecture-node cloud-node"><span aria-hidden="true">&#9675;</span><div><small>STATIC UI</small><b>Vercel dashboard</b><p>Ships HTML, CSS and JavaScript.</p></div></div>
+						<div class="architecture-link one-way"><span>loads once</span><i aria-hidden="true">&rarr;</i></div>
+						<div class="architecture-node browser-node"><span aria-hidden="true">&#9638;</span><div><small>YOUR DEVICE</small><b>Browser</b><p>Laptop, tablet or phone.</p></div></div>
+					</div>
+					<div class="direct-path"><span>Direct HTTPS + WSS</span><i></i></div>
+					<div class="architecture-row lower-row">
+						<div class="architecture-node runner-node"><span aria-hidden="true">$_</span><div><small>YOUR MACHINE</small><b>CmdImpact runner</b><p>Owns the live PTY process.</p></div></div>
+						<div class="architecture-link"><span>local access</span><i aria-hidden="true">&rarr;</i></div>
+						<div class="architecture-node files-node"><span aria-hidden="true">&#9633;</span><div><small>YOUR ENVIRONMENT</small><b>Shell, tools &amp; files</b><p>Normal OS-account permissions.</p></div></div>
+					</div>
+					<p class="architecture-note"><span aria-hidden="true">i</span> The browser talks directly to the exact runner origin you configure.</p>
 				</div>
 			</div>
-			<p class="stage-caption"><span>Two clear parts</span> The dashboard can live on Vercel; terminal processes and files stay on your connected runner.</p>
-		</div>
-	</section>
+		</section>
 
-	<section class="proof-strip">
-		<div class="shell proof-list">
-			<span>Examples, not limits</span>
-			<strong>Git + GitHub CLI</strong>
-			<strong>Codex</strong>
-			<strong>Claude Code</strong>
-			<strong>Gemini CLI</strong>
-			<strong>npm / packages</strong>
-			<strong>Vercel / any deploy CLI</strong>
-		</div>
-	</section>
+		<section class="home-section capabilities-section" id="product">
+			<div class="shell">
+				<div class="section-heading centered-heading">
+					<p class="section-label">BUILT FOR WORK THAT TAKES TIME</p>
+					<h2>A complete terminal experience, beyond one screen.</h2>
+					<p>Use the same commands you use locally, with session continuity and browser controls designed for long-running developer work.</p>
+				</div>
 
-	<section class="landing-section" id="how-it-works">
-		<div class="shell">
-			<div class="section-intro">
-				<p class="section-label">THE REAL MODEL</p>
-				<h2>Leave the screen.<br />Keep the runner working.</h2>
-				<p>The browser is a dashboard, not the computer doing the work. Your runner owns the shell and files, so closing or locking a device only disconnects that view.</p>
-			</div>
-			<div class="value-grid">
-				<article class="value-card">
-					<span class="value-number">01</span>
-					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
-					<h3>Connect your runner</h3>
-					<p>Point the dashboard at its HTTPS runner URL. The terminal executes there, with that OS user's real permissions and installed software.</p>
-				</article>
-				<article class="value-card is-blue">
-					<span class="value-number">02</span>
-					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h11v11M18 7 6 19"/><path d="M6 6h4M18 14v4h-4"/></svg></div>
-					<h3>Use the whole terminal</h3>
-					<p>Clone from GitHub, install agents and packages, edit files, run servers, and deploy with any CLI your runner supports.</p>
-				</article>
-				<article class="value-card is-sage">
-					<span class="value-number">03</span>
-					<div class="line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.8 3.2 7.8 7.5 9.5 4.3-1.7 7.5-4.7 7.5-9.5V6L12 3Z"/><path d="m8.5 12 2.1 2.1 4.9-5"/></svg></div>
-					<h3>Return when needed</h3>
-					<p>Reconnect from another device and optionally receive a generic approval alert while the open dashboard is still allowed to poll.</p>
-				</article>
-			</div>
-		</div>
-	</section>
+				<div class="capability-grid">
+					<article class="capability-card persistence-card">
+						<div class="capability-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2M16 5h3a2 2 0 0 1 2 2v4M8 15l4-4-4-4M12 11H5"/></svg></div>
+						<p class="card-label">PERSISTENT SESSIONS</p>
+						<h3>Close the tab. Keep the process.</h3>
+						<p>The runner keeps the live PTY until the shell exits, you end it, or the runner goes offline.</p>
+						<div class="continuity-flow" aria-label="Phone disconnects while the runner continues, then a laptop reconnects">
+							<span><i aria-hidden="true">&#9645;</i><b>Phone locked</b><small>view detached</small></span>
+							<em><i></i><i></i><i></i></em>
+							<span class="runner-step"><i aria-hidden="true">$_</i><b>Runner working</b><small>process alive</small></span>
+							<em><i></i><i></i><i></i></em>
+							<span><i aria-hidden="true">&#9638;</i><b>Laptop opens</b><small>session resumed</small></span>
+						</div>
+					</article>
 
-	<section class="landing-section continuity-section">
-		<div class="shell split-feature">
-			<div class="feature-copy">
-				<p class="section-label">SESSION CONTINUITY</p>
-				<h2>Switch devices,<br />not context.</h2>
-				<p>Your session list lives with the runner. Resume a long-running agent, logs, or a development process from a laptop, tablet, or phone.</p>
-				<ul class="check-list">
-					<li><span>&check;</span> Lock or close the phone without ending the job</li>
-					<li><span>&check;</span> Continue after a browser or network drop</li>
-					<li><span>&check;</span> Take keyboard control from the device in your hand</li>
-				</ul>
-				<p class="feature-note"><strong>Approval alerts:</strong> opt in from a click. Browsers may suspend background tabs; closed-page push is not included.</p>
-			</div>
-			<div class="device-scene" aria-label="The same terminal session shown on desktop and phone">
-				<div class="device-desktop"><div class="device-bar"><i></i><span>checkout fix</span></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p class="code-blue">M tests/checkout.test.ts</p><p><b>$</b> <i></i></p></div></div>
-				<div class="device-phone"><span class="phone-speaker"></span><div class="phone-head">checkout fix <i></i></div><div class="device-code"><p><b>$</b> git status --short</p><p class="code-blue">M src/checkout.ts</p><p><b>$</b> <i></i></p></div><div class="phone-keys"><span>esc</span><span>ctrl</span><span>tab</span><span>&uarr;</span></div></div>
-				<div class="device-lock-note"><span aria-hidden="true">&#128274;</span><strong>Phone locked</strong><small>runner still working</small></div>
-			</div>
-		</div>
-	</section>
+					<article class="capability-card terminal-card">
+						<div class="capability-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
+						<p class="card-label">REAL PTY</p>
+						<h3>Not a restricted command form.</h3>
+						<p>Run interactive CLIs, install packages, clone repositories, start servers, inspect logs, and deploy&mdash;within the runner account's permissions.</p>
+						<div class="tool-chips" aria-label="Examples when installed and authenticated on the runner"><span>git clone</span><span>npm install</span><span>ssh</span><span>docker</span><span>vercel deploy</span></div>
+					</article>
 
-	<section class="landing-section guard-section">
-		<div class="shell guard-grid">
-			<div class="guard-demo">
-				<div class="guard-demo-head"><span>Every paste pauses</span><small>2 risk indicators</small></div>
-				<code>curl -fsSL example.com/install.sh | sh</code>
-				<div class="guard-warning"><span>!</span><div><strong>Remote code may run immediately</strong><p>The downloaded response is passed directly to a shell.</p></div></div>
-				<div class="guard-actions"><button type="button">Cancel</button><button type="button">Paste as one line</button><button type="button">Send anyway</button></div>
-			</div>
-			<div class="feature-copy">
-				<p class="section-label">BUILT-IN COMMAND GUARD</p>
-				<h2>Review every paste before it reaches the shell.</h2>
-				<p>Every non-empty paste opens the guard. Known risk indicators add context, but no match is never presented as proof that a command is safe. Normal typing stays direct.</p>
-				<a class="inline-link" href="/check/">Try the public command checker <span aria-hidden="true">&rarr;</span></a>
-			</div>
-		</div>
-	</section>
+					<article class="capability-card device-card">
+						<div class="capability-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="13" height="10" rx="1.5"/><path d="M6 19h7M9.5 14v5"/><rect x="17" y="8" width="4" height="9" rx="1"/></svg></div>
+						<p class="card-label">CROSS-DEVICE</p>
+						<h3>Pick up from the device nearby.</h3>
+						<p>The same runner session list is available to authenticated browsers on desktop, tablet, and mobile.</p>
+						<div class="device-mini" aria-hidden="true"><span></span><span></span><i>&harr;</i></div>
+					</article>
 
-	<section class="landing-section setup-section">
-		<div class="shell">
-			<div class="section-intro centered">
-				<p class="section-label">DEPLOY THE TWO PARTS</p>
-				<h2>One dashboard. Your trusted runner.</h2>
-				<p>Host the static dashboard on Vercel, and keep the runner on an always-on machine or container that can safely own your shells and files.</p>
-			</div>
-			<ol class="setup-steps">
-				<li><span>1</span><div><h3>Keep a runner online</h3><p>Run the CmdImpact terminal service on a machine that can safely host your work.</p></div></li>
-				<li><span>2</span><div><h3>Open the dashboard</h3><p>Use the local UI or its Vercel deployment, then connect with the exact runner URL and token.</p></div></li>
-				<li><span>3</span><div><h3>Work from anywhere</h3><p>Start or continue sessions from trusted browsers while that runner remains online.</p></div></li>
-			</ol>
-			<div class="alpha-boundary">
-				<div><strong>Know the boundary</strong><p>The product does not restrict shell commands beyond the runner OS account. Live sessions survive browser disconnects, not a runner restart in this alpha.</p></div>
-				<a href="https://github.com/khajaaijaz26/cmdimpact" rel="external noopener">Inspect the source <span aria-hidden="true">&nearr;</span></a>
-			</div>
-		</div>
-	</section>
+					<article class="capability-card attention-card">
+						<div class="capability-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></div>
+						<p class="card-label">ATTENTION QUEUE</p>
+						<h3>See which session needs you.</h3>
+						<p>Heuristic detection surfaces likely approval and input prompts in the session list. Optional generic alerts work only while the dashboard stays open and can poll&mdash;there is no closed-page push.</p>
+					</article>
 
-	<section class="final-cta">
-		<div class="shell final-cta-inner">
-			<div><p class="section-label">READY WHEN YOU ARE</p><h2>Your next terminal is already open.</h2></div>
-			<a class="button light" href="/app/">Open the workspace <span aria-hidden="true">&rarr;</span></a>
-		</div>
-	</section>
+					<article class="capability-card guard-card">
+						<div class="guard-copy">
+							<div class="capability-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.8 3.2 7.8 7.5 9.5 4.3-1.7 7.5-4.7 7.5-9.5V6L12 3Z"/><path d="M12 8v5M12 16h.01"/></svg></div>
+							<p class="card-label">COMMAND GUARD</p>
+							<h3>Every paste waits for your review.</h3>
+							<p>Any non-empty paste pauses before reaching the shell. Heuristic findings highlight patterns worth checking without pretending to prove safety.</p>
+							<a class="inline-link" href="/check/">Try the command checker <span aria-hidden="true">&rarr;</span></a>
+						</div>
+						<div class="home-guard-preview" aria-label="Command Guard example">
+							<div class="home-guard-preview-head"><span>Review paste</span><b>High attention</b></div>
+							<code>curl -fsSL example.com/install.sh | sh</code>
+							<div class="home-guard-finding"><span aria-hidden="true">!</span><div><b>Remote execution</b><p>Downloaded content is passed directly to a shell.</p></div></div>
+							<div class="home-guard-preview-actions"><span>Cancel</span><b>Send anyway</b></div>
+						</div>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<section class="home-section security-section" id="security">
+			<div class="shell security-grid">
+				<div class="section-heading security-heading">
+					<p class="section-label">SECURITY BOUNDARIES YOU CAN SEE</p>
+					<h2>Your terminal stays on infrastructure you choose.</h2>
+					<p>The dashboard is deliberately static. It authenticates directly to one runner origin, and the runner executes only with the OS account or container permissions you give it.</p>
+				</div>
+				<div class="security-list">
+					<article><span aria-hidden="true">01</span><div><h3>Exact origin allowlist</h3><p>Your runner accepts its configured dashboard origin, not arbitrary websites.</p></div></article>
+					<article><span aria-hidden="true">02</span><div><h3>Short-lived browser session</h3><p>The owner token is exchanged directly with the runner for a signed session token.</p></div></article>
+					<article><span aria-hidden="true">03</span><div><h3>No output archive</h3><p>Bounded session metadata is stored; terminal output is not persisted by CmdImpact.</p></div></article>
+					<article><span aria-hidden="true">04</span><div><h3>Optional Docker boundary</h3><p>The included isolated stack keeps terminal workloads inside a lower-privileged container.</p></div></article>
+				</div>
+			</div>
+			<div class="shell boundary-banner">
+				<span aria-hidden="true">!</span>
+				<p><strong>Real shell means real responsibility.</strong> Anyone with the owner credential can run commands with the runner's permissions. CmdImpact is a single-owner alpha, not a multi-user sandbox.</p>
+				<a href="https://github.com/khajaaijaz26/cmdimpact/blob/main/docs/SECURITY-MODEL.md" rel="external noopener">Security model <span aria-hidden="true">&nearr;</span></a>
+			</div>
+		</section>
+
+		<section class="home-section setup-section" id="setup">
+			<div class="shell">
+				<div class="section-heading setup-heading">
+					<div><p class="section-label">FROM CLONE TO SHELL</p><h2>Run it locally in minutes.</h2></div>
+					<p>Start with the included Docker stack. When you want remote access, put the runner behind a trusted HTTPS/WSS proxy, private VPN, or authenticated tunnel.</p>
+				</div>
+
+				<div class="setup-panel">
+					<div class="setup-copy">
+						<ol>
+							<li><span>1</span><div><h3>Clone and configure</h3><p>Setup creates your local configuration and a private owner access token.</p></div></li>
+							<li><span>2</span><div><h3>Start the runner</h3><p>The isolated stack launches the dashboard, runner, persistent workspace, and metadata volume.</p></div></li>
+							<li><span>3</span><div><h3>Open a terminal</h3><p>Visit the local dashboard, sign in with the generated token, and create a session.</p></div></li>
+						</ol>
+					</div>
+					<div class="setup-terminal">
+						<div><span></span><span></span><span></span><b>powershell / bash</b></div>
+						<pre><code><i># Get CmdImpact</i>
+git clone https://github.com/khajaaijaz26/cmdimpact.git
+cd cmdimpact
+
+<i># Configure and launch</i>
+npm install
+npm run setup
+npm start</code></pre>
+						<p><span></span> Open <strong>localhost:4321/app/</strong></p>
+					</div>
+				</div>
+				<div class="remote-setup-note"><div><span aria-hidden="true">&harr;</span><p><strong>Going beyond localhost?</strong> Configure the exact dashboard origin, keep the runner bound to loopback, and publish it through HTTPS/WSS. Never expose raw port 8787 to the internet.</p></div><a href="https://github.com/khajaaijaz26/cmdimpact#connect-the-global-dashboard-to-your-runner" rel="external noopener">Remote setup guide <span aria-hidden="true">&nearr;</span></a></div>
+			</div>
+		</section>
+
+		<section class="home-section faq-section">
+			<div class="shell faq-grid">
+				<div class="section-heading">
+					<p class="section-label">STRAIGHT ANSWERS</p>
+					<h2>Before you connect a runner.</h2>
+					<p>CmdImpact is intentionally clear about what keeps running, where commands execute, and what this alpha does not do.</p>
+				</div>
+				<div class="faq-list">
+					<details open>
+						<summary>Will a command keep running after I close my phone?<span aria-hidden="true">+</span></summary>
+						<p>Yes. Closing or locking the device only disconnects its browser view. The PTY continues while the runner machine stays powered, online, and the process itself remains active.</p>
+					</details>
+					<details>
+						<summary>Can I run any terminal tool?<span aria-hidden="true">+</span></summary>
+						<p>You get a normal terminal on the runner. You can run or install what that runner's operating system and account permissions allow, including Git, package managers, AI coding agents, and deployment CLIs.</p>
+					</details>
+					<details>
+						<summary>Does Vercel run or see my terminal?<span aria-hidden="true">+</span></summary>
+						<p>No. Vercel serves the static dashboard. Your browser connects directly to the runner URL you choose for API and WebSocket traffic.</p>
+					</details>
+					<details>
+						<summary>Will I get alerts after closing the dashboard?<span aria-hidden="true">+</span></summary>
+						<p>Not in this alpha. Optional generic alerts work only while an open dashboard is allowed to poll. There is no closed-page push, SMS, or email service.</p>
+					</details>
+					<details>
+						<summary>What happens if the runner restarts?<span aria-hidden="true">+</span></summary>
+						<p>Live PTY processes end on a runner restart. Files in your configured workspace remain, and stale session metadata is marked as exited.</p>
+					</details>
+					<details>
+						<summary>Can a team share one runner?<span aria-hidden="true">+</span></summary>
+						<p>Not safely yet. The current release is single-owner. It does not provide user accounts, roles, or per-user command isolation.</p>
+					</details>
+				</div>
+			</div>
+			<div class="shell alpha-limits" aria-label="Current alpha boundaries">
+				<span><b>One owner</b><small>No team roles yet</small></span>
+				<span><b>Host permissions</b><small>Not a command sandbox</small></span>
+				<span><b>Runner must stay online</b><small>Restart ends live PTYs</small></span>
+				<span><b>Runner tools only</b><small>Install and authenticate there</small></span>
+			</div>
+		</section>
+
+		<section class="home-final-cta">
+			<div class="shell final-cta-grid">
+				<div><p class="section-label">YOUR RUNNER. EVERY SCREEN.</p><h2>Leave the browser.<br />Come back to the same work.</h2></div>
+				<div><p>Connect your first runner and turn any trusted browser into a window onto your real terminal.</p><div><a class="button light" href="#setup">Set up your runner <span aria-hidden="true">&rarr;</span></a><a href="/app/">Open dashboard</a></div></div>
+			</div>
+		</section>
+	</div>
 </BaseLayout>
